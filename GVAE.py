@@ -131,7 +131,7 @@ class VAEncoder(Module):
         dim = data_dim
         seq = []
         for item in list(compress_dims):
-            seq += [Linear(dim, item),LeakyReLU(0.1)]
+            seq += [Linear(dim, item),LeakyReLU(0.1),Dropout(0.5)]
             dim = item
         self.seq = Sequential(*seq)
         self.fc1 = Linear(dim, embedding_dim)
@@ -151,7 +151,7 @@ class VADecoder(Module):
         dim = embedding_dim
         seq = []
         for item in list(decompress_dims):
-            seq += [Linear(dim, item), LeakyReLU(0.1)]
+            seq += [Linear(dim, item), LeakyReLU(0.1),Dropout(0.5)]
             dim = item
 
         seq.append(Linear(dim, data_dim))
@@ -216,21 +216,8 @@ def loss_function(recon_x, x, sigmas, mu, logvar, output_info, factor):
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
         return sum(loss) * factor / x.size()[0], KLD / x.size()[0]
 
-class MultipleOptimizer(object):
-    def __init__(self, *op):
-        self.optimizers = op
-
-    def zero_grad(self):
-        for op in self.optimizers:
-            op.zero_grad()
-
-    def step(self):
-        for op in self.optimizers:
-            op.step()
-
-
 class GVAE():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128,128),decompress_dims=(128, 128, 128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 256,512),decompress_dims=(512, 256, 128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -373,9 +360,9 @@ class GVAE():
         data_dim = self._transformer.output_dimensions
         generateFake = kNNMTD(self.opt)
         self.knnmtd_fake, knnmtd_fake_numpy = generateFake.generateData(train_data)
-        means = self.knnmtd_fake.mean(dim=1, keepdim=True)
-        stds = self.knnmtd_fake.std(dim=1, keepdim=True)
-        self.knnmtd_fake = (self.knnmtd_fake - means) / stds
+        means_fake = self.knnmtd_fake.mean(dim=1, keepdim=True)
+        stds_fake = self.knnmtd_fake.std(dim=1, keepdim=True)
+        self.knnmtd_fake = (self.knnmtd_fake - means_fake) / stds_fake
         fake_df = self._transformer.inverse_transform(knnmtd_fake_numpy)
         fake_dataloader = CreateDatasetLoader(self.knnmtd_fake, self._batch_size,self.opt)
         train_loader, test_loader = fake_dataloader.load_data()
@@ -387,11 +374,11 @@ class GVAE():
         print(self.decoder)
         print(self.discriminator)
 
-        # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
-        # optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
+        optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
 
-        optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
-        optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
+        # optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
+        # optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
         
 
         real = torch.from_numpy(train_data.astype('float32')).to(self.device)
@@ -415,7 +402,7 @@ class GVAE():
                     eps = torch.randn_like(std)
                     emb = eps * std + mu
                     fake, sigmas = self.decoder(emb)
-                    fake = self._apply_activate(fake)
+                    # fake = self._apply_activate(fake)
                     # fake = fake.detach()
                     optimizerD.zero_grad()
                     y_fake = self.discriminator(fake)
@@ -441,7 +428,7 @@ class GVAE():
                 eps = torch.randn_like(std)
                 emb = eps * std + mu
                 fake, sigmas = self.decoder(emb)
-                fake = self._apply_activate(fake)
+                # fake = self._apply_activate(fake)
                 y_fake = self.discriminator(fake)
                 fake_label = Variable(torch.ones(y_fake.size(0))).to(self.device)
                 y_fake_pred = log_softmax(y_fake, dim=1)
@@ -449,7 +436,8 @@ class GVAE():
 
                 KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
                 # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
-                recon_error = criterion(real_sampled, fake)
+                # recon_error = criterion(real_sampled, fake)
+                recon_error = self.DeepCoral(real_sampled, fake)
                 loss_g =  2 * KLD + recon_error + loss_fake_d
                 loss_g.backward()
                 optimizerVAE.step()
