@@ -45,7 +45,7 @@ class DataTransformer(object):
         return ColumnTransformInfo(
             column_name=column_name, column_type="continuous", transform=None,
             transform_aux=None,
-            output_info=[SpanInfo(1, 'leaky')],
+            output_info=[SpanInfo(1, 'relu')],
             output_dimensions=1)
 
     def _fit_discrete(self, column_name, raw_column_data):

@@ -226,8 +226,8 @@ class MultipleOptimizer(object):
             op.step()
 
 
-class GenerativeMTD():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(256, 256),decompress_dims=(256, 256),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (256, 256),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+class GAE():
+    def __init__(self,opt,D_in,run, embedding_dim=5,compress_dims=(15, 10),decompress_dims=(10, 15),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (15, 10),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -270,9 +270,9 @@ class GenerativeMTD():
                     ed = st + span_info.dim
                     data_t.append(torch.tanh(data[:, st:ed]))
                     st = ed
-                elif span_info.activation_fn == 'leaky':
+                elif span_info.activation_fn == 'relu':
                     ed = st + span_info.dim
-                    m = nn.LeakyReLU(0.1)
+                    m = nn.ReLU()
                     data_t.append(m(data[:, st:ed]))
                     st = ed
                 elif span_info.activation_fn == 'softmax':
@@ -354,7 +354,7 @@ class GenerativeMTD():
 
 
 
-    def fit_GAE(self,train_data,discrete_columns=tuple()):
+    def fit(self,train_data,discrete_columns=tuple()):
         """Trains the model.
         Args:
             csv_file (str): Absolute path of the dataset used for training.
@@ -410,6 +410,7 @@ class GenerativeMTD():
         mmd_loss = []
         coral_loss = []
         enc_loss = []
+        criterion = nn.MSELoss()
         for i in range(self.opt.epochs):
             for ix, data in enumerate(train_loader):
                 for step in range(self._discriminator_steps):
@@ -446,25 +447,23 @@ class GenerativeMTD():
                 fake_label = Variable(torch.ones(y_fake.size(0))).to(self.device)
                 y_fake_pred = log_softmax(y_fake, dim=1)
                 loss_fake_d = self.criterion(y_fake_pred, fake_label.long())
-
-                mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
-
-                loss_g =  mmd + loss_fake_d
+                # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
+                recon_error = criterion(real_sampled, fake)
+                loss_g =  recon_error + loss_fake_d
                 loss_g.backward()
                 optimizerAE.step()
-                self.decoder.sigma.data.clamp_(0.01, 1.0)
 
             AELoss.append(loss_g)
             DLoss.append(loss_d)
-            self.run["loss/De Loss"].log(loss_g)
+            self.run["loss/AE Loss"].log(loss_g)
             self.run["loss/D Loss"].log(loss_d)
             # self.run["loss/G MMD Loss"].log(mmd_loss)
             # self.run["loss/G CORAL Loss"].log(coral_loss)
             # self.run["loss/G KLD"].log(kld_loss)
-            print(f"Epoch {i+1} | Loss De: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
+            print(f"Epoch {i+1} | Loss AE: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),AELoss.cpu(),label='Generator Loss')
-        plt.plot(np.arange(self.opt.epochs),DLoss.cpu(),label='Discriminator Loss')
+        plt.plot(np.arange(self.opt.epochs),AELoss.cpu().data.numpy().argmax(),label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),DLoss.cpu().data.numpy().argmax(),label='Discriminator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()

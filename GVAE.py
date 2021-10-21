@@ -3,7 +3,7 @@ from keras.datasets import mnist
 import matplotlib.pyplot as plt
 from numpy.core.numeric import cross
 from torch._C import device
-from torch.nn.modules.loss import BCEWithLogitsLoss
+from torch.nn.modules.loss import BCEWithLogitsLoss, MSELoss
 from tqdm import tqdm
 from torchvision import transforms
 from torchsummary import summary
@@ -131,7 +131,7 @@ class VAEncoder(Module):
         dim = data_dim
         seq = []
         for item in list(compress_dims):
-            seq += [Linear(dim, item),ReLU()]
+            seq += [Linear(dim, item),LeakyReLU(0.1)]
             dim = item
         self.seq = Sequential(*seq)
         self.fc1 = Linear(dim, embedding_dim)
@@ -151,7 +151,7 @@ class VADecoder(Module):
         dim = embedding_dim
         seq = []
         for item in list(decompress_dims):
-            seq += [Linear(dim, item), ReLU()]
+            seq += [Linear(dim, item), LeakyReLU(0.1)]
             dim = item
 
         seq.append(Linear(dim, data_dim))
@@ -229,8 +229,8 @@ class MultipleOptimizer(object):
             op.step()
 
 
-class GenerativeMTD():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(256, 256),decompress_dims=(256, 256),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (256, 256),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+class GVAE():
+    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128),decompress_dims=(128, 128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -273,9 +273,9 @@ class GenerativeMTD():
                     ed = st + span_info.dim
                     data_t.append(torch.tanh(data[:, st:ed]))
                     st = ed
-                elif span_info.activation_fn == 'leaky':
+                elif span_info.activation_fn == 'relu':
                     ed = st + span_info.dim
-                    m = nn.LeakyReLU(0.1)
+                    m = nn.ReLU()
                     data_t.append(m(data[:, st:ed]))
                     st = ed
                 elif span_info.activation_fn == 'softmax':
@@ -357,7 +357,7 @@ class GenerativeMTD():
 
 
 
-    def fit_GVAE(self,train_data,discrete_columns=tuple()):
+    def fit(self,train_data,discrete_columns=tuple()):
         """Trains the model.
         Args:
             csv_file (str): Absolute path of the dataset used for training.
@@ -401,6 +401,7 @@ class GenerativeMTD():
         mmd_loss = []
         coral_loss = []
         enc_loss = []
+        criterion = nn.MSELoss()
         for i in range(self.opt.epochs):
             for ix, data in enumerate(train_loader):
                 for step in range(self._discriminator_steps):
@@ -444,21 +445,21 @@ class GenerativeMTD():
                 y_fake_pred = log_softmax(y_fake, dim=1)
                 loss_fake_d = self.criterion(y_fake_pred, fake_label.long())
 
-                KLD = - 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-                mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
-
-                loss_g =  KLD + mmd + loss_fake_d
+                KLD = torch.sum(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()),dim=0)
+                # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
+                recon_error = criterion(real_sampled, fake)
+                loss_g =  0.005 * KLD + recon_error + loss_fake_d
                 loss_g.backward()
                 optimizerVAE.step()
                 self.decoder.sigma.data.clamp_(0.01, 1.0)
             VAEGLoss.append(loss_g)
             DLoss.append(loss_d)
-            self.run["loss/De Loss"].log(loss_g)
+            self.run["loss/VAE Loss"].log(loss_g)
             self.run["loss/D Loss"].log(loss_d)
-            print(f"Epoch {i+1} | Loss De: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
+            print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),VAEGLoss.cpu(),label='Generator Loss')
-        plt.plot(np.arange(self.opt.epochs),DLoss.cpu(),label='Discriminator Loss')
+        plt.plot(np.arange(self.opt.epochs),VAEGLoss.cpu().data.numpy().argmax(),label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),DLoss.cpu().data.numpy().argmax(),label='Discriminator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()

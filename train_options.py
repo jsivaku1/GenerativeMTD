@@ -1,7 +1,6 @@
 import argparse
 import os
 import torch
-import models
 
 class TrainOptions:
 # Parsing arguments

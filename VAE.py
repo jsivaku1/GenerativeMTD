@@ -132,7 +132,7 @@ class VAEncoder(Module):
         dim = data_dim
         seq = []
         for item in list(compress_dims):
-            seq += [Linear(dim, item),ReLU()]
+            seq += [Linear(dim, item),LeakyReLU(0.1),Dropout(0.5)]
             dim = item
         self.seq = Sequential(*seq)
         self.fc1 = Linear(dim, embedding_dim)
@@ -152,7 +152,7 @@ class VADecoder(Module):
         dim = embedding_dim
         seq = []
         for item in list(decompress_dims):
-            seq += [Linear(dim, item), ReLU()]
+            seq += [Linear(dim, item), LeakyReLU(0.1),Dropout(0.5)]
             dim = item
 
         seq.append(Linear(dim, data_dim))
@@ -163,8 +163,8 @@ class VADecoder(Module):
         return self.seq(input), self.sigma
 
 
-class GenerativeMTD():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(256, 256),decompress_dims=(256, 256),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (256, 256),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+class VAE():
+    def __init__(self,opt,D_in,run, embedding_dim=10,compress_dims=(100, 50, 15),decompress_dims=(15, 50, 100),l2scale=1e-5,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -189,7 +189,6 @@ class GenerativeMTD():
         # self.run["config/AE lr"] = self.encoder_lr
         # self.run["config/Discriminator lr"] = self._generator_lr
         self.run["config/AE dim"] = [self.compress_dims, self.embedding_dim,self.decompress_dims]
-        self.run["config/discriminator dim"] = self._discriminator_dim
         self.run["config/epoch"] = self.opt.epochs
 
     def _apply_activate(self, data):
@@ -202,9 +201,9 @@ class GenerativeMTD():
                     ed = st + span_info.dim
                     data_t.append(torch.tanh(data[:, st:ed]))
                     st = ed
-                elif span_info.activation_fn == 'leaky':
+                elif span_info.activation_fn == 'relu':
                     ed = st + span_info.dim
-                    m = nn.LeakyReLU(0.1)
+                    m = nn.ReLU()
                     data_t.append(m(data[:, st:ed]))
                     st = ed
                 elif span_info.activation_fn == 'softmax':
@@ -284,7 +283,7 @@ class GenerativeMTD():
         loss = torch.mean(torch.mul((xc - xct), (xc - xct)))   # frobenius norm between source and target
         return loss
 
-    def fit_VAE(self,train_data,discrete_columns=tuple()):
+    def fit(self,train_data,discrete_columns=tuple()):
         """Trains the model.
         Args:
             csv_file (str): Absolute path of the dataset used for training.
@@ -324,7 +323,8 @@ class GenerativeMTD():
         print(self.encoder)
         print(self.decoder)
 
-        optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
 
         
 
@@ -334,7 +334,7 @@ class GenerativeMTD():
         real = (real - means) / stds
         VAEGLoss = []
         DLoss = []
-
+        criterion = nn.MSELoss(reduction="mean")
         for i in range(self.opt.epochs):
             for ix, data in enumerate(train_loader):
                 
@@ -348,23 +348,22 @@ class GenerativeMTD():
                 fake, sigmas = self.decoder(emb)
                 fake = self._apply_activate(fake)
                
-                KLD = - 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-                mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
-
-                loss_g =  KLD + mmd 
+                KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()),dim=0)
+                # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
+                recon_error = criterion(real_sampled, fake)
+                loss_g =  0.1 * KLD + recon_error 
                 loss_g.backward()
                 optimizerVAE.step()
                 self.decoder.sigma.data.clamp_(0.01, 1.0)
 
             VAEGLoss.append(loss_g)
-            self.run["loss/AE Loss"].log(loss_g)
-            self.run["loss/MMD Loss"].log(mmd)
+            self.run["loss/VAE Loss"].log(loss_g)
+            self.run["loss/MSE Loss"].log(recon_error)
             self.run["loss/KLD Loss"].log(KLD)
 
-            print(f"Epoch {i+1} | Loss De: {loss_g.detach().cpu(): .4f}",flush=True)
+            print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),VAEGLoss.cpu(),label='Generator Loss')
-        plt.plot(np.arange(self.opt.epochs),DLoss.detach().cpu(),label='Discriminator Loss')
+        plt.plot(np.arange(self.opt.epochs),VAEGLoss.data.numpy().argmax(),label='Generator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()

@@ -1,32 +1,14 @@
-import ClusterMTD
 from ClusterMTD import *
-import VAE as VAE
-import GVAE as GVAE
-import AE as AE
-import GAE as GAE
-
 from VAE import *
 from GVAE import *
 from AE import *
 from GAE import *
-import pandas as pd
-import numpy as np
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader, random_split
-import ClusterMTD
-from ClusterMTD import *
 from train_options import *
 from data_transformer import *
 import neptune
 import neptune.new as neptune
-import os
-import sys
-import argparse
+
 
 
 def train_GVAE(opt):
@@ -41,8 +23,8 @@ def train_GVAE(opt):
     data = LoadFile(opt,run)
     D_in = data.__dim__()
     df,opt = data.load_data()
-    model = GVAE.GenerativeMTD(opt, D_in,run)
-    model.fit_GVAE(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
+    model = GVAE(opt, D_in,run)
+    model.fit(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
 
 def train_GAE(opt):
     run = neptune.init(project="jaysivakumar/G-AE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
@@ -56,8 +38,8 @@ def train_GAE(opt):
     data = LoadFile(opt,run)
     D_in = data.__dim__()
     df,opt = data.load_data()
-    model = GAE.GenerativeMTD(opt, D_in,run)
-    model.fit_GAE(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
+    model = GAE(opt, D_in,run)
+    model.fit(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
 
 
 def train_AE(opt):
@@ -72,8 +54,8 @@ def train_AE(opt):
     data = LoadFile(opt,run)
     D_in = data.__dim__()
     df,opt = data.load_data()
-    model = AE.GenerativeMTD(opt, D_in,run)
-    model.fit_AE(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
+    model = AE(opt, D_in,run)
+    model.fit(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
 
 
 def train_VAE(opt):
@@ -88,8 +70,8 @@ def train_VAE(opt):
     data = LoadFile(opt,run)
     D_in = data.__dim__()
     df,opt = data.load_data()
-    model = VAE.GenerativeMTD(opt, D_in,run)
-    model.fit_VAE(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
+    model = VAE(opt, D_in,run)
+    model.fit(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
 
 if __name__ == "__main__":
     opt = TrainOptions().parse()
