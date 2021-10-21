@@ -230,7 +230,7 @@ class MultipleOptimizer(object):
 
 
 class GVAE():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128),decompress_dims=(128, 128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128,128),decompress_dims=(128, 128, 128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -387,9 +387,11 @@ class GVAE():
         print(self.decoder)
         print(self.discriminator)
 
-        optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        # optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
 
-        optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
+        optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
+        optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
         
 
         real = torch.from_numpy(train_data.astype('float32')).to(self.device)
@@ -445,16 +447,18 @@ class GVAE():
                 y_fake_pred = log_softmax(y_fake, dim=1)
                 loss_fake_d = self.criterion(y_fake_pred, fake_label.long())
 
-                KLD = torch.sum(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()),dim=0)
+                KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
                 # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
                 recon_error = criterion(real_sampled, fake)
-                loss_g =  0.005 * KLD + recon_error + loss_fake_d
+                loss_g =  2 * KLD + recon_error + loss_fake_d
                 loss_g.backward()
                 optimizerVAE.step()
                 self.decoder.sigma.data.clamp_(0.01, 1.0)
             VAEGLoss.append(loss_g)
             DLoss.append(loss_d)
             self.run["loss/VAE Loss"].log(loss_g)
+            self.run["loss/MSE Loss"].log(recon_error)
+            self.run["loss/KLD Loss"].log(KLD)
             self.run["loss/D Loss"].log(loss_d)
             print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))

@@ -12,7 +12,7 @@ from torch.utils.data import TensorDataset,DataLoader,Dataset
 from torch.utils.data import random_split
 import torch
 import torch.optim as optim
-from torch.optim import Adam, SGD
+from torch.optim import Adam, SGD,  RMSprop
 from torch.autograd import Variable, backward
 import pandas as pd
 from sklearn.cluster import KMeans
@@ -163,8 +163,30 @@ class VADecoder(Module):
         return self.seq(input), self.sigma
 
 
+def loss_function(recon_x, x, sigmas, mu, logvar, output_info, factor):
+    st = 0
+    loss = []
+    for column_info in output_info:
+        for span_info in column_info:
+            if span_info.activation_fn != "softmax":
+                ed = st + span_info.dim
+                std = sigmas[st]
+                loss.append(((x[:, st] - torch.tanh(recon_x[:, st])) ** 2 / 2 / (std ** 2)).sum())
+                loss.append(torch.log(std) * x.size()[0])
+                st = ed
+
+            else:
+                ed = st + span_info.dim
+                loss.append(cross_entropy(
+                    recon_x[:, st:ed], torch.argmax(x[:, st:ed], dim=-1), reduction='sum'))
+                st = ed
+
+    assert st == recon_x.size()[1]
+    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    return sum(loss) * factor / x.size()[0], KLD / x.size()[0]
+
 class VAE():
-    def __init__(self,opt,D_in,run, embedding_dim=10,compress_dims=(100, 50, 15),decompress_dims=(15, 50, 100),l2scale=1e-5,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128, 128),decompress_dims=(128, 128, 128),l2scale=1e-5,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -324,6 +346,7 @@ class VAE():
         print(self.decoder)
 
         # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        # optimizerVAE = RMSprop(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,momentum=0.9, eps = 1e-4, weight_decay=self._generator_decay)
         optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
 
         
@@ -334,7 +357,7 @@ class VAE():
         real = (real - means) / stds
         VAEGLoss = []
         DLoss = []
-        criterion = nn.MSELoss(reduction="mean")
+        criterion = nn.MSELoss()
         for i in range(self.opt.epochs):
             for ix, data in enumerate(train_loader):
                 
@@ -348,11 +371,14 @@ class VAE():
                 fake, sigmas = self.decoder(emb)
                 fake = self._apply_activate(fake)
                
-                KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()),dim=0)
+                KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
                 # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
                 recon_error = criterion(real_sampled, fake)
-                loss_g =  0.1 * KLD + recon_error 
+                loss_g =  2 * KLD + recon_error 
+
+                
                 loss_g.backward()
+
                 optimizerVAE.step()
                 self.decoder.sigma.data.clamp_(0.01, 1.0)
 
@@ -363,7 +389,7 @@ class VAE():
 
             print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),VAEGLoss.data.numpy().argmax(),label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),VAEGLoss.detach().cpu().numpy(),label='Generator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()
@@ -386,7 +412,6 @@ class VAE():
     
     def sample(self, samples):
         self.decoder.eval()
-
         steps = samples // self.batch_size + 1
         data = []
         for _ in range(steps):
@@ -396,7 +421,6 @@ class VAE():
             fake, sigmas = self.decoder(noise)
             fake = torch.tanh(fake)
             data.append(fake.detach().cpu().numpy())
-
         data = np.concatenate(data, axis=0)
         data = data[:samples]
         return self.transformer.inverse_transform(data, sigmas.detach().cpu().numpy())
