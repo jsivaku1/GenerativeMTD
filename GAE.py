@@ -270,9 +270,9 @@ class GAE():
                     ed = st + span_info.dim
                     data_t.append(torch.tanh(data[:, st:ed]))
                     st = ed
-                elif span_info.activation_fn == 'leaky':
+                elif span_info.activation_fn == 'relu':
                     ed = st + span_info.dim
-                    m = nn.LeakyReLU(0.1)
+                    m = nn.ReLU()
                     data_t.append(m(data[:, st:ed]))
                     st = ed
                 elif span_info.activation_fn == 'softmax':

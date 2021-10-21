@@ -198,9 +198,9 @@ class AE():
                     ed = st + span_info.dim
                     data_t.append(torch.tanh(data[:, st:ed]))
                     st = ed
-                elif span_info.activation_fn == 'leaky':
+                elif span_info.activation_fn == 'relu':
                     ed = st + span_info.dim
-                    m = nn.LeakyReLU(0.1)
+                    m = nn.ReLU()
                     data_t.append(m(data[:, st:ed]))
                     st = ed
                 elif span_info.activation_fn == 'softmax':
@@ -332,6 +332,7 @@ class AE():
         mmd_loss = []
         coral_loss = []
         enc_loss = []
+        criterion = nn.MSELoss()
         for i in range(self.opt.epochs):
             for ix, data in enumerate(train_loader):
                 
@@ -345,15 +346,15 @@ class AE():
                 fake = self.decoder(en_x)
                 fake = self._apply_activate(fake)
 
-                mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
-
-                loss_g =  mmd
+                # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
+                recon_error = criterion(real_sampled, fake)
+                loss_g =  recon_error
                 loss_g.backward()
                 optimizerAE.step()
 
             AELoss.append(loss_g)
             self.run["loss/AE Loss"].log(loss_g)
-            self.run["loss/MMD Loss"].log(mmd)
+            # self.run["loss/MSE Loss"].log(recon_error)
 
             print(f"Epoch {i+1} | Loss AE: {loss_g.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
