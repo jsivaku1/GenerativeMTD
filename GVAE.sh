@@ -1,8 +1,8 @@
 #!/bin/bash -l
 # Job Name
-#SBATCH --job-name=VAE-MTD
+#SBATCH --job-name=GVAE
 # Output File Name
-#SBATCH --output=VAE-MTD_output.txt
+#SBATCH --output=GVAE_output.txt
 # Error File Name
 #SBATCH --error=VAE-MTD_error.log
 # Number of Nodes to Use

@@ -1,10 +1,10 @@
 #!/bin/bash -l
 # Job Name
-#SBATCH --job-name=VAE-MTD
+#SBATCH --job-name=AE
 # Output File Name
-#SBATCH --output=VAE-MTD_output.txt
+#SBATCH --output=AE_output.txt
 # Error File Name
-#SBATCH --error=VAE-MTD_error.log
+#SBATCH --error=AE_error.log
 # Number of Nodes to Use
 #SBATCH --nodes=1
 # Number of Tasks per Node
