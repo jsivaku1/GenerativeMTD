@@ -164,7 +164,7 @@ class VADecoder(Module):
 
 
 class VAE():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128),decompress_dims=(128, 128),l2scale=1e-5,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+    def __init__(self,opt,D_in,run, embedding_dim=10,compress_dims=(100, 50, 15),decompress_dims=(15, 50, 100),l2scale=1e-5,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -347,7 +347,7 @@ class VAE():
                 fake, sigmas = self.decoder(emb)
                 fake = self._apply_activate(fake)
                
-                KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()),dim=0)
+                KLD = torch.sum(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()),dim=0)
                 # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
                 recon_error = criterion(real_sampled, fake)
                 loss_g =  0.005 * KLD + recon_error 
@@ -356,7 +356,7 @@ class VAE():
                 self.decoder.sigma.data.clamp_(0.01, 1.0)
 
             VAEGLoss.append(loss_g)
-            self.run["loss/AE Loss"].log(loss_g)
+            self.run["loss/VAE Loss"].log(loss_g)
             self.run["loss/MSE Loss"].log(recon_error)
             self.run["loss/KLD Loss"].log(KLD)
 

@@ -445,7 +445,7 @@ class GVAE():
                 y_fake_pred = log_softmax(y_fake, dim=1)
                 loss_fake_d = self.criterion(y_fake_pred, fake_label.long())
 
-                KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()),dim=0)
+                KLD = torch.sum(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()),dim=0)
                 # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
                 recon_error = criterion(real_sampled, fake)
                 loss_g =  0.005 * KLD + recon_error + loss_fake_d
