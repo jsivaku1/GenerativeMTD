@@ -410,6 +410,7 @@ class GAE():
         mmd_loss = []
         coral_loss = []
         enc_loss = []
+        criterion = nn.MSELoss()
         for i in range(self.opt.epochs):
             for ix, data in enumerate(train_loader):
                 for step in range(self._discriminator_steps):
@@ -446,24 +447,23 @@ class GAE():
                 fake_label = Variable(torch.ones(y_fake.size(0))).to(self.device)
                 y_fake_pred = log_softmax(y_fake, dim=1)
                 loss_fake_d = self.criterion(y_fake_pred, fake_label.long())
-
-                mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
-
-                loss_g =  mmd + loss_fake_d
+                # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
+                recon_error = criterion(real_sampled, fake)
+                loss_g =  recon_error + loss_fake_d
                 loss_g.backward()
                 optimizerAE.step()
 
             AELoss.append(loss_g)
             DLoss.append(loss_d)
-            self.run["loss/De Loss"].log(loss_g)
+            self.run["loss/AE Loss"].log(loss_g)
             self.run["loss/D Loss"].log(loss_d)
             # self.run["loss/G MMD Loss"].log(mmd_loss)
             # self.run["loss/G CORAL Loss"].log(coral_loss)
             # self.run["loss/G KLD"].log(kld_loss)
             print(f"Epoch {i+1} | Loss AE: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),AELoss,label='Generator Loss')
-        plt.plot(np.arange(self.opt.epochs),DLoss,label='Discriminator Loss')
+        plt.plot(np.arange(self.opt.epochs),AELoss.cpu().data.numpy().argmax(),label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),DLoss.cpu().data.numpy().argmax(),label='Discriminator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()

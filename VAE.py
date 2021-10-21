@@ -164,7 +164,7 @@ class VADecoder(Module):
 
 
 class VAE():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(256, 256),decompress_dims=(256, 256),l2scale=1e-5,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128),decompress_dims=(128, 128),l2scale=1e-5,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -333,7 +333,7 @@ class VAE():
         real = (real - means) / stds
         VAEGLoss = []
         DLoss = []
-        recon_Error = nn.MSELoss()
+        criterion = nn.MSELoss()
         for i in range(self.opt.epochs):
             for ix, data in enumerate(train_loader):
                 
@@ -347,22 +347,22 @@ class VAE():
                 fake, sigmas = self.decoder(emb)
                 fake = self._apply_activate(fake)
                
-                KLD = - 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-                mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
-
-                loss_g =  KLD + mmd 
+                KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()),dim=0)
+                # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
+                recon_error = criterion(real_sampled, fake)
+                loss_g =  0.005 * KLD + recon_error 
                 loss_g.backward()
                 optimizerVAE.step()
                 self.decoder.sigma.data.clamp_(0.01, 1.0)
 
             VAEGLoss.append(loss_g)
             self.run["loss/AE Loss"].log(loss_g)
-            self.run["loss/MMD Loss"].log(mmd)
+            self.run["loss/MSE Loss"].log(recon_error)
             self.run["loss/KLD Loss"].log(KLD)
 
             print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),VAEGLoss,label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),VAEGLoss.cpu().data.numpy().argmax(),label='Generator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()

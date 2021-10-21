@@ -358,7 +358,7 @@ class AE():
 
             print(f"Epoch {i+1} | Loss AE: {loss_g.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),AELoss,label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),AELoss.cpu().data.numpy().argmax(),label='Generator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()
