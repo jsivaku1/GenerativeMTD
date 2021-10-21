@@ -17,9 +17,9 @@
 #SBATCH --gres=gpu:2
 
 # Load module
-#module load cuda11.1/toolkit/11.1.1
+module load cuda11.1/toolkit/11.1.1
 
 # Activate Conda Env
-#conda activate deepmtd
+conda activate deepmtd
 
 python3 train.py --model 'GAE' --file 'Data/imputed_SweatBinary.csv' --k 3 --num_obs 100 --epochs 150
