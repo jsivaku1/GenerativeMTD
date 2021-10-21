@@ -348,10 +348,10 @@ class VAE():
                 fake, sigmas = self.decoder(emb)
                 fake = self._apply_activate(fake)
                
-                KLD = torch.sum(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()),dim=0)
+                KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp()),dim=0)
                 # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
                 recon_error = criterion(real_sampled, fake)
-                loss_g =  0.005 * KLD + recon_error 
+                loss_g =  0.1 * KLD + recon_error 
                 loss_g.backward()
                 optimizerVAE.step()
                 self.decoder.sigma.data.clamp_(0.01, 1.0)
@@ -363,7 +363,7 @@ class VAE():
 
             print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),VAEGLoss.cpu().data.numpy().argmax(),label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),VAEGLoss.data.numpy().argmax(),label='Generator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()
