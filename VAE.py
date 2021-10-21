@@ -132,7 +132,7 @@ class VAEncoder(Module):
         dim = data_dim
         seq = []
         for item in list(compress_dims):
-            seq += [Linear(dim, item),ReLU()]
+            seq += [Linear(dim, item),LeakyReLU(0.1),Dropout(0.5)]
             dim = item
         self.seq = Sequential(*seq)
         self.fc1 = Linear(dim, embedding_dim)
@@ -152,7 +152,7 @@ class VADecoder(Module):
         dim = embedding_dim
         seq = []
         for item in list(decompress_dims):
-            seq += [Linear(dim, item), ReLU()]
+            seq += [Linear(dim, item), LeakyReLU(0.1),Dropout(0.5)]
             dim = item
 
         seq.append(Linear(dim, data_dim))
@@ -323,7 +323,8 @@ class VAE():
         print(self.encoder)
         print(self.decoder)
 
-        optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
 
         
 
@@ -333,7 +334,7 @@ class VAE():
         real = (real - means) / stds
         VAEGLoss = []
         DLoss = []
-        criterion = nn.MSELoss()
+        criterion = nn.MSELoss(reduction="mean")
         for i in range(self.opt.epochs):
             for ix, data in enumerate(train_loader):
                 
