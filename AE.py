@@ -186,7 +186,6 @@ class AE():
         # self.run["config/AE lr"] = self.encoder_lr
         # self.run["config/Discriminator lr"] = self._generator_lr
         self.run["config/AE dim"] = [self.compress_dims, self.embedding_dim,self.decompress_dims]
-        self.run["config/discriminator dim"] = self._discriminator_dim
         self.run["config/epoch"] = self.opt.epochs
 
     def _apply_activate(self, data):
@@ -322,7 +321,6 @@ class AE():
         self.decoder = Decoder(self.embedding_dim, self.compress_dims, data_dim).to(self.device)
         print(self.encoder)
         print(self.decoder)
-        print(self.discriminator)
 
         optimizerAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
         real = torch.from_numpy(train_data.astype('float32')).to(self.device)
@@ -356,24 +354,16 @@ class AE():
             AELoss.append(loss_g)
             self.run["loss/AE Loss"].log(loss_g)
             self.run["loss/MMD Loss"].log(mmd)
-            # self.run["loss/G MMD Loss"].log(mmd_loss)
-            # self.run["loss/G CORAL Loss"].log(coral_loss)
-            # self.run["loss/G KLD"].log(kld_loss)
-            print(f"Epoch {i+1} | Loss De: {loss_g.detach().cpu(): .4f}",flush=True)
+
+            print(f"Epoch {i+1} | Loss AE: {loss_g.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),AELoss.cpu(),label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),AELoss,label='Generator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()
         self.run['loss/loss_plot'].upload(fig)
 
-        # fig = plt.figure(figsize=(15, 15))
-        # plt.plot(np.arange(self.opt.epochs),mmd_loss.detach().cpu(),label='MMD Loss')
-        # plt.plot(np.arange(self.opt.epochs),coral_loss.detach().cpu(),label='CORAL Loss')
-        # plt.xlabel('epoch')
-        # plt.ylabel('Loss')
-        # plt.legend()
-        # self.run['loss/MMD+CORAL plot'].upload(fig)
+
         self.run.stop()
 
 

@@ -24,7 +24,7 @@ def train_GVAE(opt):
     D_in = data.__dim__()
     df,opt = data.load_data()
     model = GVAE(opt, D_in,run)
-    model.fit_GVAE(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
+    model.fit(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
 
 def train_GAE(opt):
     run = neptune.init(project="jaysivakumar/G-AE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
@@ -39,7 +39,7 @@ def train_GAE(opt):
     D_in = data.__dim__()
     df,opt = data.load_data()
     model = GAE(opt, D_in,run)
-    model.fit_GAE(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
+    model.fit(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
 
 
 def train_AE(opt):
@@ -55,7 +55,7 @@ def train_AE(opt):
     D_in = data.__dim__()
     df,opt = data.load_data()
     model = AE(opt, D_in,run)
-    model.fit_AE(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
+    model.fit(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
 
 
 def train_VAE(opt):
@@ -71,7 +71,7 @@ def train_VAE(opt):
     D_in = data.__dim__()
     df,opt = data.load_data()
     model = VAE(opt, D_in,run)
-    model.fit_VAE(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
+    model.fit(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
 
 if __name__ == "__main__":
     opt = TrainOptions().parse()

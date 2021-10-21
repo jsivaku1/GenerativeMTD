@@ -452,7 +452,6 @@ class GAE():
                 loss_g =  mmd + loss_fake_d
                 loss_g.backward()
                 optimizerAE.step()
-                self.decoder.sigma.data.clamp_(0.01, 1.0)
 
             AELoss.append(loss_g)
             DLoss.append(loss_d)
@@ -461,10 +460,10 @@ class GAE():
             # self.run["loss/G MMD Loss"].log(mmd_loss)
             # self.run["loss/G CORAL Loss"].log(coral_loss)
             # self.run["loss/G KLD"].log(kld_loss)
-            print(f"Epoch {i+1} | Loss De: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
+            print(f"Epoch {i+1} | Loss AE: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),AELoss.cpu(),label='Generator Loss')
-        plt.plot(np.arange(self.opt.epochs),DLoss.cpu(),label='Discriminator Loss')
+        plt.plot(np.arange(self.opt.epochs),AELoss,label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),DLoss,label='Discriminator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()

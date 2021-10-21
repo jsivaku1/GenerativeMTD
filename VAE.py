@@ -189,7 +189,6 @@ class VAE():
         # self.run["config/AE lr"] = self.encoder_lr
         # self.run["config/Discriminator lr"] = self._generator_lr
         self.run["config/AE dim"] = [self.compress_dims, self.embedding_dim,self.decompress_dims]
-        self.run["config/discriminator dim"] = self._discriminator_dim
         self.run["config/epoch"] = self.opt.epochs
 
     def _apply_activate(self, data):
@@ -361,10 +360,9 @@ class VAE():
             self.run["loss/MMD Loss"].log(mmd)
             self.run["loss/KLD Loss"].log(KLD)
 
-            print(f"Epoch {i+1} | Loss De: {loss_g.detach().cpu(): .4f}",flush=True)
+            print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),VAEGLoss.cpu(),label='Generator Loss')
-        plt.plot(np.arange(self.opt.epochs),DLoss.detach().cpu(),label='Discriminator Loss')
+        plt.plot(np.arange(self.opt.epochs),VAEGLoss,label='Generator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()
