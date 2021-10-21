@@ -1,0 +1,249 @@
+/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/neptune/new/internal/utils/git.py:34: UserWarning: GitPython could not be initialized
+  warnings.warn("GitPython could not be initialized")
+/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/neptune/new/internal/utils/git.py:34: UserWarning: GitPython could not be initialized
+  warnings.warn("GitPython could not be initialized")
+/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/neptune/new/internal/utils/git.py:34: UserWarning: GitPython could not be initialized
+  warnings.warn("GitPython could not be initialized")
+/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/numpy/lib/shape_base.py:379: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  res = asanyarray(func1d(inarr_view[ind0], *args, **kwargs))
+Traceback (most recent call last):
+  File "/data/home/dhwon/VAE-MTD/train.py", line 57, in <module>
+    model.fit(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
+  File "/data/home/dhwon/VAE-MTD/models.py", line 458, in fit
+    plt.plot(np.arange(self.opt.epochs),VAEGLoss,label='Generator Loss')
+  File "/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/matplotlib/pyplot.py", line 3019, in plot
+    return gca().plot(
+  File "/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/matplotlib/axes/_axes.py", line 1605, in plot
+    lines = [*self._get_lines(*args, data=data, **kwargs)]
+  File "/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/matplotlib/axes/_base.py", line 315, in __call__
+    yield from self._plot_args(this, kwargs)
+  File "/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/matplotlib/axes/_base.py", line 491, in _plot_args
+    y = _check_1d(xy[1])
+  File "/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/matplotlib/cbook/__init__.py", line 1339, in _check_1d
+    return np.atleast_1d(x)
+  File "<__array_function__ internals>", line 5, in atleast_1d
+  File "/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/numpy/core/shape_base.py", line 65, in atleast_1d
+    ary = asanyarray(ary)
+  File "/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/torch/_tensor.py", line 643, in __array__
+    return self.numpy()
+TypeError: can't convert cuda:0 device type tensor to numpy. Use Tensor.cpu() to copy the tensor to host memory first.
+Waiting for the remaining 332875 operations to synchronize with Neptune. Do not kill this process.
+Still waiting for the remaining 323875 operations (2.70% done). Please wait.
+Still waiting for the remaining 323875 operations (2.70% done). Please wait.
+Still waiting for the remaining 323875 operations (2.70% done). Please wait.
+Still waiting for the remaining 323875 operations (2.70% done). Please wait.
+Still waiting for the remaining 314875 operations (5.41% done). Please wait.
+Still waiting for the remaining 314875 operations (5.41% done). Please wait.
+Still waiting for the remaining 314875 operations (5.41% done). Please wait.
+Still waiting for the remaining 314875 operations (5.41% done). Please wait.
+Still waiting for the remaining 305875 operations (8.11% done). Please wait.
+Still waiting for the remaining 305875 operations (8.11% done). Please wait.
+Still waiting for the remaining 305875 operations (8.11% done). Please wait.
+Still waiting for the remaining 302875 operations (9.01% done). Please wait.
+Still waiting for the remaining 296875 operations (10.81% done). Please wait.
+Still waiting for the remaining 296875 operations (10.81% done). Please wait.
+Still waiting for the remaining 296875 operations (10.81% done). Please wait.
+Still waiting for the remaining 296875 operations (10.81% done). Please wait.
+Still waiting for the remaining 287875 operations (13.52% done). Please wait.
+Still waiting for the remaining 287875 operations (13.52% done). Please wait.
+Still waiting for the remaining 287875 operations (13.52% done). Please wait.
+Still waiting for the remaining 287875 operations (13.52% done). Please wait.
+Still waiting for the remaining 278875 operations (16.22% done). Please wait.
+Still waiting for the remaining 278875 operations (16.22% done). Please wait.
+Still waiting for the remaining 278875 operations (16.22% done). Please wait.
+Still waiting for the remaining 272875 operations (18.02% done). Please wait.
+Still waiting for the remaining 269875 operations (18.93% done). Please wait.
+Still waiting for the remaining 269875 operations (18.93% done). Please wait.
+Still waiting for the remaining 269875 operations (18.93% done). Please wait.
+Still waiting for the remaining 269875 operations (18.93% done). Please wait.
+Still waiting for the remaining 269875 operations (18.93% done). Please wait.
+Still waiting for the remaining 260875 operations (21.63% done). Please wait.
+Still waiting for the remaining 260875 operations (21.63% done). Please wait.
+Still waiting for the remaining 260875 operations (21.63% done). Please wait.
+Still waiting for the remaining 260875 operations (21.63% done). Please wait.
+Still waiting for the remaining 253875 operations (23.73% done). Please wait.
+Still waiting for the remaining 251875 operations (24.33% done). Please wait.
+Still waiting for the remaining 251875 operations (24.33% done). Please wait.
+Still waiting for the remaining 251875 operations (24.33% done). Please wait.
+Still waiting for the remaining 251875 operations (24.33% done). Please wait.
+Still waiting for the remaining 242875 operations (27.04% done). Please wait.
+Still waiting for the remaining 242875 operations (27.04% done). Please wait.
+Still waiting for the remaining 242875 operations (27.04% done). Please wait.
+Still waiting for the remaining 234875 operations (29.44% done). Please wait.
+Still waiting for the remaining 233875 operations (29.74% done). Please wait.
+Still waiting for the remaining 233875 operations (29.74% done). Please wait.
+Still waiting for the remaining 233875 operations (29.74% done). Please wait.
+Still waiting for the remaining 233875 operations (29.74% done). Please wait.
+Still waiting for the remaining 233875 operations (29.74% done). Please wait.
+Still waiting for the remaining 232875 operations (30.04% done). Please wait.
+Still waiting for the remaining 224875 operations (32.44% done). Please wait.
+Still waiting for the remaining 224875 operations (32.44% done). Please wait.
+Still waiting for the remaining 224875 operations (32.44% done). Please wait.
+Still waiting for the remaining 224875 operations (32.44% done). Please wait.
+Still waiting for the remaining 215875 operations (35.15% done). Please wait.
+Still waiting for the remaining 215875 operations (35.15% done). Please wait.
+Still waiting for the remaining 215875 operations (35.15% done). Please wait.
+Still waiting for the remaining 215875 operations (35.15% done). Please wait.
+Still waiting for the remaining 213875 operations (35.75% done). Please wait.
+Still waiting for the remaining 206875 operations (37.85% done). Please wait.
+Still waiting for the remaining 206875 operations (37.85% done). Please wait.
+Still waiting for the remaining 206875 operations (37.85% done). Please wait.
+Still waiting for the remaining 206875 operations (37.85% done). Please wait.
+Still waiting for the remaining 197875 operations (40.56% done). Please wait.
+Still waiting for the remaining 197875 operations (40.56% done). Please wait.
+Still waiting for the remaining 197875 operations (40.56% done). Please wait.
+Still waiting for the remaining 197875 operations (40.56% done). Please wait.
+Still waiting for the remaining 197875 operations (40.56% done). Please wait.
+Still waiting for the remaining 197875 operations (40.56% done). Please wait.
+Still waiting for the remaining 188875 operations (43.26% done). Please wait.
+Still waiting for the remaining 188875 operations (43.26% done). Please wait.
+Still waiting for the remaining 188875 operations (43.26% done). Please wait.
+Still waiting for the remaining 188875 operations (43.26% done). Please wait.
+Still waiting for the remaining 179875 operations (45.96% done). Please wait.
+Still waiting for the remaining 179875 operations (45.96% done). Please wait.
+Still waiting for the remaining 179875 operations (45.96% done). Please wait.
+Still waiting for the remaining 179875 operations (45.96% done). Please wait.
+Still waiting for the remaining 179875 operations (45.96% done). Please wait.
+Still waiting for the remaining 170875 operations (48.67% done). Please wait.
+Still waiting for the remaining 170875 operations (48.67% done). Please wait.
+Still waiting for the remaining 170875 operations (48.67% done). Please wait.
+Still waiting for the remaining 170875 operations (48.67% done). Please wait.
+Still waiting for the remaining 170875 operations (48.67% done). Please wait.
+Still waiting for the remaining 161875 operations (51.37% done). Please wait.
+Still waiting for the remaining 161875 operations (51.37% done). Please wait.
+Still waiting for the remaining 161875 operations (51.37% done). Please wait.
+Still waiting for the remaining 161875 operations (51.37% done). Please wait.
+Still waiting for the remaining 161875 operations (51.37% done). Please wait.
+Still waiting for the remaining 161875 operations (51.37% done). Please wait.
+Still waiting for the remaining 161875 operations (51.37% done). Please wait.
+Still waiting for the remaining 161875 operations (51.37% done). Please wait.
+Still waiting for the remaining 152875 operations (54.07% done). Please wait.
+Still waiting for the remaining 152875 operations (54.07% done). Please wait.
+Still waiting for the remaining 152875 operations (54.07% done). Please wait.
+Still waiting for the remaining 152875 operations (54.07% done). Please wait.
+Still waiting for the remaining 143875 operations (56.78% done). Please wait.
+Still waiting for the remaining 143875 operations (56.78% done). Please wait.
+Still waiting for the remaining 143875 operations (56.78% done). Please wait.
+Still waiting for the remaining 143875 operations (56.78% done). Please wait.
+Still waiting for the remaining 135875 operations (59.18% done). Please wait.
+Still waiting for the remaining 134875 operations (59.48% done). Please wait.
+Still waiting for the remaining 134875 operations (59.48% done). Please wait.
+Still waiting for the remaining 134875 operations (59.48% done). Please wait.
+Still waiting for the remaining 134875 operations (59.48% done). Please wait.
+Still waiting for the remaining 134875 operations (59.48% done). Please wait.
+Still waiting for the remaining 134875 operations (59.48% done). Please wait.
+Still waiting for the remaining 125875 operations (62.19% done). Please wait.
+Still waiting for the remaining 125875 operations (62.19% done). Please wait.
+Still waiting for the remaining 125875 operations (62.19% done). Please wait.
+Still waiting for the remaining 125875 operations (62.19% done). Please wait.
+Still waiting for the remaining 125875 operations (62.19% done). Please wait.
+Still waiting for the remaining 125875 operations (62.19% done). Please wait.
+Still waiting for the remaining 125875 operations (62.19% done). Please wait.
+Still waiting for the remaining 117875 operations (64.59% done). Please wait.
+Still waiting for the remaining 117875 operations (64.59% done). Please wait.
+Still waiting for the remaining 117875 operations (64.59% done). Please wait.
+Still waiting for the remaining 117875 operations (64.59% done). Please wait.
+Still waiting for the remaining 117875 operations (64.59% done). Please wait.
+Still waiting for the remaining 117875 operations (64.59% done). Please wait.
+Still waiting for the remaining 117875 operations (64.59% done). Please wait.
+Still waiting for the remaining 117875 operations (64.59% done). Please wait.
+Still waiting for the remaining 117875 operations (64.59% done). Please wait.
+Still waiting for the remaining 117875 operations (64.59% done). Please wait.
+Still waiting for the remaining 108875 operations (67.29% done). Please wait.
+Still waiting for the remaining 108875 operations (67.29% done). Please wait.
+Still waiting for the remaining 108875 operations (67.29% done). Please wait.
+Still waiting for the remaining 108875 operations (67.29% done). Please wait.
+Still waiting for the remaining 108875 operations (67.29% done). Please wait.
+Still waiting for the remaining 108875 operations (67.29% done). Please wait.
+Still waiting for the remaining 99875 operations (70.00% done). Please wait.
+Still waiting for the remaining 99875 operations (70.00% done). Please wait.
+Still waiting for the remaining 99875 operations (70.00% done). Please wait.
+Still waiting for the remaining 99875 operations (70.00% done). Please wait.
+Still waiting for the remaining 99875 operations (70.00% done). Please wait.
+Still waiting for the remaining 99875 operations (70.00% done). Please wait.
+Still waiting for the remaining 99875 operations (70.00% done). Please wait.
+Still waiting for the remaining 90875 operations (72.70% done). Please wait.
+Still waiting for the remaining 90875 operations (72.70% done). Please wait.
+Still waiting for the remaining 90875 operations (72.70% done). Please wait.
+Still waiting for the remaining 90875 operations (72.70% done). Please wait.
+Still waiting for the remaining 84875 operations (74.50% done). Please wait.
+Still waiting for the remaining 81875 operations (75.40% done). Please wait.
+Still waiting for the remaining 81875 operations (75.40% done). Please wait.
+Still waiting for the remaining 81875 operations (75.40% done). Please wait.
+Still waiting for the remaining 81875 operations (75.40% done). Please wait.
+Still waiting for the remaining 81875 operations (75.40% done). Please wait.
+Still waiting for the remaining 81875 operations (75.40% done). Please wait.
+Still waiting for the remaining 72875 operations (78.11% done). Please wait.
+Still waiting for the remaining 72875 operations (78.11% done). Please wait.
+Still waiting for the remaining 72875 operations (78.11% done). Please wait.
+Still waiting for the remaining 72875 operations (78.11% done). Please wait.
+Still waiting for the remaining 72875 operations (78.11% done). Please wait.
+Still waiting for the remaining 63875 operations (80.81% done). Please wait.
+Still waiting for the remaining 63875 operations (80.81% done). Please wait.
+Still waiting for the remaining 63875 operations (80.81% done). Please wait.
+Still waiting for the remaining 63875 operations (80.81% done). Please wait.
+Still waiting for the remaining 63875 operations (80.81% done). Please wait.
+Still waiting for the remaining 63875 operations (80.81% done). Please wait.
+Still waiting for the remaining 63875 operations (80.81% done). Please wait.
+Still waiting for the remaining 54875 operations (83.51% done). Please wait.
+Still waiting for the remaining 54875 operations (83.51% done). Please wait.
+Still waiting for the remaining 54875 operations (83.51% done). Please wait.
+Still waiting for the remaining 54875 operations (83.51% done). Please wait.
+Still waiting for the remaining 54875 operations (83.51% done). Please wait.
+Still waiting for the remaining 54875 operations (83.51% done). Please wait.
+Still waiting for the remaining 54875 operations (83.51% done). Please wait.
+Still waiting for the remaining 54875 operations (83.51% done). Please wait.
+Still waiting for the remaining 54875 operations (83.51% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 45875 operations (86.22% done). Please wait.
+Still waiting for the remaining 36875 operations (88.92% done). Please wait.
+Still waiting for the remaining 36875 operations (88.92% done). Please wait.
+Still waiting for the remaining 36875 operations (88.92% done). Please wait.
+Still waiting for the remaining 36875 operations (88.92% done). Please wait.
+Still waiting for the remaining 36875 operations (88.92% done). Please wait.
+Still waiting for the remaining 27875 operations (91.63% done). Please wait.
+Still waiting for the remaining 27875 operations (91.63% done). Please wait.
+Still waiting for the remaining 27875 operations (91.63% done). Please wait.
+Still waiting for the remaining 27875 operations (91.63% done). Please wait.
+Still waiting for the remaining 27875 operations (91.63% done). Please wait.
+Still waiting for the remaining 27875 operations (91.63% done). Please wait.
+Still waiting for the remaining 27875 operations (91.63% done). Please wait.
+Still waiting for the remaining 27875 operations (91.63% done). Please wait.
+Still waiting for the remaining 27875 operations (91.63% done). Please wait.
+Still waiting for the remaining 18875 operations (94.33% done). Please wait.
+Still waiting for the remaining 18875 operations (94.33% done). Please wait.
+Still waiting for the remaining 18875 operations (94.33% done). Please wait.
+Still waiting for the remaining 18875 operations (94.33% done). Please wait.
+Still waiting for the remaining 18875 operations (94.33% done). Please wait.
+Still waiting for the remaining 18875 operations (94.33% done). Please wait.
+Still waiting for the remaining 18875 operations (94.33% done). Please wait.
+Still waiting for the remaining 9875 operations (97.03% done). Please wait.
+Still waiting for the remaining 9875 operations (97.03% done). Please wait.
+Still waiting for the remaining 9875 operations (97.03% done). Please wait.
+Still waiting for the remaining 9875 operations (97.03% done). Please wait.
+Still waiting for the remaining 9875 operations (97.03% done). Please wait.
+Still waiting for the remaining 9875 operations (97.03% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
+Still waiting for the remaining 875 operations (99.74% done). Please wait.
