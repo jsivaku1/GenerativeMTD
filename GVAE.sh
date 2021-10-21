@@ -22,4 +22,4 @@
 # Activate Conda Env
 #conda activate deepmtd
 
-python3 train.py --file 'Data/imputed_SweatBinary.csv' --k 3 --num_obs 100 --epochs 150
+python3 train.py --model 'GVAE' --file 'Data/imputed_SweatBinary.csv' --k 3 --num_obs 100 --epochs 150

@@ -18,6 +18,7 @@ class TrainOptions:
         parser.add_argument("--epochs", "-e", type=int, nargs="?", default=100, help="Number of epochs to train")
         parser.add_argument("--batch_size", "-b", type=int, default=50, help="Batch size should be less than real data dim")
         parser.add_argument("--set_seed", "-s", type=int, nargs="?", default=1, help="Set random seed")
+        parser.add_argument("--model", "-m", type=str, nargs="?", default='AE', help="GVAE | GAE | VAE | AE")
         
         self.initialized = True
         return parser
