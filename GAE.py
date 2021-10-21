@@ -124,25 +124,22 @@ class CreateDatasetLoader(Dataset):
     def load_data(self):
       return self.trainloader,self.testloader
 
-
 class Encoder(Module):
     def __init__(self, data_dim, compress_dims, embedding_dim):
         super(Encoder, self).__init__()
         dim = data_dim
         seq = []
         for item in list(compress_dims):
-            seq += [Linear(dim, item),ReLU()]
+            seq += [
+                Linear(dim, item),BatchNorm1d(item),ReLU(), Dropout(0.5)
+            ]
             dim = item
+        seq.append(Linear(dim, embedding_dim))
         self.seq = Sequential(*seq)
-        self.fc1 = Linear(dim, embedding_dim)
-        self.fc2 = Linear(dim, embedding_dim)
+        
 
-    def forward(self, input):
-        feature = self.seq(input)
-        mu = self.fc1(feature)
-        logvar = self.fc2(feature)
-        std = torch.exp(0.5 * logvar)
-        return mu, std, logvar
+    def forward(self, input):        
+        return self.seq(input)
 
 
 class Decoder(Module):
@@ -151,15 +148,15 @@ class Decoder(Module):
         dim = embedding_dim
         seq = []
         for item in list(decompress_dims):
-            seq += [Linear(dim, item), ReLU()]
+            seq += [Linear(dim, item), ReLU(), Dropout(0.5)]
             dim = item
 
         seq.append(Linear(dim, data_dim))
         self.seq = Sequential(*seq)
-        self.sigma = Parameter(torch.ones(data_dim) * 0.1)
 
     def forward(self, input):
-        return self.seq(input), self.sigma
+        return self.seq(input)
+        
 
 class Discriminator(Module):
 
@@ -357,7 +354,7 @@ class GenerativeMTD():
 
 
 
-    def fit(self,train_data,discrete_columns=tuple()):
+    def fit_GAE(self,train_data,discrete_columns=tuple()):
         """Trains the model.
         Args:
             csv_file (str): Absolute path of the dataset used for training.
@@ -399,7 +396,7 @@ class GenerativeMTD():
         print(self.decoder)
         print(self.discriminator)
 
-        optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        optimizerAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
 
         optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
         
@@ -408,7 +405,7 @@ class GenerativeMTD():
         means = real.mean(dim=1, keepdim=True)
         stds = real.std(dim=1, keepdim=True)
         real = (real - means) / stds
-        VAEGLoss = []
+        AELoss = []
         DLoss = []
         mmd_loss = []
         coral_loss = []
@@ -420,12 +417,9 @@ class GenerativeMTD():
                     real_sampled = self.sample_data(real,self._batch_size)
                     real_sampled = real_sampled.to(self.device)
                     fake_knnmtd = data.to(self.device)
-                    mu, std, logvar = self.encoder(fake_knnmtd)
-                    eps = torch.randn_like(std)
-                    emb = eps * std + mu
-                    fake, sigmas = self.decoder(emb)
+                    en_x = self.encoder(fake_knnmtd)
+                    fake = self.decoder(en_x)
                     fake = self._apply_activate(fake)
-                    # fake = fake.detach()
                     optimizerD.zero_grad()
                     y_fake = self.discriminator(fake)
                     y_real = self.discriminator(real_sampled)
@@ -440,43 +434,27 @@ class GenerativeMTD():
                     loss_d = loss_fake_d + loss_real_d
                     loss_d.backward()
                     optimizerD.step()
-
                 
-                optimizerVAE.zero_grad()
+                optimizerAE.zero_grad()
                 real_sampled = self.sample_data(real,self._batch_size)
                 real_sampled = real_sampled.to(self.device)
                 fake_knnmtd = data.to(self.device)
-                mu, std, logvar = self.encoder(fake_knnmtd)
-                eps = torch.randn_like(std)
-                emb = eps * std + mu
-                fake, sigmas = self.decoder(emb)
+                en_x = self.encoder(fake_knnmtd)
+                fake = self.decoder(en_x)
                 fake = self._apply_activate(fake)
                 y_fake = self.discriminator(fake)
                 fake_label = Variable(torch.ones(y_fake.size(0))).to(self.device)
                 y_fake_pred = log_softmax(y_fake, dim=1)
                 loss_fake_d = self.criterion(y_fake_pred, fake_label.long())
 
-                KLD = - 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
                 mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
 
-                loss_g =  KLD + mmd + loss_fake_d
+                loss_g =  mmd + loss_fake_d
                 loss_g.backward()
-                optimizerVAE.step()
+                optimizerAE.step()
                 self.decoder.sigma.data.clamp_(0.01, 1.0)
-                
 
-
-                # self.run["loss/G loss"].log(loss_g)
-                # self.run["loss/D loss"].log(loss_d)
-                # self.run["loss/G MMD"].log(mmd)
-                # self.run["loss/G CORAL"].log(coral)
-                # self.run["loss/G KLD"].log(KLD)
-            # print(KLD)
-            # print(mmd)
-            # print(loss_g)
-            # print(torch.mean(y_fake))
-            # print(torch.mean(y_real))
-            VAEGLoss.append(loss_g)
+            AELoss.append(loss_g)
             DLoss.append(loss_d)
             self.run["loss/De Loss"].log(loss_g)
             self.run["loss/D Loss"].log(loss_d)
@@ -485,20 +463,13 @@ class GenerativeMTD():
             # self.run["loss/G KLD"].log(kld_loss)
             print(f"Epoch {i+1} | Loss De: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),VAEGLoss.detach().cpu(),label='Generator Loss')
-        plt.plot(np.arange(self.opt.epochs),DLoss.detach().cpu(),label='Discriminator Loss')
+        plt.plot(np.arange(self.opt.epochs),AELoss.cpu(),label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),DLoss.cpu(),label='Discriminator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()
         self.run['loss/loss_plot'].upload(fig)
 
-        # fig = plt.figure(figsize=(15, 15))
-        # plt.plot(np.arange(self.opt.epochs),mmd_loss.detach().cpu(),label='MMD Loss')
-        # plt.plot(np.arange(self.opt.epochs),coral_loss.detach().cpu(),label='CORAL Loss')
-        # plt.xlabel('epoch')
-        # plt.ylabel('Loss')
-        # plt.legend()
-        # self.run['loss/MMD+CORAL plot'].upload(fig)
         self.run.stop()
 
     def sample_data(self, data, n):
