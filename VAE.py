@@ -163,8 +163,8 @@ class VADecoder(Module):
         return self.seq(input), self.sigma
 
 
-class GenerativeMTD():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(256, 256),decompress_dims=(256, 256),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (256, 256),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+class VAE():
+    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(256, 256),decompress_dims=(256, 256),l2scale=1e-5,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -284,7 +284,7 @@ class GenerativeMTD():
         loss = torch.mean(torch.mul((xc - xct), (xc - xct)))   # frobenius norm between source and target
         return loss
 
-    def fit_VAE(self,train_data,discrete_columns=tuple()):
+    def fit(self,train_data,discrete_columns=tuple()):
         """Trains the model.
         Args:
             csv_file (str): Absolute path of the dataset used for training.
