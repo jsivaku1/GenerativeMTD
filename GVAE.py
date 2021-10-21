@@ -374,11 +374,11 @@ class GVAE():
         print(self.decoder)
         print(self.discriminator)
 
-        optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
-        optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
+        # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        # optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
 
-        # optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
-        # optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
+        optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
+        optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
         
 
         real = torch.from_numpy(train_data.astype('float32')).to(self.device)
@@ -435,9 +435,9 @@ class GVAE():
                 loss_fake_d = self.criterion(y_fake_pred, fake_label.long())
 
                 KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
-                # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
+                recon_error = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
                 # recon_error = criterion(real_sampled, fake)
-                recon_error = self.DeepCoral(real_sampled, fake)
+                # recon_error = self.DeepCoral(real_sampled, fake)
                 loss_g =  2 * KLD + recon_error + loss_fake_d
                 loss_g.backward()
                 optimizerVAE.step()

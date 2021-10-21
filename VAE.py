@@ -186,7 +186,7 @@ def loss_function(recon_x, x, sigmas, mu, logvar, output_info, factor):
     return sum(loss) * factor / x.size()[0], KLD / x.size()[0]
 
 class VAE():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128, 128),decompress_dims=(128, 128, 128),l2scale=1e-5,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 256, 512),decompress_dims=(512, 256, 128),l2scale=1e-5,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -373,7 +373,8 @@ class VAE():
                
                 KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
                 # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
-                recon_error = criterion(real_sampled, fake)
+                # recon_error = criterion(real_sampled, fake)
+                recon_error = self.DeepCoral(real_sampled, fake)
                 loss_g =  2 * KLD + recon_error 
 
                 
