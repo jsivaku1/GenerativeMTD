@@ -1,0 +1,8 @@
+/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/neptune/new/internal/utils/git.py:34: UserWarning: GitPython could not be initialized
+  warnings.warn("GitPython could not be initialized")
+/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/neptune/new/internal/utils/git.py:34: UserWarning: GitPython could not be initialized
+  warnings.warn("GitPython could not be initialized")
+/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/neptune/new/internal/utils/git.py:34: UserWarning: GitPython could not be initialized
+  warnings.warn("GitPython could not be initialized")
+/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/numpy/lib/shape_base.py:379: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
+  res = asanyarray(func1d(inarr_view[ind0], *args, **kwargs))

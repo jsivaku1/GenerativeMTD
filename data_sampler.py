@@ -4,15 +4,13 @@ import numpy as np
 class DataSampler(object):
     """DataSampler samples the conditional vector and corresponding data for CTGAN."""
 
-    def __init__(self, data, output_info, log_frequency):
+    def __init__(self, data, output_info,column_transform_info,log_frequency):
         self._data = data
 
         def is_discrete_column(column_info):
-            return (len(column_info) == 1
-                    and column_info[0].activation_fn == "softmax")
+            return (len(column_info.output_info) == 1 and column_info.output_info[0].activation_fn == "softmax" and column_info.column_type == "discrete")
 
-        n_discrete_columns = sum(
-            [1 for column_info in output_info if is_discrete_column(column_info)])
+        n_discrete_columns = sum([1 for column_info in column_transform_info if is_discrete_column(column_info)])
 
         self._discrete_column_matrix_st = np.zeros(
             n_discrete_columns, dtype="int32")
@@ -24,9 +22,9 @@ class DataSampler(object):
 
         # Compute _rid_by_cat_cols
         st = 0
-        for column_info in output_info:
+        for column_info in column_transform_info:
             if is_discrete_column(column_info):
-                span_info = column_info[0]
+                span_info = column_info.output_info[0]
                 ed = st + span_info.dim
 
                 rid_by_cat = []
@@ -35,44 +33,38 @@ class DataSampler(object):
                 self._rid_by_cat_cols.append(rid_by_cat)
                 st = ed
             else:
-                st += sum([span_info.dim for span_info in column_info])
+                st += sum([span_info.dim for span_info in column_info.output_info])
         assert st == data.shape[1]
 
         # Prepare an interval matrix for efficiently sample conditional vector
         max_category = max(
-            [column_info[0].dim for column_info in output_info
-             if is_discrete_column(column_info)], default=0)
+            [column_info.output_info[0].dim for column_info in column_transform_info if is_discrete_column(column_info)], default=0)
 
         self._discrete_column_cond_st = np.zeros(n_discrete_columns, dtype='int32')
-        self._discrete_column_n_category = np.zeros(
-            n_discrete_columns, dtype='int32')
-        self._discrete_column_category_prob = np.zeros(
-            (n_discrete_columns, max_category))
+        self._discrete_column_n_category = np.zeros(n_discrete_columns, dtype='int32')
+        self._discrete_column_category_prob = np.zeros((n_discrete_columns, max_category))
         self._n_discrete_columns = n_discrete_columns
-        self._n_categories = sum(
-            [column_info[0].dim for column_info in output_info
-             if is_discrete_column(column_info)])
+        self._n_categories = sum([column_info.output_info[0].dim for column_info in column_transform_info if is_discrete_column(column_info)])
 
         st = 0
         current_id = 0
         current_cond_st = 0
-        for column_info in output_info:
+        for column_info in column_transform_info:
             if is_discrete_column(column_info):
-                span_info = column_info[0]
+                span_info = column_info.output_info[0]
                 ed = st + span_info.dim
                 category_freq = np.sum(data[:, st:ed], axis=0)
                 if log_frequency:
                     category_freq = np.log(category_freq + 1)
                 category_prob = category_freq / np.sum(category_freq)
-                self._discrete_column_category_prob[current_id, :span_info.dim] = (
-                    category_prob)
+                self._discrete_column_category_prob[current_id, :span_info.dim] = (category_prob)
                 self._discrete_column_cond_st[current_id] = current_cond_st
                 self._discrete_column_n_category[current_id] = span_info.dim
                 current_cond_st += span_info.dim
                 current_id += 1
                 st = ed
             else:
-                st += sum([span_info.dim for span_info in column_info])
+                st += sum([span_info.dim for span_info in column_info.output_info])
 
     def _random_choice_prob_index(self, discrete_column_id):
         probs = self._discrete_column_category_prob[discrete_column_id]

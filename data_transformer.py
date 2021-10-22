@@ -42,7 +42,7 @@ class DataTransformer(object):
         # valid_component_indicator = gm.weights_ > self._weight_threshold
         # num_components = valid_component_indicator.sum()
 
-        return ColumnTransformInfo(column_name=column_name, column_type="continuous", transform=None,transform_aux=None,output_info=[SpanInfo(1, 'tanh'), SpanInfo(1, 'softmax')],output_dimensions=1,min_val = raw_column_data.column_name.min(), max_val=raw_column_data.column_name.max())
+        return ColumnTransformInfo(column_name=column_name, column_type="continuous", transform=None,transform_aux=None,output_info=[SpanInfo(1, 'softmax')],output_dimensions=1,min_val = np.min(raw_column_data), max_val=np.max(raw_column_data))
 
         # return ColumnTransformInfo(
         #     column_name=column_name, column_type="continuous", transform=None,
@@ -56,7 +56,7 @@ class DataTransformer(object):
         ohe.fit(raw_column_data)
         num_categories = len(ohe.dummies)
 
-        return ColumnTransformInfo(column_name=column_name, column_type="discrete", transform=ohe,transform_aux=None,output_info=[SpanInfo(num_categories, 'softmax')],output_dimensions=num_categories,min_val = raw_column_data.column_name.min(), max_val=raw_column_data.column_name.max())
+        return ColumnTransformInfo(column_name=column_name, column_type="discrete", transform=ohe,transform_aux=None,output_info=[SpanInfo(num_categories, 'softmax')],output_dimensions=num_categories,min_val = np.min(raw_column_data), max_val=np.max(raw_column_data))
 
     def fit(self, raw_data, discrete_columns=tuple()):
         """Fit GMM for continuous columns and One hot encoder for discrete columns.
@@ -134,36 +134,22 @@ class DataTransformer(object):
 
         return np.concatenate(column_data_list, axis=1).astype(float)
 
-    def _inverse_transform_continuous(self, column_transform_info, column_data, sigmas, st):
-        gm = column_transform_info.transform
-        valid_component_indicator = column_transform_info.transform_aux
-
-        selected_normalized_value = column_data[:, 0]
-        selected_component_probs = column_data[:, 1:]
-
+    def _inverse_transform_continuous(self, column_transform_info, column_data, sigmas, st, real_means, real_stds):
+        selected_normalized_value = column_data
         if sigmas is not None:
             sig = sigmas[st]
             selected_normalized_value = np.random.normal(selected_normalized_value, sig)
-
-        selected_normalized_value = np.clip(selected_normalized_value, -1, 1)
-        component_probs = np.ones((len(column_data), self._max_clusters)) * -100
-        component_probs[:, valid_component_indicator] = selected_component_probs
-
-        means = gm.means_.reshape([-1])
-        stds = np.sqrt(gm.covariances_).reshape([-1])
-        selected_component = np.argmax(component_probs, axis=1)
-
-        std_t = stds[selected_component]
-        mean_t = means[selected_component]
-        column = selected_normalized_value * 4 * std_t + mean_t
-
+        selected_normalized_value = np.clip(selected_normalized_value, 0, 1)
+        std_t = real_stds[st]
+        mean_t = real_means[st]
+        column = selected_normalized_value * 4 * std_t.item() + mean_t.item()
         return column
 
     def _inverse_transform_discrete(self, column_transform_info, column_data):
         ohe = column_transform_info.transform
         return ohe.reverse_transform(column_data)
 
-    def inverse_transform(self, data, sigmas=None):
+    def inverse_transform(self, data, real_means,real_stds,sigmas=None):
         """Take matrix data and output raw data.
         Output uses the same type as input to the transform function.
         Either np array or pd dataframe.
@@ -176,7 +162,8 @@ class DataTransformer(object):
             column_data = data[:, st:st + dim]
 
             if column_transform_info.column_type == 'continuous':
-                recovered_column_data = column_data
+                 recovered_column_data = self._inverse_transform_continuous(
+                    column_transform_info, column_data, sigmas, st,real_means,real_stds)
                 
             else:
                 assert column_transform_info.column_type == 'discrete'
