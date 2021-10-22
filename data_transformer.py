@@ -9,7 +9,7 @@ SpanInfo = namedtuple("SpanInfo", ["dim", "activation_fn"])
 ColumnTransformInfo = namedtuple(
     "ColumnTransformInfo", ["column_name", "column_type",
                             "transform", "transform_aux",
-                            "output_info", "output_dimensions"])
+                            "output_info", "output_dimensions","min_val","max_val"])
 
 
 class DataTransformer(object):
@@ -42,11 +42,13 @@ class DataTransformer(object):
         # valid_component_indicator = gm.weights_ > self._weight_threshold
         # num_components = valid_component_indicator.sum()
 
-        return ColumnTransformInfo(
-            column_name=column_name, column_type="continuous", transform=None,
-            transform_aux=None,
-            output_info=[SpanInfo(1, 'relu')],
-            output_dimensions=1)
+        return ColumnTransformInfo(column_name=column_name, column_type="continuous", transform=None,transform_aux=None,output_info=[SpanInfo(1, 'tanh'), SpanInfo(1, 'softmax')],output_dimensions=1,min_val = raw_column_data.column_name.min(), max_val=raw_column_data.column_name.max())
+
+        # return ColumnTransformInfo(
+        #     column_name=column_name, column_type="continuous", transform=None,
+        #     transform_aux=None,
+        #     output_info=[SpanInfo(1, 'relu')],
+        #     output_dimensions=1)
 
     def _fit_discrete(self, column_name, raw_column_data):
         """Fit one hot encoder for discrete column."""
@@ -54,11 +56,7 @@ class DataTransformer(object):
         ohe.fit(raw_column_data)
         num_categories = len(ohe.dummies)
 
-        return ColumnTransformInfo(
-            column_name=column_name, column_type="discrete", transform=ohe,
-            transform_aux=None,
-            output_info=[SpanInfo(num_categories, 'softmax')],
-            output_dimensions=num_categories)
+        return ColumnTransformInfo(column_name=column_name, column_type="discrete", transform=ohe,transform_aux=None,output_info=[SpanInfo(num_categories, 'softmax')],output_dimensions=num_categories,min_val = raw_column_data.column_name.min(), max_val=raw_column_data.column_name.max())
 
     def fit(self, raw_data, discrete_columns=tuple()):
         """Fit GMM for continuous columns and One hot encoder for discrete columns.

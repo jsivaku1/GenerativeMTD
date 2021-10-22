@@ -367,7 +367,7 @@ class GAE():
         self._transformer = DataTransformer()
         self._transformer.fit(train_data, discrete_columns)
 
-        train_data = self._transformer.transform(train_data)
+        train_data_transformed = self._transformer.transform(train_data)
         self._data_sampler = DataSampler(
             train_data,
             self._transformer.output_info_list,
@@ -376,7 +376,7 @@ class GAE():
         # self._batch_size = train_data.shape[0]
 
         generateFake = kNNMTD(self.opt)
-        self.knnmtd_fake, knnmtd_fake_numpy = generateFake.generateData(train_data)
+        self.knnmtd_fake, knnmtd_fake_numpy = generateFake.generateData(train_data_transformed)
         means = self.knnmtd_fake.mean(dim=1, keepdim=True)
         stds = self.knnmtd_fake.std(dim=1, keepdim=True)
         self.knnmtd_fake = (self.knnmtd_fake - means) / stds

@@ -26,6 +26,9 @@ from data_sampler import *
 import random
 import matplotlib.pyplot as plt
 from packaging import version
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 torch.cuda.empty_cache()
 KERNEL_TYPE = "multiscale"
 
@@ -250,6 +253,11 @@ class GVAE():
         self.run["config/discriminator dim"] = self._discriminator_dim
         self.run["config/epoch"] = self.opt.epochs
 
+    def clip_tensors(self, real, fake_transformed):
+        for i in np.arange(real.size(1)):
+            fake_transformed[:,i] = torch.clamp(fake_transformed[:,i], torch.min(real[:,i]),torch.max(real[:,i]))
+        return fake_transformed
+
     def _apply_activate(self, data):
         """Apply proper activation function to the output of the generator."""
         data_t = []
@@ -352,14 +360,14 @@ class GVAE():
         """
         self._transformer = DataTransformer()
         self._transformer.fit(train_data, discrete_columns)
-        train_data = self._transformer.transform(train_data)
+        train_data_transformed = self._transformer.transform(train_data)
         self._data_sampler = DataSampler(
-            train_data,
+            train_data_transformed,
             self._transformer.output_info_list,
             self._log_frequency)
         data_dim = self._transformer.output_dimensions
         generateFake = kNNMTD(self.opt)
-        self.knnmtd_fake, knnmtd_fake_numpy = generateFake.generateData(train_data)
+        self.knnmtd_fake, knnmtd_fake_numpy = generateFake.generateData(train_data_transformed)
         means_fake = self.knnmtd_fake.mean(dim=1, keepdim=True)
         stds_fake = self.knnmtd_fake.std(dim=1, keepdim=True)
         self.knnmtd_fake = (self.knnmtd_fake - means_fake) / stds_fake
@@ -384,9 +392,9 @@ class GVAE():
         
 
         real = torch.from_numpy(train_data.astype('float32')).to(self.device)
-        means = real.mean(dim=1, keepdim=True)
-        stds = real.std(dim=1, keepdim=True)
-        real = (real - means) / stds
+        self.real_data_means = real.mean(dim=1, keepdim=True)
+        self.real_data_stds = real.std(dim=1, keepdim=True)
+        real = (real - self.real_data_means) / self.real_data_stds
         VAEGLoss = []
         DLoss = []
         mmd_loss = []
@@ -405,6 +413,7 @@ class GVAE():
                     emb = eps * std + mu
                     fake, sigmas = self.decoder(emb)
                     fake = self._apply_activate(fake)
+                    fake = self.clip_tensors(real, fake)
                     # fake = fake.detach()
                     optimizerD.zero_grad()
                     y_fake = self.discriminator(fake)
@@ -415,8 +424,8 @@ class GVAE():
                     y_real_pred = log_softmax(y_real, dim=1)
                     loss_fake_d = self.criterion(y_fake_pred, fake_label.long())
                     loss_real_d = self.criterion(y_real_pred, real_label.long())
-                    self.run["loss/Fake Loss"].log(loss_fake_d)
-                    self.run["loss/Real Loss"].log(loss_real_d)
+                    self.run["output/Fake Loss"].log(loss_fake_d)
+                    self.run["output/Real Loss"].log(loss_real_d)
                     loss_d = loss_fake_d + loss_real_d
                     loss_d.backward()
                     optimizerD.step()
@@ -431,6 +440,9 @@ class GVAE():
                 emb = eps * std + mu
                 fake, sigmas = self.decoder(emb)
                 fake = self._apply_activate(fake)
+                fake = self.clip_tensors(real, fake)
+
+
                 y_fake = self.discriminator(fake)
                 fake_label = Variable(torch.ones(y_fake.size(0))).to(self.device)
                 y_fake_pred = log_softmax(y_fake, dim=1)
@@ -447,18 +459,25 @@ class GVAE():
                 self.decoder.sigma.data.clamp_(0.01, 1.0)
             VAEGLoss.append(loss_g)
             DLoss.append(loss_d)
-            self.run["loss/VAE Loss"].log(loss_g)
-            self.run["loss/MSE Loss"].log(recon_error)
-            self.run["loss/KLD Loss"].log(KLD)
-            self.run["loss/D Loss"].log(loss_d)
+            self.run["output/VAE Loss"].log(loss_g)
+            self.run["output/MSE Loss"].log(recon_error)
+            self.run["output/KLD Loss"].log(KLD)
+            self.run["output/D Loss"].log(loss_d)
             print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
+
+            if(self.opt.epochs % 10 == 0):
+                fake = self.sample(1000)
+                self.plot_diagnostics(train_data,fake,self.opt.epochs)
+                pcd = self.pcd(train_data,fake)
+                self.run["output/PCD"].log(pcd)
+
         fig = plt.figure(figsize=(15, 15))
         plt.plot(np.arange(self.opt.epochs),VAEGLoss,label='Generator Loss')
         plt.plot(np.arange(self.opt.epochs),DLoss,label='Discriminator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()
-        self.run['loss/loss_plot'].upload(fig)
+        self.run['diagnostics/loss_plot'].upload(fig)
         self.run.stop()
 
     def sample_data(self, data, n):
@@ -474,6 +493,25 @@ class GVAE():
         indice = torch.tensor(indice)
         sampled_values = data[indice]
         return sampled_values
+
+    def pcd(self, real, fake):
+        return np.linalg.norm((real.corr()-fake.corr()),ord='fro')
+
+    def plot_diagnostics(self, real, fake,epoch):
+        fig, axs = plt.subplots(5, 4,squeeze=True,frameon=True)
+        for ax,col in zip(axs.flat,real.columns):
+            sns.kdeplot(real[col],label='Real',ax=ax)
+            sns.kdeplot(fake[col],label='Proposed',ax=ax)
+            ax.set(xlabel=col, ylabel='')
+            ax.get_yaxis().set_label_coords(-0.4,0.5)
+            ax.legend([],[], frameon=False)
+
+        fig.delaxes(axs[4,3]) 
+        fig.tight_layout()
+        axs.flatten()[-2].legend(loc='lower right', bbox_to_anchor=(0.5, -1.5), ncol=3)
+        plt.subplots_adjust(top=0.94)
+        plt.suptitle(f"Density Plot for epoch {epoch}")
+        self.run["output/diagnotics"].upload(fig)
     
     def sample(self, samples):
         self.decoder.eval()
@@ -486,9 +524,9 @@ class GVAE():
             noise = torch.normal(mean=mean, std=std).to(self.device)
             fake, sigmas = self.decoder(noise)
             fake = torch.tanh(fake)
-            data.append(fake.detach().cpu().numpy())
-
-        data = np.concatenate(data, axis=0)
+            fake_final = torch.cat((fake_final,fake),dim=0)
+        data = (fake_final * self.real_data_stds) + self.real_data_means
+        data = np.concatenate(data.detach().cpu().numpy(), axis=0)
         data = data[:samples]
         return self.transformer.inverse_transform(data, sigmas.detach().cpu().numpy())
 

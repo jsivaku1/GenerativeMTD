@@ -34,9 +34,15 @@ X = df.to_numpy()
 # plt.scatter(X[:,0],X[:,1])
 # plt.show()
 
+#%%
+data = torch.rand((2, 5))
+st = 0
+for i in data.size(1):
+    data[:,i] = torch.clamp(data[:,i], 0, 0.1)
+data
 
 #%%
-data = torch.randn(1, 5)
+data = torch.rand((2, 5))
 test = data[ :, 0]
 
 dist = torch.norm(data - test, dim=0, p=None)
