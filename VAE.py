@@ -372,9 +372,9 @@ class VAE():
                 fake = self._apply_activate(fake)
                
                 KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
-                # mmd = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
+                recon_error = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
                 # recon_error = criterion(real_sampled, fake)
-                recon_error = self.DeepCoral(real_sampled, fake)
+                # recon_error = self.DeepCoral(real_sampled, fake)
                 loss_g =  2 * KLD + recon_error 
 
                 
@@ -390,7 +390,7 @@ class VAE():
 
             print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f}",flush=True)
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),VAEGLoss.detach().cpu().numpy(),label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),VAEGLoss,label='Generator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()
