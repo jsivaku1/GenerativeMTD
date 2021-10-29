@@ -139,7 +139,7 @@ class DataTransformer(object):
         if sigmas is not None:
             sig = sigmas[st]
             selected_normalized_value = np.random.normal(selected_normalized_value, sig)
-        selected_normalized_value = np.clip(selected_normalized_value, 0, 1)
+        selected_normalized_value = np.clip(selected_normalized_value, -1, 1)
         std_t = real_stds[st]
         mean_t = real_means[st]
         column = (selected_normalized_value * std_t.item()) + mean_t.item()

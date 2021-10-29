@@ -6,3 +6,5 @@
   warnings.warn("GitPython could not be initialized")
 /data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/numpy/lib/shape_base.py:379: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
   res = asanyarray(func1d(inarr_view[ind0], *args, **kwargs))
+/data/home/dhwon/GenerativeMTD/GVAE.py:506: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
+  fig, axs = plt.subplots(5, 4,figsize=(5,5),squeeze=True,frameon=True)
