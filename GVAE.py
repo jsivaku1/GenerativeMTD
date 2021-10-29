@@ -365,10 +365,10 @@ class GVAE():
         data_dim = self._transformer.output_dimensions
         generateFake = kNNMTD(self.opt)
         self.knnmtd_fake, knnmtd_fake_numpy = generateFake.generateData(train_data_transformed)
-        means_fake = self.knnmtd_fake.mean(dim=1, keepdim=True)
-        stds_fake = self.knnmtd_fake.std(dim=1, keepdim=True)
-        self.knnmtd_fake = (self.knnmtd_fake - means_fake) / stds_fake
-        fake_df = self._transformer.inverse_transform(knnmtd_fake_numpy,means_fake,stds_fake)
+        self.fake_data_means = self.knnmtd_fake.mean(dim=0)
+        self.fake_data_stds = self.knnmtd_fake.std(dim=0)
+        self.knnmtd_fake = (self.knnmtd_fake - self.fake_data_means) / self.fake_data_stds
+        fake_df = self._transformer.inverse_transform(knnmtd_fake_numpy,self.fake_data_means,self.fake_data_stds)
         fake_dataloader = CreateDatasetLoader(self.knnmtd_fake, self._batch_size,self.opt)
         train_loader, test_loader = fake_dataloader.load_data()
 
@@ -379,19 +379,29 @@ class GVAE():
         print(self.decoder)
         print(self.discriminator)
 
-        optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
-        optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
+        # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        # optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
 
-        # optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
-        # optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
+        optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
+        optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
 
         # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizerVAE, mode='min',factor=0.1, patience=10, threshold=0.01, threshold_mode='abs')
         
 
         real = torch.from_numpy(train_data_transformed.astype('float32')).to(self.device)
-        self.real_data_means = real.mean(dim=1, keepdim=True)
-        self.real_data_stds = real.std(dim=1, keepdim=True)
+        self.real_data_means = real.mean(dim=0)
+        self.real_data_stds = real.std(dim=0)
         real = (real - self.real_data_means) / self.real_data_stds
+
+
+        means = torch.stack((self.real_data_means,self.fake_data_means.to(self.device)))
+        print(means)
+        self.real_fake_means = torch.mean(means,dim=0)
+        stds = torch.stack((self.real_data_stds,self.fake_data_stds.to(self.device)))
+        self.real_fake_stds = torch.mean(stds,dim=0)
+        print(self.real_fake_means)
+        print(self.real_fake_stds)
+
         VAEGLoss = []
         DLoss = []
         mmd_loss = []
@@ -522,7 +532,9 @@ class GVAE():
             data.append(fake.detach().cpu().numpy())
         data = np.concatenate(data, axis=0)
         data = data[:samples]
-        return self._transformer.inverse_transform(data,self.real_data_means,self.real_data_stds,sigmas.detach().cpu().numpy())
+
+
+        return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
 
     def set_device(self, device):
         self.device = device

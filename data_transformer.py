@@ -42,7 +42,7 @@ class DataTransformer(object):
         # valid_component_indicator = gm.weights_ > self._weight_threshold
         # num_components = valid_component_indicator.sum()
 
-        return ColumnTransformInfo(column_name=column_name, column_type="continuous", transform=None,transform_aux=None,output_info=[SpanInfo(1, 'softmax')],output_dimensions=1,min_val = np.min(raw_column_data), max_val=np.max(raw_column_data))
+        return ColumnTransformInfo(column_name=column_name, column_type="continuous", transform=None,transform_aux=None,output_info=[SpanInfo(1, 'tanh')],output_dimensions=1,min_val = np.min(raw_column_data), max_val=np.max(raw_column_data))
 
         # return ColumnTransformInfo(
         #     column_name=column_name, column_type="continuous", transform=None,
