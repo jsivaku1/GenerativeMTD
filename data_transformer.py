@@ -142,7 +142,7 @@ class DataTransformer(object):
         selected_normalized_value = np.clip(selected_normalized_value, 0, 1)
         std_t = real_stds[st]
         mean_t = real_means[st]
-        column = selected_normalized_value * 4 * std_t.item() + mean_t.item()
+        column = (selected_normalized_value * std_t.item()) + mean_t.item()
         return column
 
     def _inverse_transform_discrete(self, column_transform_info, column_data):

@@ -280,8 +280,8 @@ class GVAE():
                     st = ed
                 else:
                     assert 0
-
         return torch.cat(data_t, dim=1)
+
     @staticmethod
     def _gumbel_softmax(logits, tau=1, hard=False, eps=1e-10, dim=-1):
         """Deals with the instability of the gumbel_softmax for older versions of torch.
@@ -379,11 +379,11 @@ class GVAE():
         print(self.decoder)
         print(self.discriminator)
 
-        # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
-        # optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
+        optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
 
-        optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
-        optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
+        # optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
+        # optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
 
         # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizerVAE, mode='min',factor=0.1, patience=10, threshold=0.01, threshold_mode='abs')
         
@@ -493,7 +493,7 @@ class GVAE():
         return np.linalg.norm((real.corr()-fake.corr()),ord='fro')
 
     def plot_diagnostics(self, real, fake,epoch):
-        fig, axs = plt.subplots(5, 4,squeeze=True,frameon=True)
+        fig, axs = plt.subplots(5, 4,figsize=(5,5),squeeze=True,frameon=True)
         for ax,col in zip(axs.flat,real.columns):
             sns.kdeplot(real[col],label='Real',ax=ax)
             sns.kdeplot(fake[col],label='Proposed',ax=ax)
