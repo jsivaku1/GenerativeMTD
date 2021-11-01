@@ -1,4 +1,5 @@
 import numpy as np
+from pandas.core.indexes.base import Index
 from keras.datasets import mnist
 import matplotlib.pyplot as plt
 from numpy.core.numeric import cross
@@ -174,7 +175,7 @@ class Discriminator(Module):
             seq += [Linear(dim, item), LeakyReLU(0.2), Dropout(0.5)]
             dim = item
 
-        seq += [Linear(dim, 2)]
+        seq += [Linear(dim, 1)]
         self.seq = Sequential(*seq)
 
     def calc_gradient_penalty(self, real_data, fake_data, device='cpu', lambda_=10):
@@ -220,7 +221,7 @@ def loss_function(recon_x, x, sigmas, mu, logvar, output_info, factor):
         return sum(loss) * factor / x.size()[0], KLD / x.size()[0]
 
 class GVAE():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 256,512),decompress_dims=(512, 256, 128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128,128),decompress_dims=(128, 128, 128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -358,6 +359,8 @@ class GVAE():
             csv_file (str): Absolute path of the dataset used for training.
             n_epochs (int): Number of epochs to train.
         """
+        self._batch_size = train_data.shape[0]
+
         self._transformer = DataTransformer()
         self._transformer.fit(train_data, discrete_columns)
         train_data_transformed = self._transformer.transform(train_data)
@@ -379,11 +382,11 @@ class GVAE():
         print(self.decoder)
         print(self.discriminator)
 
-        # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
-        # optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
+        optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
 
-        optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
-        optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
+        # optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
+        # optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
 
         # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizerVAE, mode='min',factor=0.1, patience=10, threshold=0.01, threshold_mode='abs')
         
@@ -395,94 +398,82 @@ class GVAE():
 
 
         means = torch.stack((self.real_data_means,self.fake_data_means.to(self.device)))
-        print(means)
         self.real_fake_means = torch.mean(means,dim=0)
         stds = torch.stack((self.real_data_stds,self.fake_data_stds.to(self.device)))
         self.real_fake_stds = torch.mean(stds,dim=0)
-        print(self.real_fake_means)
-        print(self.real_fake_stds)
 
         VAEGLoss = []
         DLoss = []
         mmd_loss = []
         coral_loss = []
         enc_loss = []
+        # criterion = nn.BCEWithLogitsLoss()
         criterion = nn.MSELoss()
         for i in range(self.opt.epochs):
             for ix, data in enumerate(train_loader):
+                # for p in self.discriminator.parameters():  # reset requires_grad
+                    # p.requires_grad = True  # they are set to False below in netG update
+
                 for step in range(self._discriminator_steps):
 
-                    real_sampled = self.sample_data(real,self._batch_size)
-                    real_sampled = real_sampled.to(self.device)
+                    # real_sampled = self.sample_data(real,self._batch_size)
+                    # real_sampled = real_sampled.to(self.device)
                     fake_knnmtd = data.to(self.device)
                     mu, std, logvar = self.encoder(fake_knnmtd)
                     eps = torch.randn_like(std)
                     emb = eps * std + mu
                     fake, sigmas = self.decoder(emb)
                     fake = self._apply_activate(fake)
-                    # fake = self.clip_tensors(real, fake)
-                    # fake = fake.detach()
+
                     optimizerD.zero_grad()
-                    y_fake = self.discriminator(fake)
-                    y_real = self.discriminator(real_sampled)
-                    fake_label = Variable(torch.ones(y_fake.size(0))).to(self.device)
-                    real_label = Variable(torch.zeros(y_real.size(0))).to(self.device)
-                    y_fake_pred = log_softmax(y_fake, dim=1)
-                    y_real_pred = log_softmax(y_real, dim=1)
-                    loss_fake_d = self.criterion(y_fake_pred, fake_label.long())
-                    loss_real_d = self.criterion(y_real_pred, real_label.long())
-                    self.run["output/Fake Loss"].log(loss_fake_d)
-                    self.run["output/Real Loss"].log(loss_real_d)
-                    loss_d = loss_fake_d + loss_real_d
+                    y_fake = self.discriminator(fake)                    
+                    y_real = self.discriminator(real)
+                    loss_fake_d = torch.mean(y_fake)
+                    loss_real_d = torch.mean(y_real)
+
+                    pen = self.discriminator.calc_gradient_penalty(real, fake, self.device)
+                    pen.backward(retain_graph=True)
+                    loss_d = -(loss_real_d - loss_fake_d)
                     loss_d.backward()
                     optimizerD.step()
 
-                
+                    self.run["output/Fake Loss"].log(loss_fake_d)
+                    self.run["output/Real Loss"].log(loss_real_d)
+
                 optimizerVAE.zero_grad()
-                real_sampled = self.sample_data(real,self._batch_size)
-                real_sampled = real_sampled.to(self.device)
+                # real_sampled = self.sample_data(real,self._batch_size)
+                # real_sampled = real_sampled.to(self.device)
                 fake_knnmtd = data.to(self.device)
                 mu, std, logvar = self.encoder(fake_knnmtd)
                 eps = torch.randn_like(std)
                 emb = eps * std + mu
                 fake, sigmas = self.decoder(emb)
                 fake = self._apply_activate(fake)
-                # fake = self.clip_tensors(real, fake)
                 y_fake = self.discriminator(fake)
-                fake_label = Variable(torch.ones(y_fake.size(0))).to(self.device)
-                y_fake_pred = log_softmax(y_fake, dim=1)
-                loss_fake_d = self.criterion(y_fake_pred, fake_label.long())
-
+                loss_fake_d = -torch.mean(y_fake)
                 KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
-                recon_error = self.MMD(real_sampled, fake, kernel=KERNEL_TYPE)
-                # recon_error = criterion(real_sampled, fake)
-                # recon_error = self.DeepCoral(real_sampled, fake)
-                loss_g =  2 * KLD + recon_error + loss_fake_d
+                loss_g =  2 * KLD + loss_fake_d
                 loss_g.backward()
                 optimizerVAE.step()
-                # scheduler.step(loss_g)
                 self.decoder.sigma.data.clamp_(0.01, 1.0)
-            VAEGLoss.append(loss_g)
-            DLoss.append(loss_d)
-            self.run["output/VAE Loss"].log(loss_g)
-            self.run["output/MSE Loss"].log(recon_error)
-            self.run["output/KLD Loss"].log(KLD)
+            VAEGLoss.append(loss_g.item())
+            DLoss.append(loss_d.item())
+            # self.run["output/D fake Loss"].log(loss_fake_d)
+            # self.run["output/D real Loss"].log(loss_real_d)
+            # self.run["output/KLD Loss"].log(KLD)
+            self.run["output/G Loss"].log(loss_g)
             self.run["output/D Loss"].log(loss_d)
             print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
-
             if(self.opt.epochs % 10 == 0):
-                fake = self.sample(1000)
-                self.plot_diagnostics(train_data,fake,self.opt.epochs)
+                # fake = self.sample(1000)
+                fake = self.transform_to_df(fake,sigmas)
+                print(fake["Recerational.Athlete"].value_counts())
+                self.plot_diagnostics(train_data,fake,i)
                 pcd = self.pcd(train_data,fake)
+                print(pcd)
                 self.run["output/PCD"].log(pcd)
-
-        fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),VAEGLoss,label='Generator Loss')
-        plt.plot(np.arange(self.opt.epochs),DLoss,label='Discriminator Loss')
-        plt.xlabel('epoch')
-        plt.ylabel('Loss')
-        plt.legend()
-        self.run['diagnostics/loss_plot'].upload(fig)
+        self.plot_loss(VAEGLoss,DLoss,'VAE+D')
+        self.plot_d_losses(loss_fake_d,loss_real_d,'D fake+real')
         self.run.stop()
 
     def sample_data(self, data, n):
@@ -490,16 +481,34 @@ class GVAE():
         Returns:
             n rows of matrix data.
         """
-        
         k = n
-
         # The following code cost 0.2 second
         indice = random.sample(range(k), k)
         indice = torch.tensor(indice)
         sampled_values = data[indice]
         return sampled_values
 
+    def plot_d_losses(self,loss1,loss2,label):
+        fig = plt.figure(figsize=(15, 15))
+        plt.plot(np.arange(self.opt.epochs),np.array(loss1),label='D Fake Loss')
+        plt.plot(np.arange(self.opt.epochs),np.array(loss2),label='D Real Loss')
+        plt.xlabel('epoch')
+        plt.ylabel('Loss')
+        plt.legend()
+        self.run['diagnostics/'+label].upload(fig)
+
+    def plot_loss(self,loss1,loss2,label):
+        fig = plt.figure(figsize=(15, 15))
+        plt.plot(np.arange(self.opt.epochs),np.array(loss1),label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),np.array(loss2),label='Discriminator Loss')
+        plt.xlabel('epoch')
+        plt.ylabel('Loss')
+        plt.legend()
+        self.run['diagnostics/'+label].upload(fig)
+
     def pcd(self, real, fake):
+        real.corr().to_csv('realcorr.csv',index=False)
+        fake.corr().to_csv('fakecorr.csv',index=False)
         return np.linalg.norm((real.corr()-fake.corr()),ord='fro')
 
     def plot_diagnostics(self, real, fake,epoch):
@@ -520,7 +529,6 @@ class GVAE():
     
     def sample(self, samples):
         self.decoder.eval()
-
         steps = samples // self._batch_size + 1
         data = []
         for _ in range(steps):
@@ -532,8 +540,12 @@ class GVAE():
             data.append(fake.detach().cpu().numpy())
         data = np.concatenate(data, axis=0)
         data = data[:samples]
-
-
+        return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
+    
+    def transform_to_df(self, fake,sigmas):
+        data = []
+        data.append(fake.detach().cpu().numpy())
+        data = np.concatenate(data, axis=0)
         return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
 
     def set_device(self, device):
