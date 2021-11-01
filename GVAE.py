@@ -221,7 +221,7 @@ def loss_function(recon_x, x, sigmas, mu, logvar, output_info, factor):
         return sum(loss) * factor / x.size()[0], KLD / x.size()[0]
 
 class GVAE():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128,128),decompress_dims=(128, 128, 128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128),decompress_dims=(128, 128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -477,8 +477,8 @@ class GVAE():
                 loss_fake_d = -torch.mean(y_fake)
                 cross_entropy = self.compute_loss(fake, real,sigmas,self.loss_factor)
                 KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
-                recon_error = self.MMD(real, fake, kernel=KERNEL_TYPE)
-                loss_g = KLD + recon_error + loss_fake_d
+                # recon_error = self.MMD(real, fake, kernel=KERNEL_TYPE)
+                loss_g = KLD + loss_fake_d
                 loss_g.backward()
                 optimizerVAE.step()
                 # self.decoder.sigma.data.clamp_(0.01, 1.0)

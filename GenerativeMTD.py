@@ -1,259 +1,283 @@
-import warnings
-
 import numpy as np
-import pandas as pd
-import torch
+from pandas.core.indexes.base import Index
+from keras.datasets import mnist
+import matplotlib.pyplot as plt
+from numpy.core.numeric import cross
+from torch._C import device
+from torch.nn.modules.loss import BCEWithLogitsLoss, MSELoss
+from tqdm import tqdm
+from torchvision import transforms
+from torchsummary import summary
 import torch.nn as nn
+from torch.utils.data import TensorDataset,DataLoader,Dataset
+from torch.utils.data import random_split
+import torch
+import torch.optim as optim
+from torch.optim import Adam, SGD
+from torch.autograd import Variable, backward
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn import metrics
+from scipy.spatial.distance import cdist
+from torch.nn.functional import cross_entropy, nll_loss, log_softmax
+from torch.nn import BatchNorm1d,Parameter, Dropout, LeakyReLU, Linear, Module, ReLU, Sequential, functional
+from ClusterMTD import *
+from data_transformer import *
+from data_sampler import *
+import random
+import matplotlib.pyplot as plt
 from packaging import version
-from torch import optim
-from torch.nn import BatchNorm1d, Dropout, LeakyReLU, Linear, Module, ReLU, Sequential, functional
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-from ctgan.data_sampler import DataSampler
-from ctgan.data_transformer import DataTransformer
-from ctgan.synthesizers.base import BaseSynthesizer
-from models import *
-from train_options import *
-import neptune
-import neptune.new as neptune
-import os
-import sys
-import argparse
+torch.cuda.empty_cache()
+KERNEL_TYPE = "multiscale"
 
+#  ---------------  Dataset  ---------------
 
-class Discriminator(Module):
+def getBestK(data):
+    distortions = []
+    inertias = []
+    mapping1 = {}
+    mapping2 = {}
+    K = range(1, 10)
+    for k in K:
+            # Building and fitting the model
+            kmeanModel = KMeans(n_clusters=k).fit(data)
+            kmeanModel.fit(data)
+        
+            distortions.append(sum(np.min(cdist(data, kmeanModel.cluster_centers_,'euclidean'), axis=1)) / data.shape[0])
+            inertias.append(kmeanModel.inertia_)
+        
+            mapping1[k] = sum(np.min(cdist(data, kmeanModel.cluster_centers_,'euclidean'), axis=1)) / data.shape[0]
+            mapping2[k] = kmeanModel.inertia_
+        
 
-    def __init__(self, input_dim, discriminator_dim):
-        super(Discriminator, self).__init__()
-        dim = input_dim 
-        seq = []
-        for item in list(discriminator_dim):
-            seq += [Linear(dim, item), LeakyReLU(0.2), Dropout(0.5)]
-            dim = item
+    curve = inertias
+    nPoints = len(curve)
+    allCoord = np.vstack((range(nPoints), curve)).T
+    np.array([range(nPoints), curve])
+    firstPoint = allCoord[0]
+    lineVec = allCoord[-1] - allCoord[0]
+    lineVecNorm = lineVec / np.sqrt(np.sum(lineVec**2))
+    vecFromFirst = allCoord - firstPoint
+    scalarProduct = np.sum(vecFromFirst * np.matlib.repmat(lineVecNorm, nPoints, 1), axis=1)
+    vecFromFirstParallel = np.outer(scalarProduct, lineVecNorm)
+    vecToLine = vecFromFirst - vecFromFirstParallel
+    distToLine = np.sqrt(np.sum(vecToLine ** 2, axis=1))
+    optimal_K = np.argmax(distToLine)
+    return int(optimal_K+1)
 
-        seq += [Linear(dim, 1)]
-        self.seq = Sequential(*seq)
+class LoadFile():
+    """Load dataset."""
 
-    def calc_gradient_penalty(self, real_data, fake_data, device='cpu', lambda_=10):
+    def __init__(self, opt,run):
+        """Initializes instance of class.
+        Args:
+            csv_file (str): Path to the csv file with the data.
+        """
+        self.run = run
+        self.opt = opt
+        self.data = pd.read_csv(self.opt.file)
+        self.opt.real_data_dim = [self.data.shape[0], self.data.shape[1]]
+        # if(self.opt.choose_best_k):
+        #   self.opt.k = getBestK(self.data)
+        # self.run["Best K"] = self.opt.k
+        self.opt.batch_size = self.opt.k
+
+    def __dim__(self):
+        return self.data.shape[1]
+        
+    # Load dataset
+    def load_data(self):
+      return self.data, self.opt
+
+class CreateDatasetLoader(Dataset):
+    """Load dataset."""
+
+    def __init__(self,data,batch_size,opt):
+        """Initializes instance of class.
+        Args:
+            csv_file (str): Path to the csv file with the data.
+        """
+        self.opt = opt
+        self.batch_size = batch_size
+        self.data = data
         self.device = torch.device('cuda:{}'.format(self.opt.gpu_ids[0])) if self.opt.gpu_ids else torch.device('cpu') 
+        self.data = self.data.to(self.device)
+        # Split into training and test
+        self.train_size = int(0.8 * len(self.data))
+        self.test_size = len(self.data) - self.train_size
+        self.trainset, self.testset = random_split(self.data, [self.train_size, self.test_size])
+        self.trainloader = DataLoader(self.trainset, batch_size=self.batch_size, shuffle=True)
+        self.testloader = DataLoader(self.testset, batch_size=self.test_size, shuffle=True)
 
-        alpha = torch.rand(real_data.size(0), 1, device=device)
-        alpha = alpha.expand(real_data.size(0), real_data.nelement() // real_data.shape(0)).contiguous().view(*real_data.shape)
+    def __len__(self):
+        return len(self.data)
 
-        interpolates = alpha * real_data + ((1 - alpha) * fake_data)
+    def __dim__(self):
+        return self.data.shape[1]
 
-        disc_interpolates = self(interpolates)
+    def __getitem__(self, idx):
+        # Convert idx from tensor to list due to pandas bug (that arises when using pytorch's random_split)
+        if isinstance(idx, torch.Tensor):
+            idx = idx.tolist()
+        return self.data[idx]
 
-        gradients = torch.autograd.grad(
-            outputs=disc_interpolates, inputs=interpolates,
-            grad_outputs=torch.ones(disc_interpolates.size(), device=device),
-            create_graph=True, retain_graph=True, only_inputs=True
-        )[0]
-        gradient_penalty = (((gradients + 1e-16).norm(2, dim=1) - 1) ** 2).mean() * lambda_
+    # Load dataset
+    def load_data(self):
+      return self.trainloader,self.testloader
 
-        return gradient_penalty
+    
+class VAEncoder(Module):
+    def __init__(self, data_dim, compress_dims, embedding_dim):
+        super(VAEncoder, self).__init__()
+        dim = data_dim
+        seq = []
+        for item in list(compress_dims):
+            seq += [Linear(dim, item),LeakyReLU(0.1),Dropout(0.5)]
+            dim = item
+        self.seq = Sequential(*seq)
+        self.fc1 = Linear(dim, embedding_dim)
+        self.fc2 = Linear(dim, embedding_dim)
 
     def forward(self, input):
-        return self.seq(input)
+        feature = self.seq(input)
+        mu = self.fc1(feature)
+        logvar = self.fc2(feature)
+        std = torch.exp(0.5 * logvar)
+        return mu, std, logvar
 
 
-class kNNMTD(Module): 
-    def __init__(self,train,opt):
-        super().__init__()
-        self.k = nn.Parameter(torch.tensor(20),requires_grad=True)
-        self.train = train
-        self.column_names = train.columns
-        self.X = np.array(train)
+class VADecoder(Module):
+    def __init__(self, embedding_dim, decompress_dims, data_dim):
+        super(VADecoder, self).__init__()
+        dim = embedding_dim
+        seq = []
+        for item in list(decompress_dims):
+            seq += [Linear(dim, item), LeakyReLU(0.1),Dropout(0.5)]
+            dim = item
+
+        seq.append(Linear(dim, data_dim))
+        self.seq = Sequential(*seq)
+        self.sigma = Parameter(torch.ones(data_dim) * 0.1)
+
+    def forward(self, input):
+        return self.seq(input), self.sigma
+
+
+
+def loss_function(recon_x, x, sigmas, mu, logvar, output_info, factor):
+        st = 0
+        loss = []
+        for column_info in output_info:
+            for span_info in column_info:
+                if span_info.activation_fn != "softmax":
+                    ed = st + span_info.dim
+                    std = sigmas[st]
+                    loss.append(((x[:, st] - torch.tanh(recon_x[:, st])) ** 2 / 2 / (std ** 2)).sum())
+                    loss.append(torch.log(std) * x.size()[0])
+                    st = ed
+
+                else:
+                    ed = st + span_info.dim
+                    loss.append(cross_entropy(
+                        recon_x[:, st:ed], torch.argmax(x[:, st:ed], dim=-1), reduction='sum'))
+                    st = ed
+
+        assert st == recon_x.size()[1]
+        KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        return sum(loss) * factor / x.size()[0], KLD / x.size()[0]
+
+class GMTD():
+    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128,128),decompress_dims=(128, 128, 128),l2scale=1e-5,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
-        np.random.RandomState(self.opt.set_seed)
-        self._gen_obs = self.opt.num_obs * 10
-        self._synthSamples = []
-        self.surrogate_data = pd.DataFrame()
-
-    def diffusion(self,sample):
-        new_sample = []
-        n = len(sample)
-        min_val = np.min(sample)
-        max_val = np.max(sample)
-        u_set = (min_val + max_val) / 2
-        if(u_set == min_val or u_set == max_val):
-            Nl = len([i for i in sample if i <= u_set])
-            Nu = len([i for i in sample if i >= u_set])
-        else:
-            Nl = len([i for i in sample if i < u_set])
-            Nu = len([i for i in sample if i > u_set])
-        skew_l = Nl / (Nl + Nu)
-        skew_u = Nu / (Nl + Nu)
-        var = np.var(sample,ddof=1)
-        if(var == 0):
-            a = min_val/5
-            b = max_val*5
-            h=0
-            new_sample = np.random.uniform(a, b, size=self._gen_obs) 
-        else:
-            h = var / n
-            a = u_set - (skew_l * np.sqrt(-2 * (var/Nl) * np.log(10**(-20))))
-            b = u_set + (skew_u * np.sqrt(-2 * (var/Nu) * np.log(10**(-20))))
-            L = a if a <= min_val else min_val
-            U = b if b >= max_val else max_val
-            while(len(new_sample) < self._gen_obs):
-                    x = np.random.uniform(L,U)
-                    if(x <= u_set):
-                        MF = (x-L) / (u_set-L)
-                    elif(x > u_set):
-                        MF = (U-x)/(U-u_set)
-                    elif(x < L or x > U) :
-                        MF = 0
-                    rs = np.random.uniform(0,1)
-                    if(MF > rs):
-                        new_sample.append(x)
-                    else:
-                        continue
-        return a,b,np.array(new_sample)
-
-
-    def findNeighbors(self, X, y):
-        dist = torch.norm(X - y, dim=1, p=None)
-        knn = dist.topk(self.opt.k+1, largest=False)
-        return knn.values, knn.indices
-    
-    def generateData(self):
-
-        for ix, value in enumerate(self.train):
-            for col in range(self.train.shape):
-                X = self.train[:,col]
-                y = value[:,col]
-                array_to_diffuse,_ = self.findNeighbors(X,y)
-                L,U,new_sample = np.apply_along_axis(self.diffusion, 0, array_to_diffuse)
-                self._synthSamples.append(new_sample.tolist())
-        return torch.tensor(self._synthSamples)
-
-
-class CTGANSynthesizer(BaseSynthesizer):
-    """Conditional Table GAN Synthesizer.
-
-    This is the core class of the CTGAN project, where the different components
-    are orchestrated together.
-    For more details about the process, please check the [Modeling Tabular data using
-    Conditional GAN](https://arxiv.org/abs/1907.00503) paper.
-    Args:
-        embedding_dim (int):
-            Size of the random sample passed to the Generator. Defaults to 128.
-        generator_dim (tuple or list of ints):
-            Size of the output samples for each one of the Residuals. A Residual Layer
-            will be created for each one of the values provided. Defaults to (256, 256).
-        discriminator_dim (tuple or list of ints):
-            Size of the output samples for each one of the Discriminator Layers. A Linear Layer
-            will be created for each one of the values provided. Defaults to (256, 256).
-        generator_lr (float):
-            Learning rate for the generator. Defaults to 2e-4.
-        generator_decay (float):
-            Generator weight decay for the Adam Optimizer. Defaults to 1e-6.
-        discriminator_lr (float):
-            Learning rate for the discriminator. Defaults to 2e-4.
-        discriminator_decay (float):
-            Discriminator weight decay for the Adam Optimizer. Defaults to 1e-6.
-        batch_size (int):
-            Number of data samples to process in each step.
-        discriminator_steps (int):
-            Number of discriminator updates to do for each generator update.
-            From the WGAN paper: https://arxiv.org/abs/1701.07875. WGAN paper
-            default is 5. Default used is 1 to match original CTGAN implementation.
-        log_frequency (boolean):
-            Whether to use log frequency of categorical levels in conditional
-            sampling. Defaults to ``True``.
-        verbose (boolean):
-            Whether to have print statements for progress results. Defaults to ``False``.
-        epochs (int):
-            Number of training epochs. Defaults to 300.
-        pac (int):
-            Number of samples to group together when applying the discriminator.
-            Defaults to 10.
-        cuda (bool):
-            Whether to attempt to use cuda for GPU computation.
-            If this is False or CUDA is not available, CPU will be used.
-            Defaults to ``True``.
-    """
-
-    def __init__(self, embedding_dim=128, generator_dim=(256, 256), discriminator_dim=(256, 256),
-                 generator_lr=2e-4, generator_decay=1e-6, discriminator_lr=2e-4,
-                 discriminator_decay=1e-6, batch_size=500, discriminator_steps=1,
-                 log_frequency=True, verbose=False, epochs=300, pac=10, cuda=True):
-
-        assert batch_size % 2 == 0
-
-        self._embedding_dim = embedding_dim
-        self._generator_dim = generator_dim
-        self._discriminator_dim = discriminator_dim
+        self.D_in = D_in
+        self.embedding_dim = embedding_dim
+        self.compress_dims = compress_dims
+        self.decompress_dims = decompress_dims
+        self.l2scale = l2scale
+        self.loss_factor = loss_factor
 
         self._generator_lr = generator_lr
         self._generator_decay = generator_decay
-        self._discriminator_lr = discriminator_lr
-        self._discriminator_decay = discriminator_decay
 
         self._batch_size = batch_size
-        self._discriminator_steps = discriminator_steps
-        self._log_frequency = log_frequency
-        self._verbose = verbose
         self._epochs = epochs
-        self.pac = pac
-
-        if not cuda or not torch.cuda.is_available():
-            device = 'cpu'
-        elif isinstance(cuda, str):
-            device = cuda
-        else:
-            device = 'cuda'
-
-        self._device = torch.device(device)
-
+        self.run = run
+        self._log_frequency = log_frequency
+        self.device = torch.device('cuda:{}'.format(self.opt.gpu_ids[0])) if self.opt.gpu_ids else torch.device('cpu') 
         self._transformer = None
         self._data_sampler = None
         self._generator = None
-    
-    def MMD(self, x, y, kernel):
-        """Emprical maximum mean discrepancy. The lower the result, the more evidence that distributions are the same.
+        self.knnmtd_fake = None
+        self.criterion = nn.NLLLoss()
 
-        Args:
-            x: first sample, distribution P
-            y: second sample, distribution Q
-            kernel: kernel type such as "multiscale" or "rbf"
-        """
-        xx, yy, zz = torch.mm(x, x.t()), torch.mm(y, y.t()), torch.mm(x, y.t())
-        rx = (xx.diag().unsqueeze(0).expand_as(xx))
-        ry = (yy.diag().unsqueeze(0).expand_as(yy))
-        
-        dxx = rx.t() + rx - 2. * xx # Used for A in (1)
-        dyy = ry.t() + ry - 2. * yy # Used for B in (1)
-        dxy = rx.t() + ry - 2. * zz # Used for C in (1)
-        
-        XX, YY, XY = (torch.zeros(xx.shape).to(self.device),
-                    torch.zeros(xx.shape).to(self.device),
-                    torch.zeros(xx.shape).to(self.device))
-        
-        if kernel == "multiscale":
+        self.run["config/batch_size"] = self._batch_size
+        # self.run["config/AE lr"] = self.encoder_lr
+
+        self.run["config/AE dim"] = [self.compress_dims, self.embedding_dim,self.decompress_dims]
+
+        self.run["config/epoch"] = self.opt.epochs
+
+    def clip_tensors(self, real, fake_transformed):
+        for i in np.arange(real.size(1)):
+            fake_transformed[:,i] = torch.clamp(fake_transformed[:,i], torch.min(real[:,i]),torch.max(real[:,i]))
+        return fake_transformed
+
+    def compute_loss(self, recon_x, x,sigmas, factor):
+            """Compute the cross entropy loss on the fixed discrete column."""
+            loss = []
             
-            bandwidth_range = [0.2, 0.5, 0.9, 1.3]
-            for a in bandwidth_range:
-                XX += a**2 * (a**2 + dxx)**-1
-                YY += a**2 * (a**2 + dyy)**-1
-                XY += a**2 * (a**2 + dxy)**-1
-                
-        if kernel == "rbf":
-        
-            bandwidth_range = [10, 15, 20, 50]
-            for a in bandwidth_range:
-                XX += torch.exp(-0.5*dxx/a)
-                YY += torch.exp(-0.5*dyy/a)
-                XY += torch.exp(-0.5*dxy/a)
-        
-        
+            st = 0
+            st_c = 0
+            for column_info in self._transformer.output_info_list:
+                for span_info in column_info:
+                    if len(column_info) != 1 or span_info.activation_fn != "softmax":
+                        st += span_info.dim
+                        # std = sigmas[st]
+                        # loss.append(((x[:, st] - recon_x[:, st]) ** 2 / 2 / (std ** 2)).sum())
+                        # loss.append(torch.log(std) * x.size()[0])
+                        # st = ed
 
-        return torch.mean(XX + YY - 2. * XY)
+                    else:
+                        ed = st + span_info.dim
+                        tmp = functional.cross_entropy(x[:, st:ed],torch.argmax(recon_x[:, st:ed], dim=1),reduction='none')
+                        loss.append(tmp)
+                        st = ed
+
+            assert st == recon_x.size()[1]
+            loss = torch.stack(loss, dim=1)
+
+            return (loss * factor).sum() / x.size()[0]
+
+    def _apply_activate(self, data):
+        """Apply proper activation function to the output of the generator."""
+        data_t = []
+        st = 0
+        for column_info in self._transformer.output_info_list:
+            for span_info in column_info:
+                if span_info.activation_fn == 'tanh':
+                    ed = st + span_info.dim
+                    data_t.append(torch.tanh(data[:, st:ed]))
+                    st = ed
+                elif span_info.activation_fn == 'relu':
+                    ed = st + span_info.dim
+                    m = nn.ReLU()
+                    data_t.append(m(data[:, st:ed]))
+                    st = ed
+                elif span_info.activation_fn == 'softmax':
+                    ed = st + span_info.dim
+                    transformed = self._gumbel_softmax(data[:, st:ed], tau=0.2)
+                    data_t.append(transformed)
+                    st = ed
+                else:
+                    assert 0
+        return torch.cat(data_t, dim=1)
 
     @staticmethod
     def _gumbel_softmax(logits, tau=1, hard=False, eps=1e-10, dim=-1):
         """Deals with the instability of the gumbel_softmax for older versions of torch.
-
         For more details about the issue:
         https://drive.google.com/file/d/1AA5wPfZ1kquaRtVruCd6BiYZGcDeNxyP/view?usp=sharing
         Args:
@@ -279,302 +303,207 @@ class CTGANSynthesizer(BaseSynthesizer):
 
         return functional.gumbel_softmax(logits, tau=tau, hard=hard, eps=eps, dim=dim)
 
-    def _apply_activate(self, data):
-        """Apply proper activation function to the output of the generator."""
-        data_t = []
-        st = 0
-        for column_info in self._transformer.output_info_list:
-            for span_info in column_info:
-                if span_info.activation_fn == 'tanh':
-                    ed = st + span_info.dim
-                    data_t.append(torch.tanh(data[:, st:ed]))
-                    st = ed
-                elif span_info.activation_fn == 'softmax':
-                    ed = st + span_info.dim
-                    transformed = self._gumbel_softmax(data[:, st:ed], tau=0.2)
-                    data_t.append(transformed)
-                    st = ed
-                else:
-                    assert 0
-
-        return torch.cat(data_t, dim=1)
-
-    def _cond_loss(self, data, c, m):
-        """Compute the cross entropy loss on the fixed discrete column."""
-        loss = []
-        st = 0
-        st_c = 0
-        for column_info in self._transformer.output_info_list:
-            for span_info in column_info:
-                if len(column_info) != 1 or span_info.activation_fn != "softmax":
-                    # not discrete column
-                    st += span_info.dim
-                else:
-                    ed = st + span_info.dim
-                    ed_c = st_c + span_info.dim
-                    tmp = functional.cross_entropy(
-                        data[:, st:ed],
-                        torch.argmax(c[:, st_c:ed_c], dim=1),
-                        reduction='none'
-                    )
-                    loss.append(tmp)
-                    st = ed
-                    st_c = ed_c
-
-        loss = torch.stack(loss, dim=1)
-
-        return (loss * m).sum() / data.size()[0]
-
-    def _validate_discrete_columns(self, train_data, discrete_columns):
-        """Check whether ``discrete_columns`` exists in ``train_data``.
+    def MMD(self, x, y, kernel):
+        """Emprical maximum mean discrepancy. The lower the result, the more evidence that distributions are the same.
 
         Args:
-            train_data (numpy.ndarray or pandas.DataFrame):
-                Training Data. It must be a 2-dimensional numpy array or a pandas.DataFrame.
-            discrete_columns (list-like):
-                List of discrete columns to be used to generate the Conditional
-                Vector. If ``train_data`` is a Numpy array, this list should
-                contain the integer indices of the columns. Otherwise, if it is
-                a ``pandas.DataFrame``, this list should contain the column names.
+            x: first sample, distribution P
+            y: second sample, distribution Q
+            kernel: kernel type such as "multiscale" or "rbf"
         """
-        if isinstance(train_data, pd.DataFrame):
-            invalid_columns = set(discrete_columns) - set(train_data.columns)
-        elif isinstance(train_data, np.ndarray):
-            invalid_columns = []
-            for column in discrete_columns:
-                if column < 0 or column >= train_data.shape[1]:
-                    invalid_columns.append(column)
-        else:
-            raise TypeError('``train_data`` should be either pd.DataFrame or np.array.')
+        xx, yy, zz = torch.mm(x, x.t()), torch.mm(y, y.t()), torch.mm(x, y.t())
+        rx = (xx.diag().unsqueeze(0).expand_as(xx))
+        ry = (yy.diag().unsqueeze(0).expand_as(yy))
+        dxx = rx.t() + rx - 2. * xx # Used for A in (1)
+        dyy = ry.t() + ry - 2. * yy # Used for B in (1)
+        dxy = rx.t() + ry - 2. * zz # Used for C in (1)
+        XX, YY, XY = (torch.zeros(xx.shape).to(self.device),
+                    torch.zeros(xx.shape).to(self.device),
+                    torch.zeros(xx.shape).to(self.device))
+        if kernel == "multiscale":
+            bandwidth_range = [0.2, 0.5, 0.9, 1.3]
+            for a in bandwidth_range:
+                XX += a**2 * (a**2 + dxx)**-1
+                YY += a**2 * (a**2 + dyy)**-1
+                XY += a**2 * (a**2 + dxy)**-1
+        if kernel == "rbf":
+            bandwidth_range = [10, 15, 20, 50]
+            for a in bandwidth_range:
+                XX += torch.exp(-0.5*dxx/a)
+                YY += torch.exp(-0.5*dyy/a)
+                XY += torch.exp(-0.5*dxy/a)
+        return torch.mean(XX + YY - 2. * XY)
+    
+    def DeepCoral(self, source, target):
+        # d = source.data.shape[1]
+        xm = torch.mean(source, 1, keepdim=True)
+        xc = torch.matmul(torch.transpose(xm, 0, 1), xm)  # source covariance
+        xmt = torch.mean(target, 1, keepdim=True)
+        xct = torch.matmul(torch.transpose(xmt, 0, 1), xmt)   # target covariance
+        loss = torch.mean(torch.mul((xc - xct), (xc - xct)))   # frobenius norm between source and target
+        return loss
 
-        if invalid_columns:
-            raise ValueError('Invalid columns found: {}'.format(invalid_columns))
 
-    def fit(self, train_data, discrete_columns=tuple(), epochs=None):
-        """Fit the CTGAN Synthesizer models to the training data.
 
+    def fit(self,train_data,discrete_columns=tuple()):
+        """Trains the model.
         Args:
-            train_data (numpy.ndarray or pandas.DataFrame):
-                Training Data. It must be a 2-dimensional numpy array or a pandas.DataFrame.
-            discrete_columns (list-like):
-                List of discrete columns to be used to generate the Conditional
-                Vector. If ``train_data`` is a Numpy array, this list should
-                contain the integer indices of the columns. Otherwise, if it is
-                a ``pandas.DataFrame``, this list should contain the column names.
+            csv_file (str): Absolute path of the dataset used for training.
+            n_epochs (int): Number of epochs to train.
         """
-        self._validate_discrete_columns(train_data, discrete_columns)
-
-        if epochs is None:
-            epochs = self._epochs
-        else:
-            warnings.warn(
-                ('`epochs` argument in `fit` method has been deprecated and will be removed '
-                 'in a future version. Please pass `epochs` to the constructor instead'),
-                DeprecationWarning
-            )
+        self._batch_size = train_data.shape[0]
 
         self._transformer = DataTransformer()
         self._transformer.fit(train_data, discrete_columns)
-
-        train_data = self._transformer.transform(train_data)
-
-        self._data_sampler = DataSampler(
-            train_data,
-            self._transformer.output_info_list,
-            self._log_frequency)
-
+        train_data_transformed = self._transformer.transform(train_data)
+        self._data_sampler = DataSampler(train_data_transformed,self._transformer.output_info_list,self._transformer._column_transform_info_list, self._log_frequency)
         data_dim = self._transformer.output_dimensions
+        generateFake = kNNMTD(self.opt)
+        self.knnmtd_fake, knnmtd_fake_numpy = generateFake.generateData(train_data_transformed)
+        self.fake_data_means = self.knnmtd_fake.mean(dim=0)
+        self.fake_data_stds = self.knnmtd_fake.std(dim=0)
+        self.knnmtd_fake = (self.knnmtd_fake - self.fake_data_means) / self.fake_data_stds
+        fake_df = self._transformer.inverse_transform(knnmtd_fake_numpy,self.fake_data_means,self.fake_data_stds)
+        fake_dataloader = CreateDatasetLoader(self.knnmtd_fake, self._batch_size,self.opt)
+        train_loader, test_loader = fake_dataloader.load_data()
 
-        self._generator = kNNMTD(train_data, self.opt, self.run).to(self._device)
+        self.encoder = VAEncoder(data_dim, self.compress_dims, self.embedding_dim).to(self.device)
+        self.decoder = VADecoder(self.embedding_dim, self.compress_dims, data_dim).to(self.device)
+        print(self.encoder)
+        print(self.decoder)
 
-        discriminator = Discriminator(
-            data_dim + self._data_sampler.dim_cond_vec(),
-            self._discriminator_dim,
-            pac=self.pac
-        ).to(self._device)
+        # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
 
-        optimizerG = optim.Adam(
-            self._generator.parameters(), lr=self._generator_lr, betas=(0.5, 0.9),
-            weight_decay=self._generator_decay
-        )
+        optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
+        
+        real = torch.from_numpy(train_data_transformed.astype('float32')).to(self.device)
+        self.real_data_means = real.mean(dim=0)
+        self.real_data_stds = real.std(dim=0)
+        real = (real - self.real_data_means) / self.real_data_stds
 
-        optimizerD = optim.Adam(
-            discriminator.parameters(), lr=self._discriminator_lr,
-            betas=(0.5, 0.9), weight_decay=self._discriminator_decay
-        )
 
-        mean = torch.zeros(self._batch_size, self._embedding_dim, device=self._device)
-        std = mean + 1
+        means = torch.stack((self.real_data_means,self.fake_data_means.to(self.device)))
+        self.real_fake_means = torch.mean(means,dim=0)
+        stds = torch.stack((self.real_data_stds,self.fake_data_stds.to(self.device)))
+        self.real_fake_stds = torch.mean(stds,dim=0)
 
-        steps_per_epoch = max(len(train_data) // self._batch_size, 1)
-        for i in range(epochs):
-            for id_ in range(steps_per_epoch):
+        VAEGLoss = []
+        DLoss = []
 
-                for n in range(self._discriminator_steps):
-                    fakez = torch.normal(mean=mean, std=std)
+        for i in range(self.opt.epochs):
+            for ix, data in enumerate(train_loader):
 
-                    condvec = self._data_sampler.sample_condvec(self._batch_size)
-                    if condvec is None:
-                        c1, m1, col, opt = None, None, None, None
-                        real = self._data_sampler.sample_data(self._batch_size, col, opt)
-                    else:
-                        c1, m1, col, opt = condvec
-                        c1 = torch.from_numpy(c1).to(self._device)
-                        m1 = torch.from_numpy(m1).to(self._device)
-                        fakez = torch.cat([fakez, c1], dim=1)
 
-                        perm = np.arange(self._batch_size)
-                        np.random.shuffle(perm)
-                        real = self._data_sampler.sample_data(
-                            self._batch_size, col[perm], opt[perm])
-                        c2 = c1[perm]
+                optimizerVAE.zero_grad()
+                # real_sampled = self.sample_data(real,self._batch_size)
+                # real_sampled = real_sampled.to(self.device)
+                fake_knnmtd = data.to(self.device)
+                mu, std, logvar = self.encoder(fake_knnmtd)
+                eps = torch.randn_like(std)
+                emb = eps * std + mu
+                fake, sigmas = self.decoder(emb)
+                fake = self._apply_activate(fake)
 
-                    fake = self._generator(fakez)
-                    fakeact = self._apply_activate(fake)
 
-                    real = torch.from_numpy(real.astype('float32')).to(self._device)
-
-                    if c1 is not None:
-                        fake_cat = torch.cat([fakeact, c1], dim=1)
-                        real_cat = torch.cat([real, c2], dim=1)
-                    else:
-                        real_cat = real
-                        fake_cat = fakeact
-
-                    y_fake = discriminator(fake_cat)
-                    y_real = discriminator(real_cat)
-
-                    pen = discriminator.calc_gradient_penalty(
-                        real_cat, fake_cat, self._device, self.pac)
-                    loss_d = -(torch.mean(y_real) - torch.mean(y_fake))
-
-                    optimizerD.zero_grad()
-                    pen.backward(retain_graph=True)
-                    loss_d.backward()
-                    optimizerD.step()
-
-                fakez = torch.normal(mean=mean, std=std)
-                condvec = self._data_sampler.sample_condvec(self._batch_size)
-
-                if condvec is None:
-                    c1, m1, col, opt = None, None, None, None
-                else:
-                    c1, m1, col, opt = condvec
-                    c1 = torch.from_numpy(c1).to(self._device)
-                    m1 = torch.from_numpy(m1).to(self._device)
-                    fakez = torch.cat([fakez, c1], dim=1)
-
-                fake = self._generator(fakez)
-                fakeact = self._apply_activate(fake)
-
-                if c1 is not None:
-                    y_fake = discriminator(torch.cat([fakeact, c1], dim=1))
-                else:
-                    y_fake = discriminator(fakeact)
-
-                if condvec is None:
-                    cross_entropy = 0
-                else:
-                    cross_entropy = self._cond_loss(fake, c1, m1)
-
-                loss_g = -torch.mean(y_fake) + cross_entropy
-
-                optimizerG.zero_grad()
+                cross_entropy = self.compute_loss(fake, real,sigmas,self.loss_factor)
+                KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
+                recon_error = self.MMD(real, fake, kernel=KERNEL_TYPE)
+                deepcoral = self.DeepCoral(real,fake)
+                loss_g = KLD + recon_error + deepcoral
                 loss_g.backward()
-                optimizerG.step()
+                optimizerVAE.step()
+                # self.decoder.sigma.data.clamp_(0.01, 1.0)
 
-            if self._verbose:
-                print(f"Epoch {i+1}, Loss G: {loss_g.detach().cpu(): .4f}, "
-                      f"Loss D: {loss_d.detach().cpu(): .4f}",
-                      flush=True)
+            VAEGLoss.append(loss_g.item())
+            self.run["output/G Loss"].log(loss_g)
+            print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f}",flush=True)
+            if(self.opt.epochs % 10 == 0):
+                fake = self.transform_to_df(fake,sigmas)
+                print(fake["Recerational.Athlete"].value_counts())
+                self.plot_diagnostics(train_data,fake,i)
+                pcd = self.pcd(train_data,fake)
+                self.run["output/PCD"].log(pcd)
+        fake = self.sample(1000)
+        self.plot_diagnostics(train_data,fake,i)
+        pcd = self.pcd(train_data,fake)
+        self.run["output/PCD"].log(pcd)
 
-    def sample(self, n, condition_column=None, condition_value=None):
-        """Sample data similar to the training data.
+        self.run.stop()
 
-        Choosing a condition_column and condition_value will increase the probability of the
-        discrete condition_value happening in the condition_column.
-        Args:
-            n (int):
-                Number of rows to sample.
-            condition_column (string):
-                Name of a discrete column.
-            condition_value (string):
-                Name of the category in the condition_column which we wish to increase the
-                probability of happening.
+    def sample_data(self, data, n):
+        """Sample data from original training data satisfying the sampled conditional vector.
         Returns:
-            numpy.ndarray or pandas.DataFrame
+            n rows of matrix data.
         """
-        if condition_column is not None and condition_value is not None:
-            condition_info = self._transformer.convert_column_name_value_to_id(
-                condition_column, condition_value)
-            global_condition_vec = self._data_sampler.generate_cond_from_condition_column_info(
-                condition_info, self._batch_size)
-        else:
-            global_condition_vec = None
+        k = n
+        # The following code cost 0.2 second
+        indice = random.sample(range(k), k)
+        indice = torch.tensor(indice)
+        sampled_values = data[indice]
+        return sampled_values
 
-        steps = n // self._batch_size + 1
+    def plot_d_losses(self,loss1,loss2,label):
+        fig = plt.figure(figsize=(15, 15))
+        plt.plot(np.arange(self.opt.epochs),np.array(loss1.detach()),label='D Fake Loss')
+        plt.plot(np.arange(self.opt.epochs),np.array(loss2.detach()),label='D Real Loss')
+        plt.xlabel('epoch')
+        plt.ylabel('Loss')
+        plt.legend()
+        self.run['diagnostics/'+label].upload(fig)
+
+    def plot_loss(self,loss1,loss2,label):
+        fig = plt.figure(figsize=(15, 15))
+        plt.plot(np.arange(self.opt.epochs),np.array(loss1.detach()),label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),np.array(loss2.detach()),label='Discriminator Loss')
+        plt.xlabel('epoch')
+        plt.ylabel('Loss')
+        plt.legend()
+        self.run['diagnostics/'+label].upload(fig)
+
+    def pcd(self, real, fake):
+        # real.corr().to_csv('realcorr.csv',index=False)
+        # fake.corr().to_csv('fakecorr.csv',index=False)
+        pcd = np.linalg.norm((real.corr()-fake.corr()),ord='fro')
+        print(pcd)
+        return pcd
+
+    def plot_diagnostics(self, real, fake,epoch):
+        fig, axs = plt.subplots(5, 4,figsize=(5,5),squeeze=True,frameon=True)
+        for ax,col in zip(axs.flat,real.columns):
+            sns.kdeplot(real[col],label='Real',ax=ax)
+            sns.kdeplot(fake[col],label='Proposed',ax=ax)
+            ax.set(xlabel=col, ylabel='')
+            ax.get_yaxis().set_label_coords(-0.4,0.5)
+            ax.legend([],[], frameon=False)
+
+        fig.delaxes(axs[4,3]) 
+        fig.tight_layout()
+        axs.flatten()[-2].legend(loc='lower right', bbox_to_anchor=(0.5, -1.5), ncol=3)
+        plt.subplots_adjust(top=0.94)
+        plt.suptitle(f"Density Plot for epoch {epoch}")
+        self.run["output/diagnotics"].upload(fig)
+    
+    def sample(self, samples):
+        self.decoder.eval()
+        steps = samples // self._batch_size + 1
         data = []
-        for i in range(steps):
-            mean = torch.zeros(self._batch_size, self._embedding_dim)
+        for _ in range(steps):
+            mean = torch.zeros(self._batch_size, self.embedding_dim)
             std = mean + 1
-            fakez = torch.normal(mean=mean, std=std).to(self._device)
-
-            if global_condition_vec is not None:
-                condvec = global_condition_vec.copy()
-            else:
-                condvec = self._data_sampler.sample_original_condvec(self._batch_size)
-
-            if condvec is None:
-                pass
-            else:
-                c1 = condvec
-                c1 = torch.from_numpy(c1).to(self._device)
-                fakez = torch.cat([fakez, c1], dim=1)
-
-            fake = self._generator(fakez)
-            fakeact = self._apply_activate(fake)
-            data.append(fakeact.detach().cpu().numpy())
-
+            noise = torch.normal(mean=mean, std=std).to(self.device)
+            fake, sigmas = self.decoder(noise)
+            fake = self._apply_activate(fake)
+            data.append(fake.detach().cpu().numpy())
         data = np.concatenate(data, axis=0)
-        data = data[:n]
-
-        return self._transformer.inverse_transform(data)
+        data = data[:samples]
+        return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
+    
+    def transform_to_df(self, fake,sigmas):
+        data = []
+        data.append(fake.detach().cpu().numpy())
+        data = np.concatenate(data, axis=0)
+        return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
 
     def set_device(self, device):
-        self._device = device
-        if self._generator is not None:
-            self._generator.to(self._device)
-
-
-if __name__ == "__main__":
-    opt = TrainOptions().parse()
-    opt.device = torch.device('cuda:{}'.format(opt.gpu_ids[0])) if opt.gpu_ids else torch.device('cpu') 
-
-    run = neptune.init(project="jaysivakumar/GenerativeMTD")  # your credentials
-    run['config/dataset/path'] = opt.file
-    # run['config/dataset/transforms'] = data_tfms # dict() object
-    # run['config/dataset/size'] = dataset_size # dict() object
-    run['config/model'] = "GenerativeMTD"
-    run['config/criterion'] = "MMD"
-    run['config/optimizer'] = "Adam"
-    # run['config/params'] = hparams # dict() object
-
-
-    # By default, read csv file in the same directory as this script
-        
-
-
-    data = LoadFile(opt,run)
-    D_in = data.__dim__()
-    df,opt = data.load_data()
-    
-
-
-    # synth_df = kNNMTD(opt,df,run)
-    # synthData_MTD = synth_df.generateData()
-    # Call the main function of the script
-
-
-
-    model = GenerativeMTD(opt, D_in,run)
-    model.fit(df)
+        self.device = device
+        self.decoder.to(self.device)
