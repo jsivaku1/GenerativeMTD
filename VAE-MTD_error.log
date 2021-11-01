@@ -1,3 +1,4 @@
+slurmstepd: error: *** JOB 4544567 ON compute130 CANCELLED AT 2021-11-01T15:12:13 ***
 /data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/neptune/new/internal/utils/git.py:34: UserWarning: GitPython could not be initialized
   warnings.warn("GitPython could not be initialized")
 /data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/neptune/new/internal/utils/git.py:34: UserWarning: GitPython could not be initialized
@@ -6,3 +7,19 @@
   warnings.warn("GitPython could not be initialized")
 /data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/numpy/lib/shape_base.py:379: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.
   res = asanyarray(func1d(inarr_view[ind0], *args, **kwargs))
+/data/home/dhwon/GenerativeMTD/GVAE.py:546: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
+  fig, axs = plt.subplots(5, 4,figsize=(5,5),squeeze=True,frameon=True)
+/data/home/dhwon/.conda/envs/deepmtd/lib/python3.9/site-packages/seaborn/distributions.py:316: UserWarning: Dataset has 0 variance; skipping density estimate. Pass `warn_singular=False` to disable this warning.
+  warnings.warn(msg, UserWarning)
+Traceback (most recent call last):
+  File "/data/home/dhwon/GenerativeMTD/train.py", line 81, in <module>
+    train_GVAE(opt)
+  File "/data/home/dhwon/GenerativeMTD/train.py", line 27, in train_GVAE
+    model.fit(df,discrete_columns = ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress"))
+  File "/data/home/dhwon/GenerativeMTD/GVAE.py", line 504, in fit
+    self.plot_loss(VAEGLoss,DLoss,'VAE+D')
+  File "/data/home/dhwon/GenerativeMTD/GVAE.py", line 531, in plot_loss
+    plt.plot(np.arange(self.opt.epochs),np.array(loss1.detach()),label='Generator Loss')
+AttributeError: 'list' object has no attribute 'detach'
+Waiting for the remaining 98 operations to synchronize with Neptune. Do not kill this process.
+Error occurred during asynchronous operation processing: Cannot log infinite or NaN value to attribute output/PCD

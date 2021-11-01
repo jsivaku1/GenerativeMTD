@@ -259,6 +259,32 @@ class GVAE():
             fake_transformed[:,i] = torch.clamp(fake_transformed[:,i], torch.min(real[:,i]),torch.max(real[:,i]))
         return fake_transformed
 
+    def compute_loss(self, recon_x, x,sigmas, factor):
+            """Compute the cross entropy loss on the fixed discrete column."""
+            loss = []
+            
+            st = 0
+            st_c = 0
+            for column_info in self._transformer.output_info_list:
+                for span_info in column_info:
+                    if len(column_info) != 1 or span_info.activation_fn != "softmax":
+                        st += span_info.dim
+                        # std = sigmas[st]
+                        # loss.append(((x[:, st] - recon_x[:, st]) ** 2 / 2 / (std ** 2)).sum())
+                        # loss.append(torch.log(std) * x.size()[0])
+                        # st = ed
+
+                    else:
+                        ed = st + span_info.dim
+                        tmp = functional.cross_entropy(x[:, st:ed],torch.argmax(recon_x[:, st:ed], dim=1),reduction='none')
+                        loss.append(tmp)
+                        st = ed
+
+            assert st == recon_x.size()[1]
+            loss = torch.stack(loss, dim=1)
+
+            return (loss * factor).sum() / x.size()[0]
+
     def _apply_activate(self, data):
         """Apply proper activation function to the output of the generator."""
         data_t = []
@@ -382,11 +408,11 @@ class GVAE():
         print(self.decoder)
         print(self.discriminator)
 
-        optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
-        optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
+        # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        # optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
 
-        # optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
-        # optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
+        optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
+        optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
 
         # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizerVAE, mode='min',factor=0.1, patience=10, threshold=0.01, threshold_mode='abs')
         
@@ -407,8 +433,6 @@ class GVAE():
         mmd_loss = []
         coral_loss = []
         enc_loss = []
-        # criterion = nn.BCEWithLogitsLoss()
-        criterion = nn.MSELoss()
         for i in range(self.opt.epochs):
             for ix, data in enumerate(train_loader):
                 # for p in self.discriminator.parameters():  # reset requires_grad
@@ -427,8 +451,8 @@ class GVAE():
 
                     optimizerD.zero_grad()
                     y_fake = self.discriminator(fake)                    
-                    y_real = self.discriminator(real)
                     loss_fake_d = torch.mean(y_fake)
+                    y_real = self.discriminator(real)
                     loss_real_d = torch.mean(y_real)
 
                     pen = self.discriminator.calc_gradient_penalty(real, fake, self.device)
@@ -451,11 +475,13 @@ class GVAE():
                 fake = self._apply_activate(fake)
                 y_fake = self.discriminator(fake)
                 loss_fake_d = -torch.mean(y_fake)
+                cross_entropy = self.compute_loss(fake, real,sigmas,self.loss_factor)
                 KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
-                loss_g =  2 * KLD + loss_fake_d
+                recon_error = self.MMD(real, fake, kernel=KERNEL_TYPE)
+                loss_g = KLD + recon_error + loss_fake_d
                 loss_g.backward()
                 optimizerVAE.step()
-                self.decoder.sigma.data.clamp_(0.01, 1.0)
+                # self.decoder.sigma.data.clamp_(0.01, 1.0)
             VAEGLoss.append(loss_g.item())
             DLoss.append(loss_d.item())
             # self.run["output/D fake Loss"].log(loss_fake_d)
@@ -465,13 +491,16 @@ class GVAE():
             self.run["output/D Loss"].log(loss_d)
             print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
             if(self.opt.epochs % 10 == 0):
-                # fake = self.sample(1000)
                 fake = self.transform_to_df(fake,sigmas)
                 print(fake["Recerational.Athlete"].value_counts())
                 self.plot_diagnostics(train_data,fake,i)
                 pcd = self.pcd(train_data,fake)
-                print(pcd)
                 self.run["output/PCD"].log(pcd)
+        fake = self.sample(1000)
+        self.plot_diagnostics(train_data,fake,i)
+        pcd = self.pcd(train_data,fake)
+        self.run["output/PCD"].log(pcd)
+
         self.plot_loss(VAEGLoss,DLoss,'VAE+D')
         self.plot_d_losses(loss_fake_d,loss_real_d,'D fake+real')
         self.run.stop()
@@ -490,8 +519,8 @@ class GVAE():
 
     def plot_d_losses(self,loss1,loss2,label):
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),np.array(loss1),label='D Fake Loss')
-        plt.plot(np.arange(self.opt.epochs),np.array(loss2),label='D Real Loss')
+        plt.plot(np.arange(self.opt.epochs),np.array(loss1.detach()),label='D Fake Loss')
+        plt.plot(np.arange(self.opt.epochs),np.array(loss2.detach()),label='D Real Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()
@@ -499,17 +528,19 @@ class GVAE():
 
     def plot_loss(self,loss1,loss2,label):
         fig = plt.figure(figsize=(15, 15))
-        plt.plot(np.arange(self.opt.epochs),np.array(loss1),label='Generator Loss')
-        plt.plot(np.arange(self.opt.epochs),np.array(loss2),label='Discriminator Loss')
+        plt.plot(np.arange(self.opt.epochs),np.array(loss1.detach()),label='Generator Loss')
+        plt.plot(np.arange(self.opt.epochs),np.array(loss2.detach()),label='Discriminator Loss')
         plt.xlabel('epoch')
         plt.ylabel('Loss')
         plt.legend()
         self.run['diagnostics/'+label].upload(fig)
 
     def pcd(self, real, fake):
-        real.corr().to_csv('realcorr.csv',index=False)
-        fake.corr().to_csv('fakecorr.csv',index=False)
-        return np.linalg.norm((real.corr()-fake.corr()),ord='fro')
+        # real.corr().to_csv('realcorr.csv',index=False)
+        # fake.corr().to_csv('fakecorr.csv',index=False)
+        pcd = np.linalg.norm((real.corr()-fake.corr()),ord='fro')
+        print(pcd)
+        return pcd
 
     def plot_diagnostics(self, real, fake,epoch):
         fig, axs = plt.subplots(5, 4,figsize=(5,5),squeeze=True,frameon=True)
