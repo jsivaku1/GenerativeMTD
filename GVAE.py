@@ -433,6 +433,7 @@ class GVAE():
         mmd_loss = []
         coral_loss = []
         enc_loss = []
+        best_pcd = np.inf
         for i in range(self.opt.epochs):
             for ix, data in enumerate(train_loader):
                 # for p in self.discriminator.parameters():  # reset requires_grad
@@ -477,10 +478,22 @@ class GVAE():
                 loss_fake_d = -torch.mean(y_fake)
                 cross_entropy = self.compute_loss(fake, real,sigmas,self.loss_factor)
                 KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
-                # recon_error = self.MMD(real, fake, kernel=KERNEL_TYPE)
-                loss_g = KLD + loss_fake_d
+                recon_error = self.MMD(real, fake, kernel=KERNEL_TYPE)
+                loss_g = KLD + recon_error+ loss_fake_d 
                 loss_g.backward()
                 optimizerVAE.step()
+
+            fake_df = self.transform_to_df(fake,sigmas)
+            self.plot_diagnostics(train_data,fake_df,i)
+            curr_pcd = self.pcd(train_data,fake_df)
+
+            if(curr_pcd < best_pcd):
+                best_pcd = curr_pcd
+                torch.save(self.encoder, 'best_encoder.pt')
+                torch.save(self.decoder, 'best_decoder.pt')
+
+
+
                 # self.decoder.sigma.data.clamp_(0.01, 1.0)
             VAEGLoss.append(loss_g.item())
             DLoss.append(loss_d.item())
@@ -491,15 +504,16 @@ class GVAE():
             self.run["output/D Loss"].log(loss_d)
             print(f"Epoch {i+1} | Loss VAE: {loss_g.detach().cpu(): .4f} | "f"Loss D: {loss_d.detach().cpu(): .4f}",flush=True)
             if(self.opt.epochs % 10 == 0):
-                fake = self.transform_to_df(fake,sigmas)
-                print(fake["Recerational.Athlete"].value_counts())
-                self.plot_diagnostics(train_data,fake,i)
-                pcd = self.pcd(train_data,fake)
+                fake_df = self.transform_to_df(fake,sigmas)
+                self.plot_diagnostics(train_data,fake_df,i)
+                pcd = self.pcd(train_data,fake_df)
                 self.run["output/PCD"].log(pcd)
-        fake = self.sample(1000)
-        self.plot_diagnostics(train_data,fake,i)
-        pcd = self.pcd(train_data,fake)
-        self.run["output/PCD"].log(pcd)
+        
+        fake_df = self.sample(1000)
+        self.plot_diagnostics(train_data,fake_df,i)
+        pcd = self.pcd(train_data,fake_df)
+        self.run["output/Final PCD"].log(pcd)
+        fake_df.to_csv('fake_data.csv',index=False)
 
         self.plot_loss(VAEGLoss,DLoss,'VAE+D')
         self.plot_d_losses(loss_fake_d,loss_real_d,'D fake+real')
@@ -557,21 +571,39 @@ class GVAE():
         plt.subplots_adjust(top=0.94)
         plt.suptitle(f"Density Plot for epoch {epoch}")
         self.run["output/diagnotics"].upload(fig)
-    
+
     def sample(self, samples):
-        self.decoder.eval()
+        best_encoder = torch.load('best_encoder.pt')
+        best_decoder = torch.load('best_decoder.pt')
         steps = samples // self._batch_size + 1
         data = []
         for _ in range(steps):
-            mean = torch.zeros(self._batch_size, self.embedding_dim)
-            std = mean + 1
-            noise = torch.normal(mean=mean, std=std).to(self.device)
-            fake, sigmas = self.decoder(noise)
+            data = self.sample(self.knnmtd_fake,steps)
+            fake_knnmtd = data.to(self.device)
+            mu, std, logvar = best_encoder(fake_knnmtd)
+            eps = torch.randn_like(std)
+            emb = eps * std + mu
+            fake, sigmas = best_decoder(emb)
             fake = self._apply_activate(fake)
             data.append(fake.detach().cpu().numpy())
         data = np.concatenate(data, axis=0)
         data = data[:samples]
         return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
+    
+    # def sample(self, samples):
+    #     self.decoder.eval()
+    #     steps = samples // self._batch_size + 1
+    #     data = []
+    #     for _ in range(steps):
+    #         mean = torch.zeros(self._batch_size, self.embedding_dim)
+    #         std = mean + 1
+    #         noise = torch.normal(mean=mean, std=std).to(self.device)
+    #         fake, sigmas = self.decoder(noise)
+    #         fake = self._apply_activate(fake)
+    #         data.append(fake.detach().cpu().numpy())
+    #     data = np.concatenate(data, axis=0)
+    #     data = data[:samples]
+    #     return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
     
     def transform_to_df(self, fake,sigmas):
         data = []
