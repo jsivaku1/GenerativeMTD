@@ -17,7 +17,6 @@ class Transformer:
         df = pd.DataFrame(data)
         for index in df:
             column = df[index]
-
             if index in categorical_columns:
                 mapper = column.value_counts().index.tolist()
                 meta.append({

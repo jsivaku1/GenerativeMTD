@@ -52,8 +52,11 @@ class DataTransformer(object):
 
     def _fit_discrete(self, column_name, raw_column_data):
         """Fit one hot encoder for discrete column."""
+
         ohe = OneHotEncodingTransformer()
-        ohe.fit(raw_column_data)
+        fit_data = pd.DataFrame(raw_column_data, columns=[column_name])
+
+        ohe.fit(fit_data, column_name)
         num_categories = len(ohe.dummies)
 
         return ColumnTransformInfo(column_name=column_name, column_type="discrete", transform=ohe,transform_aux=None,output_info=[SpanInfo(num_categories, 'softmax')],output_dimensions=num_categories,min_val = np.min(raw_column_data), max_val=np.max(raw_column_data))
@@ -115,7 +118,8 @@ class DataTransformer(object):
 
     def _transform_discrete(self, column_transform_info, raw_column_data):
         ohe = column_transform_info.transform
-        return [ohe.transform(raw_column_data)]
+        data = pd.DataFrame(raw_column_data, columns=[column_transform_info.column_name])
+        return [ohe.transform(data).to_numpy()]
 
     def transform(self, raw_data):
         """Take raw data and output a matrix data."""
@@ -147,7 +151,9 @@ class DataTransformer(object):
 
     def _inverse_transform_discrete(self, column_transform_info, column_data):
         ohe = column_transform_info.transform
-        return ohe.reverse_transform(column_data)
+        data = pd.DataFrame(column_data, columns=list(ohe.get_output_types()))
+        return ohe.reverse_transform(data)[column_transform_info.column_name]
+
 
     def inverse_transform(self, data, real_means,real_stds,sigmas=None):
         """Take matrix data and output raw data.

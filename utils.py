@@ -3,28 +3,62 @@ import numpy as np
 import xgboost as xgb
 from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.model_selection import train_test_split, StratifiedKFold, KFold
-from sklearn.metrics import accuracy_score,confusion_matrix,recall_score,precision_score,f1_score,\
-                                roc_curve, roc_auc_score, precision_recall_curve,auc, average_precision_score, precision_recall_fscore_support, classification_report
-
-import time
+from sklearn.model_selection import StratifiedKFold, KFold
+from sklearn.metrics import accuracy_score,f1_score
 from sklearn.neighbors import NearestNeighbors
-
 from scipy.stats import entropy
 import scipy as sp
 from scipy.stats import gaussian_kde, wasserstein_distance
 from scipy.stats import norm
-import seaborn as sns
-
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy.ma as ma
 from sklearn.metrics import mean_squared_error
 from dython.nominal import associations, numerical_encoding
 from sdv.metrics.tabular import CSTest, KSTest
+from preprocess import change_dtype, find_cateorical_columns, match_dtypes
+
 
 def PCD(real,synthetic):
-    return np.linalg.norm((associations(real,compute_only=True)['corr'] - associations(synthetic,compute_only=True)['corr']),ord='fro')
+    # print(real.isna().sum())
+    # print(synthetic.isna().sum())
+
+    # if(real.isnull().values.any()):
+    #     real.fillna("0", inplace=True)
+
+    # if(synthetic.isnull().values.any()):
+    #     synthetic.fillna("0", inplace=True)
+
+    # print(real.isna().sum())
+    # print(synthetic.isna().sum())
+
+    real = change_dtype(real)
+    synthetic = match_dtypes(real,synthetic)
+    for col in synthetic.columns:
+        print(synthetic[col].value_counts())
+
+    synthetic.to_csv('synthetic.csv',index=False)
+
+
+    # print(real.isna().sum())
+    # print(synthetic.isna().sum())
+
+    # if(real.isnull().values.any()):
+    #     real.fillna("0", inplace=True)
+
+    # if(synthetic.isnull().values.any()):
+    #     synthetic.fillna("0", inplace=True)
+
+    return np.linalg.norm((associations(real,nan_strategy='drop_samples',compute_only=True)['corr'] - associations(synthetic,nan_strategy='drop_samples',compute_only=True)['corr']),ord='fro')
+    # return np.linalg.norm((associations(real,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr'] - associations(synthetic,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr']),ord='fro')
+
+def stat_test(real,synthetic):
+    real,_ = find_cateorical_columns(real)
+    synthetic = match_dtypes(real,synthetic)
+    kstest = KSTest.compute(real, synthetic)
+    cstest = CSTest.compute(real, synthetic)
+    return kstest, cstest
+
 
 def wass_distance(real,synthetic):
     real = real.sample(n=real.shape[0]).reset_index(drop = True)

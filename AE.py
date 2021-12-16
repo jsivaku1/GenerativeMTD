@@ -21,7 +21,7 @@ from scipy.spatial.distance import cdist
 from torch.nn.functional import cross_entropy, nll_loss, log_softmax
 from torch.nn import BatchNorm1d,Parameter, Dropout, LeakyReLU, Linear, Module, ReLU, Sequential, functional
 from ClusterMTD import *
-from data_transformer import *
+from gvae_data_transformer import *
 from data_sampler import *
 import random
 import matplotlib.pyplot as plt

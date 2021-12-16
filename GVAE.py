@@ -22,13 +22,14 @@ from scipy.spatial.distance import cdist
 from torch.nn.functional import cross_entropy, nll_loss, log_softmax
 from torch.nn import BatchNorm1d,Parameter, Dropout, LeakyReLU, Linear, Module, ReLU, Sequential, functional
 from ClusterMTD import *
-from data_transformer import *
+from gvae_data_transformer import DataTransformer
 from data_sampler import *
 import random
 import matplotlib.pyplot as plt
 from packaging import version
 import seaborn as sns
 import matplotlib.pyplot as plt
+
 
 torch.cuda.empty_cache()
 KERNEL_TYPE = "multiscale"
@@ -84,7 +85,6 @@ class LoadFile():
         #   self.opt.k = getBestK(self.data)
         # self.run["Best K"] = self.opt.k
         self.opt.batch_size = self.opt.k
-        self.opt.class_col = self.data.columns[opt.target_col_ix]
 
     def __dim__(self):
         return self.data.shape[1]
