@@ -22,4 +22,7 @@ module load cuda11.1/toolkit/11.1.1
 # Activate Conda Env
 conda activate deepmtd
 
-python3 train.py --model 'GVAE' --file 'Data/imputed_SweatBinary.csv' --k 3 --num_obs 100 --epochs 150
+# python3 train.py --model 'GVAE' --file 'Data/imputed_SweatBinary.csv' --k 3 --num_obs 100 --epochs 200
+python3 train.py --model 'veegan' --file 'Data/imputed_SweatBinary.csv' --cat_col ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress") --target_col_ix 18 --k 3 --num_obs 100 --epochs 200
+# python3 train.py --model 'tablegan' --file 'Data/imputed_SweatBinary.csv' --cat_col ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress") --k 3 --num_obs 100 --epochs 200
+# python3 train.py --model 'tablegan' --file 'Data/imputed_SweatBinary.csv' --cat_col ("Sex", "Recerational.Athlete", "Birth.Control","PsychDistress") --k 3 --num_obs 100 --epochs 200
