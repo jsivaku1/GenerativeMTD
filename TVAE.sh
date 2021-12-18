@@ -1,10 +1,10 @@
 #!/bin/bash -l
 # Job Name
-#SBATCH --job-name=TableGAN
+#SBATCH --job-name=TVAE
 # Output File Name
-#SBATCH --output=TableGAN_output.txt
+#SBATCH --output=TVAE_output.txt
 # Error File Name
-#SBATCH --error=TableGAN_error.log
+#SBATCH --error=TVAE_error.log
 # Number of Nodes to Use
 #SBATCH --nodes=1
 # Number of Tasks per Node
@@ -22,4 +22,4 @@ module load cuda11.1/toolkit/11.1.1
 # Activate Conda Env
 conda activate deepmtd
 
-python3 train.py --model 'tablegan' --file 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 3 --num_obs 100 --epochs 500
+python3 train.py --model 'TVAE' --file 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 3 --num_obs 100 --epochs 500

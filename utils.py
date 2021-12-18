@@ -53,7 +53,7 @@ def PCD(real,synthetic):
     # return np.linalg.norm((associations(real,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr'] - associations(synthetic,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr']),ord='fro')
 
 def stat_test(real,synthetic):
-    real,_ = find_cateorical_columns(real)
+    real = change_dtype(real)
     synthetic = match_dtypes(real,synthetic)
     kstest = KSTest.compute(real, synthetic)
     cstest = CSTest.compute(real, synthetic)

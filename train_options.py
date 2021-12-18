@@ -17,8 +17,8 @@ class TrainOptions:
         parser.add_argument("--epochs", "-e", type=int, nargs="?", default=100, help="Number of epochs to train")
         parser.add_argument("--batch_size", "-b", type=int, default=50, help="Batch size should be less than real data dim")
         parser.add_argument("--set_seed", "-s", type=int, nargs="?", default=1, help="Set random seed")
-        parser.add_argument("--model", "-m", type=str, nargs="?", default='AE', help="GVAE | GAE | VAE | AE")
-        parser.add_argument("--cat_col", "-cc", type=str, nargs="?", default='', help="Categorical columns in the dataset")
+        parser.add_argument("--model", "-m", type=str, nargs="?", default='GVAE', help="GVAE | tablegan | veegan | ctgan | copulagan | TVAE ")
+        # parser.add_argument("--cat_col", "-cc", type=str, nargs="?", default='', help="Categorical columns in the dataset")
         parser.add_argument("--target_col_ix", "-t", type=int, nargs="?", default='', help="Target column index")
         
         self.initialized = True

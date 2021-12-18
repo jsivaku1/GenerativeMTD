@@ -16,10 +16,9 @@ from tablegan.tablegan import TableGAN
 import utils
 from ast import literal_eval
 from preprocess import find_cateorical_columns, match_dtypes
-
-
-
-
+from ctgan import CTGANSynthesizer,TVAESynthesizer
+from sdv.tabular import CopulaGAN
+from sdv.tabular import TVAE
 
 def train_GVAE(opt):
     run = neptune.init(project="jaysivakumar/G-VAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
@@ -34,9 +33,7 @@ def train_GVAE(opt):
     D_in = data.__dim__()
     df,opt = data.load_data()
     opt.class_col = df.columns[opt.target_col_ix]
-
     opt.cat_col = find_cateorical_columns(df)
-
     model = GVAE(opt, D_in,run)
     model.fit(df,discrete_columns = opt.cat_col)
     gvae_fake = model.sample(1000)
@@ -88,7 +85,6 @@ def train_tablegan(opt):
     D_in = data.__dim__()
     df,opt = data.load_data()
     opt.class_col = df.columns[opt.target_col_ix]
-
     opt.cat_col = find_cateorical_columns(df)
     model = TableGAN(opt,run)
     model.fit(df,categorical_columns = opt.cat_col)
@@ -104,7 +100,78 @@ def train_tablegan(opt):
     run.stop()
 
 
+def train_ctgan(opt):
+    run = neptune.init(project="jaysivakumar/CTGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
+    run['config/dataset/path'] = opt.file
+    run['config/model'] = "CTGAN"
+    run['config/criterion'] = "MMD + KL"
+    run['config/optimizer'] = "SGD"
+    data = LoadFile(opt,run)
+    D_in = data.__dim__()
+    df,opt = data.load_data()
+    opt.class_col = df.columns[opt.target_col_ix]
+    opt.cat_col = find_cateorical_columns(df)
+    model = CTGANSynthesizer(epochs=opt.epochs)
+    model.fit(df,discrete_columns = opt.cat_col)
+    ctgan_fake = model.sample(1000)
+    run['output/Final PCD'] = utils.PCD(df,ctgan_fake)
+    kstest, cstest = utils.stat_test(df,ctgan_fake)
+    run['output/KSTest'] = kstest
+    run['output/CSTest'] = cstest
+    run['output/TSTR'] = utils.predictive_model(df,ctgan_fake,opt.class_col,'TSTR')
+    run['output/TRTS'] = utils.predictive_model(df,ctgan_fake,opt.class_col,'TRTS')
+    run['output/DCR'] = utils.DCR(df,ctgan_fake)
+    run['output/NNDR'] = utils.NNDR(df,ctgan_fake)
+    run.stop()
 
+
+def train_copulagan(opt):
+    run = neptune.init(project="jaysivakumar/CopulaGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
+    run['config/dataset/path'] = opt.file
+    run['config/model'] = "CopulaGAN"
+    run['config/criterion'] = "MMD + KL"
+    run['config/optimizer'] = "SGD"
+    data = LoadFile(opt,run)
+    D_in = data.__dim__()
+    df,opt = data.load_data()
+    opt.class_col = df.columns[opt.target_col_ix]
+    opt.cat_col = find_cateorical_columns(df)
+    model = CopulaGAN(epochs=opt.epochs)
+    model.fit(df)
+    copulagan_fake = model.sample(1000)
+    run['output/Final PCD'] = utils.PCD(df,copulagan_fake)
+    kstest, cstest = utils.stat_test(df,copulagan_fake)
+    run['output/KSTest'] = kstest
+    run['output/CSTest'] = cstest
+    run['output/TSTR'] = utils.predictive_model(df,copulagan_fake,opt.class_col,'TSTR')
+    run['output/TRTS'] = utils.predictive_model(df,copulagan_fake,opt.class_col,'TRTS')
+    run['output/DCR'] = utils.DCR(df,copulagan_fake)
+    run['output/NNDR'] = utils.NNDR(df,copulagan_fake)
+    run.stop()
+
+def train_TVAE(opt):
+    run = neptune.init(project="jaysivakumar/TVAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
+    run['config/dataset/path'] = opt.file
+    run['config/model'] = "TVAE"
+    run['config/criterion'] = "MMD + KL"
+    run['config/optimizer'] = "SGD"
+    data = LoadFile(opt,run)
+    D_in = data.__dim__()
+    df,opt = data.load_data()
+    opt.class_col = df.columns[opt.target_col_ix]
+    opt.cat_col = find_cateorical_columns(df)
+    model = TVAESynthesizer(epochs=opt.epochs)
+    model.fit(df,discrete_columns=opt.cat_col)
+    tvae_fake = model.sample(1000)
+    run['output/Final PCD'] = utils.PCD(df,tvae_fake)
+    kstest, cstest = utils.stat_test(df,tvae_fake)
+    run['output/KSTest'] = kstest
+    run['output/CSTest'] = cstest
+    run['output/TSTR'] = utils.predictive_model(df,tvae_fake,opt.class_col,'TSTR')
+    run['output/TRTS'] = utils.predictive_model(df,tvae_fake,opt.class_col,'TRTS')
+    run['output/DCR'] = utils.DCR(df,tvae_fake)
+    run['output/NNDR'] = utils.NNDR(df,tvae_fake)
+    run.stop()
 
 if __name__ == "__main__":
     opt = TrainOptions().parse()
@@ -115,10 +182,12 @@ if __name__ == "__main__":
         train_veegan(opt)
     if(opt.model == 'tablegan'):
         train_tablegan(opt)
-    # if(opt.model == 'ctgan'):
-    #     train_ctgan(opt)
-    # if(opt.model == 'copulagan'):
-    #     train_copulagan(opt)
+    if(opt.model == 'ctgan'):
+        train_ctgan(opt)
+    if(opt.model == 'copulagan'):
+        train_copulagan(opt)
+    if(opt.model == 'TVAE'):
+        train_TVAE(opt)
     if(opt.model == 'GVAE'):
         train_GVAE(opt)
 
