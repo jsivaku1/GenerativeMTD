@@ -9,7 +9,7 @@ class TrainOptions:
         self.initialized = False
 
     def initialize(self,parser):
-        parser.add_argument("--file", "-f", nargs="?", default=os.path.join('../Data', "imputed_SweatBinary.csv"), help="Dataset file used for training")
+        parser.add_argument("--dataset", "-f", nargs="?", default=os.path.join('Data', "imputed_SweatBinary.csv"), help="Dataset file used for training")
         parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         parser.add_argument("--k", "-k", type=int, nargs="?", default=3, help="Number of nearest neighbors")
         parser.add_argument("--choose_best_k", action='store_true', help="Chooses best k automatically based on the dataset")

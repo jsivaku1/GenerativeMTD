@@ -78,7 +78,7 @@ class LoadFile():
         """
         self.run = run
         self.opt = opt
-        self.data = pd.read_csv(self.opt.file)
+        self.data = pd.read_csv(self.opt.dataset)
         self.opt.real_data_dim = [self.data.shape[0], self.data.shape[1]]
         # if(self.opt.choose_best_k):
         #   self.opt.k = getBestK(self.data)

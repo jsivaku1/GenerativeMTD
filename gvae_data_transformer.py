@@ -181,10 +181,9 @@ class DataTransformer(object):
             st += dim
 
         recovered_data = np.column_stack(recovered_column_data_list)
-        recovered_data = (pd.DataFrame(recovered_data, columns=column_names)
-                          .astype(self._column_raw_dtypes))
-        if not self.dataframe:
-            recovered_data = recovered_data.values
+        recovered_data = pd.DataFrame(recovered_data, columns=column_names).astype(self._column_raw_dtypes)
+        # if not self.dataframe:
+        #     recovered_data = recovered_data.values
 
         return recovered_data
 

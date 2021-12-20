@@ -19,10 +19,11 @@ from preprocess import find_cateorical_columns, match_dtypes
 from ctgan import CTGANSynthesizer,TVAESynthesizer
 from sdv.tabular import CopulaGAN
 from sdv.tabular import TVAE
+from pathlib import Path
 
 def train_GVAE(opt):
     run = neptune.init(project="jaysivakumar/G-VAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-    run['config/dataset/path'] = opt.file
+    run['config/dataset'] = Path(opt.dataset).stem
     # run['config/dataset/transforms'] = data_tfms # dict() object
     # run['config/dataset/size'] = dataset_size # dict() object
     run['config/model'] = "G-VAE"
@@ -33,10 +34,12 @@ def train_GVAE(opt):
     D_in = data.__dim__()
     df,opt = data.load_data()
     opt.class_col = df.columns[opt.target_col_ix]
+    run['config/class column'] = opt.class_col
     opt.cat_col = find_cateorical_columns(df)
     model = GVAE(opt, D_in,run)
     model.fit(df,discrete_columns = opt.cat_col)
     gvae_fake = model.sample(1000)
+    print(gvae_fake)
     run['output/Final PCD'] = utils.PCD(df,gvae_fake)
     kstest, cstest = utils.stat_test(df,gvae_fake)
     run['output/KSTest'] = kstest
@@ -49,7 +52,7 @@ def train_GVAE(opt):
 
 def train_veegan(opt):
     run = neptune.init(project="jaysivakumar/VEEGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-    run['config/dataset/path'] = opt.file
+    run['config/dataset'] = Path(opt.dataset).stem
     # run['config/dataset/transforms'] = data_tfms # dict() object
     # run['config/dataset/size'] = dataset_size # dict() object
     run['config/model'] = "VEEGAN"
@@ -60,7 +63,7 @@ def train_veegan(opt):
     D_in = data.__dim__()
     df,opt = data.load_data()
     opt.class_col = df.columns[opt.target_col_ix]
-
+    run['config/class column'] = opt.class_col
     opt.cat_col = find_cateorical_columns(df)
     model = VEEGAN(opt,run)
     model.fit(df,categorical_columns = opt.cat_col)
@@ -77,7 +80,7 @@ def train_veegan(opt):
 
 def train_tablegan(opt):
     run = neptune.init(project="jaysivakumar/TableGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-    run['config/dataset/path'] = opt.file
+    run['config/dataset'] = Path(opt.dataset).stem
     run['config/model'] = "TableGAN"
     run['config/criterion'] = "MMD + KL"
     run['config/optimizer'] = "SGD"
@@ -85,6 +88,7 @@ def train_tablegan(opt):
     D_in = data.__dim__()
     df,opt = data.load_data()
     opt.class_col = df.columns[opt.target_col_ix]
+    run['config/class column'] = opt.class_col
     opt.cat_col = find_cateorical_columns(df)
     model = TableGAN(opt,run)
     model.fit(df,categorical_columns = opt.cat_col)
@@ -102,7 +106,7 @@ def train_tablegan(opt):
 
 def train_ctgan(opt):
     run = neptune.init(project="jaysivakumar/CTGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-    run['config/dataset/path'] = opt.file
+    run['config/dataset'] = Path(opt.dataset).stem
     run['config/model'] = "CTGAN"
     run['config/criterion'] = "MMD + KL"
     run['config/optimizer'] = "SGD"
@@ -110,6 +114,7 @@ def train_ctgan(opt):
     D_in = data.__dim__()
     df,opt = data.load_data()
     opt.class_col = df.columns[opt.target_col_ix]
+    run['config/class column'] = opt.class_col
     opt.cat_col = find_cateorical_columns(df)
     model = CTGANSynthesizer(epochs=opt.epochs)
     model.fit(df,discrete_columns = opt.cat_col)
@@ -127,7 +132,7 @@ def train_ctgan(opt):
 
 def train_copulagan(opt):
     run = neptune.init(project="jaysivakumar/CopulaGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-    run['config/dataset/path'] = opt.file
+    run['config/dataset'] = Path(opt.dataset).stem
     run['config/model'] = "CopulaGAN"
     run['config/criterion'] = "MMD + KL"
     run['config/optimizer'] = "SGD"
@@ -136,6 +141,7 @@ def train_copulagan(opt):
     df,opt = data.load_data()
     opt.class_col = df.columns[opt.target_col_ix]
     opt.cat_col = find_cateorical_columns(df)
+    run['config/class column'] = opt.class_col
     model = CopulaGAN(epochs=opt.epochs)
     model.fit(df)
     copulagan_fake = model.sample(1000)
@@ -151,7 +157,7 @@ def train_copulagan(opt):
 
 def train_TVAE(opt):
     run = neptune.init(project="jaysivakumar/TVAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-    run['config/dataset/path'] = opt.file
+    run['config/dataset'] = Path(opt.dataset).stem
     run['config/model'] = "TVAE"
     run['config/criterion'] = "MMD + KL"
     run['config/optimizer'] = "SGD"
@@ -159,6 +165,8 @@ def train_TVAE(opt):
     D_in = data.__dim__()
     df,opt = data.load_data()
     opt.class_col = df.columns[opt.target_col_ix]
+    run['config/class column'] = opt.class_col
+
     opt.cat_col = find_cateorical_columns(df)
     model = TVAESynthesizer(epochs=opt.epochs)
     model.fit(df,discrete_columns=opt.cat_col)
@@ -213,7 +221,7 @@ if __name__ == "__main__":
 ####################################################################################
 # def train_GMTD(opt):
 #     run = neptune.init(project="jaysivakumar/GMTD", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-#     run['config/dataset/path'] = opt.file
+#     run['config/dataset/path'] = opt.dataset
 #     # run['config/dataset/transforms'] = data_tfms # dict() object
 #     # run['config/dataset/size'] = dataset_size # dict() object
 #     run['config/model'] = "G-MTD"
@@ -230,7 +238,7 @@ if __name__ == "__main__":
 
 # def train_GAE(opt):
 #     run = neptune.init(project="jaysivakumar/G-AE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-#     run['config/dataset/path'] = opt.file
+#     run['config/dataset/path'] = opt.dataset
 #     # run['config/dataset/transforms'] = data_tfms # dict() object
 #     # run['config/dataset/size'] = dataset_size # dict() object
 #     run['config/model'] = "G-AE"
@@ -248,7 +256,7 @@ if __name__ == "__main__":
 
 # def train_AE(opt):
 #     run = neptune.init(project="jaysivakumar/AutoE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-#     run['config/dataset/path'] = opt.file
+#     run['config/dataset/path'] = opt.dataset
 #     # run['config/dataset/transforms'] = data_tfms # dict() object
 #     # run['config/dataset/size'] = dataset_size # dict() object
 #     run['config/model'] = "AutoE"
@@ -266,7 +274,7 @@ if __name__ == "__main__":
 
 # def train_VAE(opt):
 #     run = neptune.init(project="jaysivakumar/VAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-#     run['config/dataset/path'] = opt.file
+#     run['config/dataset/path'] = opt.dataset
 #     # run['config/dataset/transforms'] = data_tfms # dict() object
 #     # run['config/dataset/size'] = dataset_size # dict() object
 #     run['config/model'] = "VAE"

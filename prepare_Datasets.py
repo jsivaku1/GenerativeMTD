@@ -64,6 +64,17 @@ datasets = [{'label': 'clev_heart','dataset': clev_heart,'class':clev_heart.colu
             {'label': 'breast','dataset': breast,'class':breast.columns[-1],},
             {'label': 'postop','dataset': postop,'class':postop.columns[-1],}]
 
+clev_heart.to_csv('Data/cleveland_heart.csv',index=False)
+urban_land.to_csv('Data/urban_land.csv',index=False)
+mammo.to_csv('Data/mammography.csv',index=False)
+sweat.to_csv('Data/sweat_binary.csv',index=False)
+immuno.to_csv('Data/immunotherapy.csv',index=False)
+cryo.to_csv('Data/cryotherapy.csv',index=False)
+caesarian.to_csv('Data/caesarian.csv',index=False)
+cervical.to_csv('Data/cervical.csv',index=False)
+breast.to_csv('Data/breast.csv',index=False)
+postop.to_csv('Data/post_operative.csv',index=False)
+
 
 sweat_ordinal = pd.read_csv("Data/Regression Datasets/imputed_Sweat3.csv")
 
@@ -84,13 +95,13 @@ liver.drop([6],axis=1,inplace=True)
 liver.dropna(axis=0,inplace=True)
 liver.reset_index(inplace=True, drop=True)
 
-bio = pd.read_csv("../Data/Regression Datasets/bioconcentration.csv")
+bio = pd.read_csv("Data/Regression Datasets/bioconcentration.csv")
 bio.drop(["CAS","SMILES","Set"],axis=1,inplace=True)
 #bio.replace({'?':np.nan},inplace=True)
 bio.dropna(axis=0,inplace=True)
 bio.reset_index(inplace=True, drop=True)
 
-fertility = pd.read_csv('../Data/Regression Datasets/fertility_Diagnosis.csv',header=None)
+fertility = pd.read_csv('Data/Regression Datasets/fertility_Diagnosis.csv',header=None)
 fertility.replace({'?':np.nan},inplace=True)
 fertility.dropna(axis=0,inplace=True)
 fertility.reset_index(inplace=True, drop=True)
@@ -99,12 +110,12 @@ fertility[[9]] = fertility[[9]].apply(LabelEncoder().fit_transform)
 
 
 
-heartfail = pd.read_csv('../Data/Regression Datasets/S1Data.csv')
+heartfail = pd.read_csv('Data/Regression Datasets/S1Data.csv')
 #heartfail.replace({'?':np.nan},inplace=True)
 heartfail.dropna(axis=0,inplace=True)
 heartfail.reset_index(inplace=True, drop=True)
 
-ccn = pd.read_csv('../Data/Regression Datasets/community-crimes-normalized.csv')
+ccn = pd.read_csv('Data/Regression Datasets/community-crimes-normalized.csv')
 ccn.drop(['state','county','community','communityname','fold'],axis=1,inplace=True)
 ccn.replace({'?':np.nan},inplace=True)
 ccn.dropna(axis=0,inplace=True)
@@ -134,3 +145,15 @@ datasets = [
             {'label': 'prostate','dataset': prostate,'class':'lpsa',},
             {'label': 'bio','dataset': bio,'class':'logBCF',},
             {'label': 'heartfail','dataset': heartfail,'class':'CPK',}]
+
+ccn.to_csv('Data/community_crime.csv',index=False)
+sweat_ordinal.to_csv('Data/sweat_ordinal.csv',index=False)
+fertility.to_csv('Data/fertility.csv',index=False)
+parkinsons.to_csv('Data/parkinsons.csv',index=False)
+thyroid.to_csv('Data/thyroid.csv',index=False)
+liver.to_csv('Data/liver.csv',index=False)
+fat.to_csv('Data/fat.csv',index=False)
+pima.to_csv('Data/pima.csv',index=False)
+prostate.to_csv('Data/prostate.csv',index=False)
+bio.to_csv('Data/bioconcentration.csv',index=False)
+heartfail.to_csv('Data/heartfail.csv',index=False)

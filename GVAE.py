@@ -6,6 +6,7 @@ from numpy.core.numeric import cross
 from torch._C import device
 from torch.nn.modules.loss import BCEWithLogitsLoss, MSELoss
 from tqdm import tqdm
+from geomloss import SamplesLoss
 from torchvision import transforms
 from torchsummary import summary
 import torch.nn as nn
@@ -29,7 +30,7 @@ import matplotlib.pyplot as plt
 from packaging import version
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+from utils import *
 
 torch.cuda.empty_cache()
 KERNEL_TYPE = "multiscale"
@@ -79,7 +80,7 @@ class LoadFile():
         """
         self.run = run
         self.opt = opt
-        self.data = pd.read_csv(self.opt.file)
+        self.data = pd.read_csv(self.opt.dataset)
         self.opt.real_data_dim = [self.data.shape[0], self.data.shape[1]]
         # if(self.opt.choose_best_k):
         #   self.opt.k = getBestK(self.data)
@@ -396,6 +397,53 @@ class GVAE():
         loss = torch.mean(torch.mul((xc - xct), (xc - xct)))   # frobenius norm between source and target
         return loss
 
+    # def one_step_epoch(self,data):
+    #     for step in range(self._discriminator_steps):
+
+    #         # real_sampled = self.sample_data(real,self._batch_size)
+    #         # real_sampled = real_sampled.to(self.device)
+    #         fake_knnmtd = data.to(self.device)
+    #         mu, std, logvar = self.encoder(fake_knnmtd)
+    #         eps = torch.randn_like(std)
+    #         emb = eps * std + mu
+    #         fake, sigmas = self.decoder(emb)
+            
+    #         fake = self._apply_activate(fake)
+
+    #         self.optimizerD.zero_grad()
+    #         y_fake = self.discriminator(fake)                    
+    #         loss_fake_d = torch.mean(y_fake)
+    #         y_real = self.discriminator(self.real)
+    #         loss_real_d = torch.mean(y_real)
+
+    #         pen = self.discriminator.calc_gradient_penalty(self.real, fake, self.device)
+    #         pen.backward(retain_graph=True)
+    #         self.loss_d = -(loss_real_d - loss_fake_d)
+    #         self.loss_d.backward()
+    #         self.optimizerD.step()
+
+    #         self.run["output/Fake Loss"].log(loss_fake_d)
+    #         self.run["output/Real Loss"].log(loss_real_d)
+
+    #     self.optimizerVAE.zero_grad()
+    #     # real_sampled = self.sample_data(real,self._batch_size)
+    #     # real_sampled = real_sampled.to(self.device)
+    #     fake_knnmtd = data.to(self.device)
+    #     mu, std, logvar = self.encoder(fake_knnmtd)
+    #     eps = torch.randn_like(std)
+    #     emb = eps * std + mu
+    #     self.fake, self.sigmas = self.decoder(emb)
+    #     self.fake = self._apply_activate(self.fake)
+
+    #     y_fake = self.discriminator(self.fake)
+    #     self.loss_fake_d = -torch.mean(y_fake)
+    #     # self.cross_entropy = self.compute_loss(self.fake, self.real,self.sigmas,self.loss_factor)
+    #     self.KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
+    #     # self.recon_error = self.MMD(self.real, self.fake, kernel=KERNEL_TYPE)
+    #     self.recon_error = self.MMD(self.real, self.fake)
+    #     self.loss_g = self.KLD + self.recon_error+ self.loss_fake_d 
+    #     self.loss_g.backward()
+    #     self.optimizerVAE.step()
     def one_step_epoch(self,data):
         for step in range(self._discriminator_steps):
 
@@ -428,19 +476,18 @@ class GVAE():
         # real_sampled = self.sample_data(real,self._batch_size)
         # real_sampled = real_sampled.to(self.device)
         fake_knnmtd = data.to(self.device)
-        mu, std, logvar = self.encoder(fake_knnmtd)
-        eps = torch.randn_like(std)
-        emb = eps * std + mu
+        mu_real, std_real, logvar_real = self.encoder(self.real)
+        mu_fake, std_fake, logvar_fake = self.encoder(fake_knnmtd)
+        eps = torch.randn_like(std_fake)
+        emb = eps * std_fake + mu_fake
         self.fake, self.sigmas = self.decoder(emb)
         self.fake = self._apply_activate(self.fake)
 
         y_fake = self.discriminator(self.fake)
         self.loss_fake_d = -torch.mean(y_fake)
-        # self.cross_entropy = self.compute_loss(self.fake, self.real,self.sigmas,self.loss_factor)
-        self.KLD = torch.mean(- 0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),dim = 1),dim=0)
-        # self.recon_error = self.MMD(self.real, self.fake, kernel=KERNEL_TYPE)
-        self.recon_error = self.MMD(self.real, self.fake)
-        self.loss_g = self.KLD + self.recon_error+ self.loss_fake_d 
+        self.recon_error = self.recon_loss(self.real, self.fake)
+        self.div_error = self.div_loss(mu_real, mu_fake)
+        self.loss_g = self.div_error + self.recon_error + self.loss_fake_d 
         self.loss_g.backward()
         self.optimizerVAE.step()
         
@@ -499,6 +546,9 @@ class GVAE():
         mmd_loss = []
         coral_loss = []
         enc_loss = []
+        self.recon_loss = nn.MSELoss()
+        self.div_loss = SamplesLoss("sinkhorn", blur=0.05,scaling = 0.95,diameter=0.01,debias=True)
+
         best_pcd = np.inf
         for i in range(self._epochs):
             for ix, data in enumerate(train_loader):
@@ -506,7 +556,7 @@ class GVAE():
 
             fake_df = self.transform_to_df(self.fake,self.sigmas)
             self.plot_diagnostics(train_data,fake_df,i)
-            curr_pcd = self.pcd(train_data,fake_df)
+            curr_pcd = PCD(train_data.copy(),fake_df.copy())
 
             if(curr_pcd < best_pcd):
                 best_pcd = curr_pcd
@@ -518,18 +568,18 @@ class GVAE():
 
             self.run["output/G Loss"].log(self.loss_g)
             self.run["output/D Loss"].log(self.loss_d)
-            self.run["output/MMD Loss"].log(self.recon_error)
-            self.run["output/KLD"].log(self.KLD)
+            self.run["output/recon Loss"].log(self.recon_error)
+            self.run["output/divergence loss"].log(self.div_error)
             print(f"Epoch {i+1} | Loss VAE: {self.loss_g.detach().cpu(): .4f} | "f"Loss D: {self.loss_d.detach().cpu(): .4f}",flush=True)
             if(self._epochs % 10 == 0):
                 fake_df = self.transform_to_df(self.fake,self.sigmas)
                 self.plot_diagnostics(train_data,fake_df,i)
-                pcd = self.pcd(train_data,fake_df)
+                pcd = PCD(train_data.copy(),fake_df.copy())
                 self.run["output/PCD"].log(pcd)
         
         fake_df = self.sample(1000)
         self.plot_diagnostics(train_data,fake_df,i)
-        pcd = self.pcd(train_data,fake_df)
+        pcd = PCD(train_data.copy(),fake_df.copy())
         self.run["output/Final PCD"].log(pcd)
         fake_df.to_csv('fake_data.csv',index=False)
 

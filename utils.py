@@ -34,8 +34,8 @@ def PCD(real,synthetic):
 
     real = change_dtype(real)
     synthetic = match_dtypes(real,synthetic)
-    for col in synthetic.columns:
-        print(synthetic[col].value_counts())
+    # for col in synthetic.columns:
+    #     print(synthetic[col].value_counts())
 
     synthetic.to_csv('synthetic.csv',index=False)
 
@@ -48,7 +48,7 @@ def PCD(real,synthetic):
 
     # if(synthetic.isnull().values.any()):
     #     synthetic.fillna("0", inplace=True)
-
+    print(np.linalg.norm((associations(real,nan_strategy='drop_samples',compute_only=True)['corr'] - associations(synthetic,nan_strategy='drop_samples',compute_only=True)['corr']),ord='fro'))
     return np.linalg.norm((associations(real,nan_strategy='drop_samples',compute_only=True)['corr'] - associations(synthetic,nan_strategy='drop_samples',compute_only=True)['corr']),ord='fro')
     # return np.linalg.norm((associations(real,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr'] - associations(synthetic,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr']),ord='fro')
 
