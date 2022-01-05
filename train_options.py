@@ -20,6 +20,7 @@ class TrainOptions:
         parser.add_argument("--model", "-m", type=str, nargs="?", default='GVAE', help="GVAE | tablegan | veegan | ctgan | copulagan | TVAE ")
         # parser.add_argument("--cat_col", "-cc", type=str, nargs="?", default='', help="Categorical columns in the dataset")
         parser.add_argument("--target_col_ix", "-t", type=int, nargs="?", default='', help="Target column index")
+        parser.add_argument("--ml_utility", "-u", type=str, nargs="?", default='classification', help="TSTR TRTS ML utility type classification | regression")
         
         self.initialized = True
         return parser

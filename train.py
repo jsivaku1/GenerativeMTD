@@ -39,13 +39,17 @@ def train_GVAE(opt):
     model = GVAE(opt, D_in,run)
     model.fit(df,discrete_columns = opt.cat_col)
     gvae_fake = model.sample(1000)
-    print(gvae_fake)
+    # print(gvae_fake)
     run['output/Final PCD'] = utils.PCD(df,gvae_fake)
     kstest, cstest = utils.stat_test(df,gvae_fake)
     run['output/KSTest'] = kstest
     run['output/CSTest'] = cstest
-    run['output/TSTR'] = utils.predictive_model(df,gvae_fake,opt.class_col,'TSTR')
-    run['output/TRTS'] = utils.predictive_model(df,gvae_fake,opt.class_col,'TRTS')
+    if(opt.ml_utility == 'classification'):
+        run['output/TSTR'] = utils.predictive_model(df,gvae_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.predictive_model(df,gvae_fake,opt.class_col,'TRTS')
+    else:
+        run['output/TSTR'] = utils.regression_model(df,gvae_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.regression_model(df,gvae_fake,opt.class_col,'TRTS')
     run['output/DCR'] = utils.DCR(df,gvae_fake)
     run['output/NNDR'] = utils.NNDR(df,gvae_fake)
     run.stop()
@@ -72,8 +76,12 @@ def train_veegan(opt):
     kstest, cstest = utils.stat_test(df,veegan_fake)
     run['output/KSTest'] = kstest
     run['output/CSTest'] = cstest
-    run['output/TSTR'] = utils.predictive_model(df,veegan_fake,opt.class_col,'TSTR')
-    run['output/TRTS'] = utils.predictive_model(df,veegan_fake,opt.class_col,'TRTS')
+    if(opt.ml_utility == 'classification'):
+        run['output/TSTR'] = utils.predictive_model(df,veegan_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.predictive_model(df,veegan_fake,opt.class_col,'TRTS')
+    else:
+        run['output/TSTR'] = utils.regression_model(df,veegan_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.regression_model(df,veegan_fake,opt.class_col,'TRTS')
     run['output/DCR'] = utils.DCR(df,veegan_fake)
     run['output/NNDR'] = utils.NNDR(df,veegan_fake)
     run.stop()
@@ -97,8 +105,12 @@ def train_tablegan(opt):
     kstest, cstest = utils.stat_test(df,tablegan_fake)
     run['output/KSTest'] = kstest
     run['output/CSTest'] = cstest
-    run['output/TSTR'] = utils.predictive_model(df,tablegan_fake,opt.class_col,'TSTR')
-    run['output/TRTS'] = utils.predictive_model(df,tablegan_fake,opt.class_col,'TRTS')
+    if(opt.ml_utility == 'classification'):
+        run['output/TSTR'] = utils.predictive_model(df,tablegan_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.predictive_model(df,tablegan_fake,opt.class_col,'TRTS')
+    else:
+        run['output/TSTR'] = utils.regression_model(df,tablegan_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.regression_model(df,tablegan_fake,opt.class_col,'TRTS')
     run['output/DCR'] = utils.DCR(df,tablegan_fake)
     run['output/NNDR'] = utils.NNDR(df,tablegan_fake)
     run.stop()
@@ -123,8 +135,12 @@ def train_ctgan(opt):
     kstest, cstest = utils.stat_test(df,ctgan_fake)
     run['output/KSTest'] = kstest
     run['output/CSTest'] = cstest
-    run['output/TSTR'] = utils.predictive_model(df,ctgan_fake,opt.class_col,'TSTR')
-    run['output/TRTS'] = utils.predictive_model(df,ctgan_fake,opt.class_col,'TRTS')
+    if(opt.ml_utility == 'classification'):
+        run['output/TSTR'] = utils.predictive_model(df,ctgan_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.predictive_model(df,ctgan_fake,opt.class_col,'TRTS')
+    else:
+        run['output/TSTR'] = utils.regression_model(df,ctgan_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.regression_model(df,ctgan_fake,opt.class_col,'TRTS')
     run['output/DCR'] = utils.DCR(df,ctgan_fake)
     run['output/NNDR'] = utils.NNDR(df,ctgan_fake)
     run.stop()
@@ -149,8 +165,12 @@ def train_copulagan(opt):
     kstest, cstest = utils.stat_test(df,copulagan_fake)
     run['output/KSTest'] = kstest
     run['output/CSTest'] = cstest
-    run['output/TSTR'] = utils.predictive_model(df,copulagan_fake,opt.class_col,'TSTR')
-    run['output/TRTS'] = utils.predictive_model(df,copulagan_fake,opt.class_col,'TRTS')
+    if(opt.ml_utility == 'classification'):
+        run['output/TSTR'] = utils.predictive_model(df,copulagan_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.predictive_model(df,copulagan_fake,opt.class_col,'TRTS')
+    else:
+        run['output/TSTR'] = utils.regression_model(df,copulagan_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.regression_model(df,copulagan_fake,opt.class_col,'TRTS')
     run['output/DCR'] = utils.DCR(df,copulagan_fake)
     run['output/NNDR'] = utils.NNDR(df,copulagan_fake)
     run.stop()
@@ -175,8 +195,12 @@ def train_TVAE(opt):
     kstest, cstest = utils.stat_test(df,tvae_fake)
     run['output/KSTest'] = kstest
     run['output/CSTest'] = cstest
-    run['output/TSTR'] = utils.predictive_model(df,tvae_fake,opt.class_col,'TSTR')
-    run['output/TRTS'] = utils.predictive_model(df,tvae_fake,opt.class_col,'TRTS')
+    if(opt.ml_utility == 'classification'):
+        run['output/TSTR'] = utils.predictive_model(df,tvae_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.predictive_model(df,tvae_fake,opt.class_col,'TRTS')
+    else:
+        run['output/TSTR'] = utils.regression_model(df,tvae_fake,opt.class_col,'TSTR')
+        run['output/TRTS'] = utils.regression_model(df,tvae_fake,opt.class_col,'TRTS')
     run['output/DCR'] = utils.DCR(df,tvae_fake)
     run['output/NNDR'] = utils.NNDR(df,tvae_fake)
     run.stop()

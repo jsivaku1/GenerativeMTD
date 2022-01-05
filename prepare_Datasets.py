@@ -141,7 +141,7 @@ datasets = [
             {'label': 'thyroid','dataset': thyroid,'class':thyroid.columns[-1],},
             {'label': 'liver','dataset': liver,'class':liver.columns[1],},
             {'label': 'fat','dataset': fat,'class':'brozek',},
-            {'label': 'pima','dataset': pima,'class':'bmi',},
+            {'label': 'pima','dataset': pima,'class':'diabetes',},
             {'label': 'prostate','dataset': prostate,'class':'lpsa',},
             {'label': 'bio','dataset': bio,'class':'logBCF',},
             {'label': 'heartfail','dataset': heartfail,'class':'CPK',}]

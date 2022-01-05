@@ -20,34 +20,11 @@ from preprocess import change_dtype, find_cateorical_columns, match_dtypes
 
 
 def PCD(real,synthetic):
-    # print(real.isna().sum())
-    # print(synthetic.isna().sum())
-
-    # if(real.isnull().values.any()):
-    #     real.fillna("0", inplace=True)
-
-    # if(synthetic.isnull().values.any()):
-    #     synthetic.fillna("0", inplace=True)
-
-    # print(real.isna().sum())
-    # print(synthetic.isna().sum())
 
     real = change_dtype(real)
     synthetic = match_dtypes(real,synthetic)
-    # for col in synthetic.columns:
-    #     print(synthetic[col].value_counts())
-
     synthetic.to_csv('synthetic.csv',index=False)
 
-
-    # print(real.isna().sum())
-    # print(synthetic.isna().sum())
-
-    # if(real.isnull().values.any()):
-    #     real.fillna("0", inplace=True)
-
-    # if(synthetic.isnull().values.any()):
-    #     synthetic.fillna("0", inplace=True)
     print(np.linalg.norm((associations(real,nan_strategy='drop_samples',compute_only=True)['corr'] - associations(synthetic,nan_strategy='drop_samples',compute_only=True)['corr']),ord='fro'))
     return np.linalg.norm((associations(real,nan_strategy='drop_samples',compute_only=True)['corr'] - associations(synthetic,nan_strategy='drop_samples',compute_only=True)['corr']),ord='fro')
     # return np.linalg.norm((associations(real,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr'] - associations(synthetic,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr']),ord='fro')
@@ -133,7 +110,7 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
             acc_real_lst.append(accuracy_real)
             f1_real_lst.append(f1_real)
             
-            return np.mean(acc_real_lst),np.mean(f1_real_lst)
+        return np.mean(acc_real_lst),np.mean(f1_real_lst)
         
     elif(mode=='TRTS'):
         X_real = real.drop(class_col,axis=1)
@@ -158,7 +135,7 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
             acc_synth_lst.append(accuracy_synth)
             f1_synth_lst.append(f1_synth)
 
-            return np.mean(acc_synth_lst),np.mean(f1_synth_lst)
+        return np.mean(acc_synth_lst),np.mean(f1_synth_lst)
 
 def regression_model(real,synthetic,class_col,mode='TSTR'):
     rmse_synth_lst = []
@@ -192,7 +169,7 @@ def regression_model(real,synthetic,class_col,mode='TSTR'):
             rmse_real_lst.append(rmse_real)
             mape_real_lst.append(mape_real)
             
-            return np.mean(rmse_real_lst),np.mean(mape_real_lst)
+        return np.mean(rmse_real_lst),np.mean(mape_real_lst)
         
     elif(mode=='TRTS'):
         X_real = real.drop(class_col,axis=1)
@@ -219,7 +196,7 @@ def regression_model(real,synthetic,class_col,mode='TSTR'):
             rmse_synth_lst.append(rmse_synth)
             mape_synth_lst.append(mape_synth)
 
-            return np.mean(rmse_synth_lst),np.mean(mape_synth_lst)
+        return np.mean(rmse_synth_lst),np.mean(mape_synth_lst)
 
 def plot_metrics(predictions, labels):
     

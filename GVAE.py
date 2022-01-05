@@ -31,6 +31,7 @@ from packaging import version
 import seaborn as sns
 import matplotlib.pyplot as plt
 from utils import *
+from sinkhorn import *
 
 torch.cuda.empty_cache()
 KERNEL_TYPE = "multiscale"
@@ -485,8 +486,11 @@ class GVAE():
 
         y_fake = self.discriminator(self.fake)
         self.loss_fake_d = -torch.mean(y_fake)
-        self.recon_error = self.recon_loss(self.real, self.fake)
-        self.div_error = self.div_loss(mu_real, mu_fake)
+        # self.recon_error = self.DeepCoral(self.real, self.fake)
+        self.recon_error = self.MMD(self.real, self.fake)
+
+        # self.recon_error = self.recon_loss(self.real, self.fake)
+        self.div_error,_,_ = self.div_loss(mu_real, mu_fake)
         self.loss_g = self.div_error + self.recon_error + self.loss_fake_d 
         self.loss_g.backward()
         self.optimizerVAE.step()
@@ -506,7 +510,7 @@ class GVAE():
         data_dim = self._transformer.output_dimensions
         generateFake = kNNMTD(self.opt)
         self.psuedo_fake, psuedo_fake_numpy = generateFake.generateData(train_data_transformed)
-        self.run['knnmtd output shape'] = len(psuedo_fake_numpy)
+        self.run['knnmtd output shape'] = psuedo_fake_numpy.shape
         self.fake_data_means = self.psuedo_fake.mean(dim=0)
         self.fake_data_stds = self.psuedo_fake.std(dim=0)
         self.psuedo_fake = (self.psuedo_fake - self.fake_data_means) / self.fake_data_stds
@@ -547,7 +551,8 @@ class GVAE():
         coral_loss = []
         enc_loss = []
         self.recon_loss = nn.MSELoss()
-        self.div_loss = SamplesLoss("sinkhorn", blur=0.05,scaling = 0.95,diameter=0.01,debias=True)
+        # self.div_loss = SamplesLoss("sinkhorn", blur=0.05,scaling = 0.95,diameter=0.01,debias=True)
+        self.div_loss = SinkhornDistance(eps=0.1, max_iter=100,device=self.device)
 
         best_pcd = np.inf
         for i in range(self._epochs):
@@ -577,11 +582,11 @@ class GVAE():
                 pcd = PCD(train_data.copy(),fake_df.copy())
                 self.run["output/PCD"].log(pcd)
         
-        fake_df = self.sample(1000)
-        self.plot_diagnostics(train_data,fake_df,i)
-        pcd = PCD(train_data.copy(),fake_df.copy())
-        self.run["output/Final PCD"].log(pcd)
-        fake_df.to_csv('fake_data.csv',index=False)
+        # fake_df = self.sample(1000)
+        # self.plot_diagnostics(train_data,fake_df,i)
+        # pcd = PCD(train_data.copy(),fake_df.copy())
+        # self.run["output/Final PCD"].log(pcd)
+        # fake_df.to_csv('fake_data.csv',index=False)
 
         self.plot_loss(VAEGLoss,DLoss,'VAE+D')
 
@@ -639,24 +644,42 @@ class GVAE():
         plt.suptitle(f"Density Plot for epoch {epoch}")
         self.run["output/diagnotics"].upload(fig)
 
+    # def sample(self, samples):
+    #     best_encoder = torch.load('best_encoder.pt')
+    #     best_decoder = torch.load('best_decoder.pt')
+    #     steps = samples // self._batch_size + 1
+    #     data = []
+    #     for _ in range(steps):
+    #         sample_fake = self.sample_data(self.psuedo_fake,self._batch_size)
+    #         fake_knnmtd = sample_fake.to(self.device)
+    #         mu, std, logvar = best_encoder(fake_knnmtd)
+    #         eps = torch.randn_like(std)
+    #         emb = eps * std + mu
+    #         fake, sigmas = best_decoder(emb)
+    #         fake = self._apply_activate(fake)
+    #         data.append(fake.detach().cpu().numpy())
+    #     data = np.concatenate(data, axis=0)
+    #     data = data[:samples]
+    #     print(data.shape)
+    #     return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
+    
     def sample(self, samples):
-        best_encoder = torch.load('best_encoder.pt')
-        best_decoder = torch.load('best_decoder.pt')
+        self.decoder.eval()
         steps = samples // self._batch_size + 1
         data = []
         for _ in range(steps):
-            sample_fake = self.sample_data(self.psuedo_fake,steps)
-            fake_knnmtd = sample_fake.to(self.device)
-            mu, std, logvar = best_encoder(fake_knnmtd)
-            eps = torch.randn_like(std)
-            emb = eps * std + mu
-            fake, sigmas = best_decoder(emb)
+            mean = torch.zeros(self.batch_size, self.embedding_dim)
+            std = mean + 1
+            noise = torch.normal(mean=mean, std=std).to(self._device)
+            fake, sigmas = self.decoder(noise)
             fake = self._apply_activate(fake)
             data.append(fake.detach().cpu().numpy())
         data = np.concatenate(data, axis=0)
         data = data[:samples]
         return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
     
+    
+
     # def sample(self, samples):
     #     self.decoder.eval()
     #     steps = samples // self._batch_size + 1
