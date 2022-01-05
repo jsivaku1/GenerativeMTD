@@ -668,9 +668,9 @@ class GVAE():
         steps = samples // self._batch_size + 1
         data = []
         for _ in range(steps):
-            mean = torch.zeros(self.batch_size, self.embedding_dim)
+            mean = torch.zeros(self._batch_size, self.embedding_dim)
             std = mean + 1
-            noise = torch.normal(mean=mean, std=std).to(self._device)
+            noise = torch.normal(mean=mean, std=std).to(self.device)
             fake, sigmas = self.decoder(noise)
             fake = self._apply_activate(fake)
             data.append(fake.detach().cpu().numpy())

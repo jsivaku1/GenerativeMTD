@@ -45,7 +45,7 @@ python3 train.py --model 'tablegan' --dataset 'Data/imputed_SweatBinary.csv' --t
 
 
 
-# python3 train.py --model 'tablegan' --dataset 'Data/community_crime.csv' --target_col_ix 123 --ml_utility regression --k 5 --num_obs 10 --epochs 200
+# python3 train.py --model 'tablegan' --dataset 'Data/community_crime.csv' --target_col_ix 122 --ml_utility regression --k 5 --num_obs 10 --epochs 200
 
 # python3 train.py --model 'tablegan' --dataset 'Data/sweat_ordinal.csv' --target_col_ix 18 --ml_utility regression --k 3 --num_obs 10 --epochs 200
 
