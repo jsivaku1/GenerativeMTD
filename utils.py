@@ -24,17 +24,21 @@ def PCD(real,synthetic):
     real = change_dtype(real)
     synthetic = match_dtypes(real,synthetic)
     synthetic.to_csv('synthetic.csv',index=False)
-
-    print(np.linalg.norm((associations(real,nan_strategy='drop_samples',compute_only=True)['corr'] - associations(synthetic,nan_strategy='drop_samples',compute_only=True)['corr']),ord='fro'))
-    return np.linalg.norm((associations(real,nan_strategy='drop_samples',compute_only=True)['corr'] - associations(synthetic,nan_strategy='drop_samples',compute_only=True)['corr']),ord='fro')
+    return np.round(np.linalg.norm((associations(real,nan_strategy='drop_samples',compute_only=True)['corr'] - associations(synthetic,nan_strategy='drop_samples',compute_only=True)['corr']),ord='fro'), 4)
     # return np.linalg.norm((associations(real,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr'] - associations(synthetic,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr']),ord='fro')
 
 def stat_test(real,synthetic):
     real = change_dtype(real)
     synthetic = match_dtypes(real,synthetic)
-    kstest = KSTest.compute(real, synthetic)
-    cstest = CSTest.compute(real, synthetic)
-    return kstest, cstest
+    if(len(find_cateorical_columns(real)) != real.shape[1]):
+        kstest = KSTest.compute(real, synthetic)
+    else:
+        kstest = np.nan
+    if(len(find_cateorical_columns(real)) != 0):
+        cstest = CSTest.compute(real, synthetic)
+    else:
+        cstest = np.nan
+    return np.round(kstest,4), np.round(cstest,4)
 
 
 def wass_distance(real,synthetic):
@@ -49,7 +53,7 @@ def DCR(real,synthetic):
     for ix,row in real.iterrows():
         dist,ix = neigh.kneighbors([row.values],return_distance=True)
         total_dist.append(dist)
-    return np.mean(total_dist), np.std(total_dist)
+    return np.round(np.mean(total_dist),4), np.round(np.std(total_dist),4)
 
 def DCkR(real,synthetic,k=3):
     neigh = NearestNeighbors(n_neighbors=k,algorithm='ball_tree')
@@ -75,7 +79,7 @@ def NNDR(real,synthetic):
             ratio = first/second
         assert 0<=ratio<=1
         total_dist.append(ratio)
-    return np.mean(total_dist), np.std(total_dist)
+    return np.round(np.mean(total_dist),4), np.round(np.std(total_dist),4)
 
 
 
@@ -103,14 +107,13 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
             accuracy_synth,f1_synth = plot_metrics(synth_test_pred, ytest)
             acc_synth_lst.append(accuracy_synth)
             f1_synth_lst.append(f1_synth)
-
             
             real_test_pred = mod.predict(X_real)
             accuracy_real,f1_real = plot_metrics(real_test_pred, y_real)
             acc_real_lst.append(accuracy_real)
             f1_real_lst.append(f1_real)
             
-        return np.mean(acc_real_lst),np.mean(f1_real_lst)
+        return np.round(np.mean(acc_real_lst),4),np.round(np.mean(f1_real_lst),4)
         
     elif(mode=='TRTS'):
         X_real = real.drop(class_col,axis=1)
@@ -135,7 +138,7 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
             acc_synth_lst.append(accuracy_synth)
             f1_synth_lst.append(f1_synth)
 
-        return np.mean(acc_synth_lst),np.mean(f1_synth_lst)
+        return np.round(np.mean(acc_synth_lst),4),np.round(np.mean(f1_synth_lst),4)
 
 def regression_model(real,synthetic,class_col,mode='TSTR'):
     rmse_synth_lst = []
@@ -169,7 +172,7 @@ def regression_model(real,synthetic,class_col,mode='TSTR'):
             rmse_real_lst.append(rmse_real)
             mape_real_lst.append(mape_real)
             
-        return np.mean(rmse_real_lst),np.mean(mape_real_lst)
+        return np.round(np.mean(rmse_real_lst),4),np.round(np.mean(mape_real_lst),4)
         
     elif(mode=='TRTS'):
         X_real = real.drop(class_col,axis=1)
@@ -196,10 +199,10 @@ def regression_model(real,synthetic,class_col,mode='TSTR'):
             rmse_synth_lst.append(rmse_synth)
             mape_synth_lst.append(mape_synth)
 
-        return np.mean(rmse_synth_lst),np.mean(mape_synth_lst)
+        return np.round(np.mean(rmse_synth_lst),4),np.round(np.mean(mape_synth_lst),4)
 
 def plot_metrics(predictions, labels):
-    
+    print(labels)
     if(len(np.unique(labels)) == 2):
         accuracy = accuracy_score(labels,predictions)
         f1_sco = f1_score(labels,predictions,pos_label=np.unique(labels)[0])

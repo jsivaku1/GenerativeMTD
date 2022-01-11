@@ -21,12 +21,56 @@ from sdv.tabular import CopulaGAN
 from sdv.tabular import TVAE
 from pathlib import Path
 
+def log_and_Save(real,fake,model_name,run,opt):
+    result_df = pd.DataFrame()
+    result_lst = []
+    data_name = Path(opt.dataset).stem
+    pcd = utils.PCD(real,fake)
+    run['output/Final PCD'] = pcd
+    kstest, cstest = utils.stat_test(real,fake)
+    run['output/KSTest'] = kstest
+    run['output/CSTest'] = cstest
+
+    dcr = utils.DCR(real,fake)
+    nndr = utils.NNDR(real,fake)
+    run['output/DCR'] = dcr
+    run['output/NNDR'] = nndr
+
+    if(opt.ml_utility == 'classification'):
+        acc_tstr, f1_tstr = utils.predictive_model(real,fake,opt.class_col,'TSTR')
+        run['output/Accuracy TSTR'] = acc_tstr
+        run['output/F1 TSTR'] = f1_tstr
+
+        acc_trts, f1_trts = utils.predictive_model(real,fake,opt.class_col,'TRTS')
+        run['output/Accuracy TRTS'] = acc_trts
+        run['output/F1 TRTS'] = f1_trts
+
+        result_lst.append([data_name,model_name,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(acc_tstr,4),np.round(f1_tstr,4),np.round(acc_trts,4),np.round(f1_trts,4),np.round(dcr,4),np.round(nndr,4)])
+        result_df = pd.DataFrame(result_lst,columns=["DataName",'Method',"PCD","KSTest","CSTest", "Acc TSTR","F1 TSTR","Acc TRTS","F1 TRTS","DCR","NNDR"])
+
+    else:
+        rmse_tstr, mape_tstr = utils.regression_model(real,fake,opt.class_col,'TSTR')
+        run['output/RMSE TSTR'] = rmse_tstr
+        run['output/MAPE TSTR'] = mape_tstr
+
+        rmse_trts, mape_trts = utils.regression_model(real,fake,opt.class_col,'TRTS')
+        run['output/RMSE TRTS'] = rmse_trts
+        run['output/MAPE TRTS'] = mape_trts
+
+        result_lst.append([data_name,model_name,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(rmse_tstr,4),np.round(mape_tstr,4),np.round(rmse_trts,4),np.round(mape_trts,4),np.round(dcr,4),np.round(nndr,4)])
+        result_df = pd.DataFrame(result_lst,columns=["DataName",'Method',"PCD","KSTest","CSTest", "RMSE TSTR","MAPE TSTR","RMSE TRTS","MAPE TRTS","DCR","NNDR"])
+    result_df.to_csv('Results/' + data_name + "_" + model_name + ".csv",index=False,float_format='%.4f')
+    
+
+
+
 def train_GVAE(opt):
     run = neptune.init(project="jaysivakumar/G-VAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
+    model_name = "GVAE"
     # run['config/dataset/transforms'] = data_tfms # dict() object
     # run['config/dataset/size'] = dataset_size # dict() object
-    run['config/model'] = "G-VAE"
+    run['config/model'] = model_name
     run['config/criterion'] = "MMD + KL"
     run['config/optimizer'] = "Adam"
     # run['config/params'] = hparams # dict() object
@@ -39,27 +83,16 @@ def train_GVAE(opt):
     model = GVAE(opt, D_in,run)
     model.fit(df,discrete_columns = opt.cat_col)
     gvae_fake = model.sample(1000)
-    # print(gvae_fake)
-    run['output/Final PCD'] = utils.PCD(df,gvae_fake)
-    kstest, cstest = utils.stat_test(df,gvae_fake)
-    run['output/KSTest'] = kstest
-    run['output/CSTest'] = cstest
-    if(opt.ml_utility == 'classification'):
-        run['output/TSTR'] = utils.predictive_model(df,gvae_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.predictive_model(df,gvae_fake,opt.class_col,'TRTS')
-    else:
-        run['output/TSTR'] = utils.regression_model(df,gvae_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.regression_model(df,gvae_fake,opt.class_col,'TRTS')
-    run['output/DCR'] = utils.DCR(df,gvae_fake)
-    run['output/NNDR'] = utils.NNDR(df,gvae_fake)
+    log_and_Save(df,gvae_fake,model_name,run,opt)
     run.stop()
 
 def train_veegan(opt):
     run = neptune.init(project="jaysivakumar/VEEGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
+    model_name = "VEEGAN"
     # run['config/dataset/transforms'] = data_tfms # dict() object
     # run['config/dataset/size'] = dataset_size # dict() object
-    run['config/model'] = "VEEGAN"
+    run['config/model'] = model_name
     run['config/criterion'] = "MMD + KL"
     run['config/optimizer'] = "SGD"
     # run['config/params'] = hparams # dict() object
@@ -72,24 +105,14 @@ def train_veegan(opt):
     model = VEEGAN(opt,run)
     model.fit(df,categorical_columns = opt.cat_col)
     veegan_fake = model.sample(1000)
-    run['output/Final PCD'] = utils.PCD(df,veegan_fake)
-    kstest, cstest = utils.stat_test(df,veegan_fake)
-    run['output/KSTest'] = kstest
-    run['output/CSTest'] = cstest
-    if(opt.ml_utility == 'classification'):
-        run['output/TSTR'] = utils.predictive_model(df,veegan_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.predictive_model(df,veegan_fake,opt.class_col,'TRTS')
-    else:
-        run['output/TSTR'] = utils.regression_model(df,veegan_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.regression_model(df,veegan_fake,opt.class_col,'TRTS')
-    run['output/DCR'] = utils.DCR(df,veegan_fake)
-    run['output/NNDR'] = utils.NNDR(df,veegan_fake)
+    log_and_Save(df,veegan_fake,model_name,run,opt)
     run.stop()
 
 def train_tablegan(opt):
     run = neptune.init(project="jaysivakumar/TableGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
-    run['config/model'] = "TableGAN"
+    model_name = "TableGAN"
+    run['config/model'] = model_name
     run['config/criterion'] = "MMD + KL"
     run['config/optimizer'] = "SGD"
     data = LoadFile(opt,run)
@@ -101,25 +124,15 @@ def train_tablegan(opt):
     model = TableGAN(opt,run)
     model.fit(df,categorical_columns = opt.cat_col)
     tablegan_fake = model.sample(1000)
-    run['output/Final PCD'] = utils.PCD(df,tablegan_fake)
-    kstest, cstest = utils.stat_test(df,tablegan_fake)
-    run['output/KSTest'] = kstest
-    run['output/CSTest'] = cstest
-    if(opt.ml_utility == 'classification'):
-        run['output/TSTR'] = utils.predictive_model(df,tablegan_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.predictive_model(df,tablegan_fake,opt.class_col,'TRTS')
-    else:
-        run['output/TSTR'] = utils.regression_model(df,tablegan_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.regression_model(df,tablegan_fake,opt.class_col,'TRTS')
-    run['output/DCR'] = utils.DCR(df,tablegan_fake)
-    run['output/NNDR'] = utils.NNDR(df,tablegan_fake)
+    log_and_Save(df,tablegan_fake,model_name,run,opt)
     run.stop()
 
 
 def train_ctgan(opt):
     run = neptune.init(project="jaysivakumar/CTGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
-    run['config/model'] = "CTGAN"
+    model_name = "CTGAN"
+    run['config/model'] = model_name
     run['config/criterion'] = "MMD + KL"
     run['config/optimizer'] = "SGD"
     data = LoadFile(opt,run)
@@ -131,25 +144,16 @@ def train_ctgan(opt):
     model = CTGANSynthesizer(epochs=opt.epochs)
     model.fit(df,discrete_columns = opt.cat_col)
     ctgan_fake = model.sample(1000)
-    run['output/Final PCD'] = utils.PCD(df,ctgan_fake)
-    kstest, cstest = utils.stat_test(df,ctgan_fake)
-    run['output/KSTest'] = kstest
-    run['output/CSTest'] = cstest
-    if(opt.ml_utility == 'classification'):
-        run['output/TSTR'] = utils.predictive_model(df,ctgan_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.predictive_model(df,ctgan_fake,opt.class_col,'TRTS')
-    else:
-        run['output/TSTR'] = utils.regression_model(df,ctgan_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.regression_model(df,ctgan_fake,opt.class_col,'TRTS')
-    run['output/DCR'] = utils.DCR(df,ctgan_fake)
-    run['output/NNDR'] = utils.NNDR(df,ctgan_fake)
+    log_and_Save(df,ctgan_fake,model_name,run,opt)
+
     run.stop()
 
 
 def train_copulagan(opt):
     run = neptune.init(project="jaysivakumar/CopulaGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
-    run['config/model'] = "CopulaGAN"
+    model_name = "CopulaGAN"
+    run['config/model'] = model_name
     run['config/criterion'] = "MMD + KL"
     run['config/optimizer'] = "SGD"
     data = LoadFile(opt,run)
@@ -161,24 +165,14 @@ def train_copulagan(opt):
     model = CopulaGAN(epochs=opt.epochs)
     model.fit(df)
     copulagan_fake = model.sample(1000)
-    run['output/Final PCD'] = utils.PCD(df,copulagan_fake)
-    kstest, cstest = utils.stat_test(df,copulagan_fake)
-    run['output/KSTest'] = kstest
-    run['output/CSTest'] = cstest
-    if(opt.ml_utility == 'classification'):
-        run['output/TSTR'] = utils.predictive_model(df,copulagan_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.predictive_model(df,copulagan_fake,opt.class_col,'TRTS')
-    else:
-        run['output/TSTR'] = utils.regression_model(df,copulagan_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.regression_model(df,copulagan_fake,opt.class_col,'TRTS')
-    run['output/DCR'] = utils.DCR(df,copulagan_fake)
-    run['output/NNDR'] = utils.NNDR(df,copulagan_fake)
+    log_and_Save(df,copulagan_fake,model_name,run,opt)
     run.stop()
 
 def train_TVAE(opt):
     run = neptune.init(project="jaysivakumar/TVAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
-    run['config/model'] = "TVAE"
+    model_name = "TVAE"
+    run['config/model'] = model_name
     run['config/criterion'] = "MMD + KL"
     run['config/optimizer'] = "SGD"
     data = LoadFile(opt,run)
@@ -186,23 +180,11 @@ def train_TVAE(opt):
     df,opt = data.load_data()
     opt.class_col = df.columns[opt.target_col_ix]
     run['config/class column'] = opt.class_col
-
     opt.cat_col = find_cateorical_columns(df)
     model = TVAESynthesizer(epochs=opt.epochs)
     model.fit(df,discrete_columns=opt.cat_col)
     tvae_fake = model.sample(1000)
-    run['output/Final PCD'] = utils.PCD(df,tvae_fake)
-    kstest, cstest = utils.stat_test(df,tvae_fake)
-    run['output/KSTest'] = kstest
-    run['output/CSTest'] = cstest
-    if(opt.ml_utility == 'classification'):
-        run['output/TSTR'] = utils.predictive_model(df,tvae_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.predictive_model(df,tvae_fake,opt.class_col,'TRTS')
-    else:
-        run['output/TSTR'] = utils.regression_model(df,tvae_fake,opt.class_col,'TSTR')
-        run['output/TRTS'] = utils.regression_model(df,tvae_fake,opt.class_col,'TRTS')
-    run['output/DCR'] = utils.DCR(df,tvae_fake)
-    run['output/NNDR'] = utils.NNDR(df,tvae_fake)
+    log_and_Save(df,tvae_fake,model_name,run,opt)
     run.stop()
 
 if __name__ == "__main__":
