@@ -201,27 +201,6 @@ class Discriminator(Module):
     def forward(self, input):
         return self.seq(input)
 
-def loss_function(recon_x, x, sigmas, mu, logvar, output_info, factor):
-        st = 0
-        loss = []
-        for column_info in output_info:
-            for span_info in column_info:
-                if span_info.activation_fn != "softmax":
-                    ed = st + span_info.dim
-                    std = sigmas[st]
-                    loss.append(((x[:, st] - torch.tanh(recon_x[:, st])) ** 2 / 2 / (std ** 2)).sum())
-                    loss.append(torch.log(std) * x.size()[0])
-                    st = ed
-
-                else:
-                    ed = st + span_info.dim
-                    loss.append(cross_entropy(
-                        recon_x[:, st:ed], torch.argmax(x[:, st:ed], dim=-1), reduction='sum'))
-                    st = ed
-
-        assert st == recon_x.size()[1]
-        KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-        return sum(loss) * factor / x.size()[0], KLD / x.size()[0]
 
 class GVAE():
     def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128),decompress_dims=(128, 128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
@@ -262,7 +241,7 @@ class GVAE():
             fake_transformed[:,i] = torch.clamp(fake_transformed[:,i], torch.min(real[:,i]),torch.max(real[:,i]))
         return fake_transformed
 
-    def compute_loss(self, recon_x, x,sigmas, factor):
+    def compute_loss(self, recon_x, x,sigmas,mu_fake,mu_real, factor):
             """Compute the cross entropy loss on the fixed discrete column."""
             loss = []
             
@@ -271,22 +250,22 @@ class GVAE():
             for column_info in self._transformer.output_info_list:
                 for span_info in column_info:
                     if len(column_info) != 1 or span_info.activation_fn != "softmax":
-                        st += span_info.dim
-                        # std = sigmas[st]
-                        # loss.append(((x[:, st] - recon_x[:, st]) ** 2 / 2 / (std ** 2)).sum())
-                        # loss.append(torch.log(std) * x.size()[0])
-                        # st = ed
-
+                        ed = st + span_info.dim
+                        recon_error = self.MMD(x[:, st], recon_x[:, st])
+                        st = ed
                     else:
                         ed = st + span_info.dim
-                        tmp = functional.cross_entropy(x[:, st:ed],torch.argmax(recon_x[:, st:ed], dim=1),reduction='none')
+                        ed_c = st_c + span_info.dim
+                        tmp = cross_entropy(recon_x[:, st_c:ed_c], torch.argmax(x[:, st:ed], dim=-1), reduction='none')
                         loss.append(tmp)
                         st = ed
+                        st_c = ed_c
 
             assert st == recon_x.size()[1]
             loss = torch.stack(loss, dim=1)
+            div_error,_,_ = self.div_loss(mu_real, mu_fake)
 
-            return (loss * factor).sum() / x.size()[0]
+            return recon_error, div_error,(loss * factor).sum() / x.size()[0]
 
     def _apply_activate(self, data):
         """Apply proper activation function to the output of the generator."""
@@ -445,6 +424,8 @@ class GVAE():
     #     self.loss_g = self.KLD + self.recon_error+ self.loss_fake_d 
     #     self.loss_g.backward()
     #     self.optimizerVAE.step()
+
+
     def one_step_epoch(self,data):
         for step in range(self._discriminator_steps):
 
@@ -483,15 +464,10 @@ class GVAE():
         emb = eps * std_fake + mu_fake
         self.fake, self.sigmas = self.decoder(emb)
         self.fake = self._apply_activate(self.fake)
-
         y_fake = self.discriminator(self.fake)
         self.loss_fake_d = -torch.mean(y_fake)
-        # self.recon_error = self.DeepCoral(self.real, self.fake)
-        self.recon_error = self.MMD(self.real, self.fake)
-
-        # self.recon_error = self.recon_loss(self.real, self.fake)
-        self.div_error,_,_ = self.div_loss(mu_real, mu_fake)
-        self.loss_g = self.div_error + self.recon_error + self.loss_fake_d 
+        self.recon_error, self.div_error,self.cross_entropy = self.compute_loss(self.fake, self.real,self.sigmas,mu_fake,mu_real, factor=2)
+        self.loss_g = self.div_error + self.recon_error + self.cross_entropy + self.loss_fake_d 
         self.loss_g.backward()
         self.optimizerVAE.step()
         
@@ -575,6 +551,7 @@ class GVAE():
             self.run["output/D Loss"].log(self.loss_d)
             self.run["output/recon Loss"].log(self.recon_error)
             self.run["output/divergence loss"].log(self.div_error)
+            self.run["output/cross entropy loss"].log(self.cross_entropy)
             print(f"Epoch {i+1} | Loss VAE: {self.loss_g.detach().cpu(): .4f} | "f"Loss D: {self.loss_d.detach().cpu(): .4f}",flush=True)
             if(self._epochs % 10 == 0):
                 fake_df = self.transform_to_df(self.fake,self.sigmas)
@@ -668,10 +645,12 @@ class GVAE():
         steps = samples // self._batch_size + 1
         data = []
         for _ in range(steps):
-            mean = torch.zeros(self._batch_size, self.embedding_dim)
-            std = mean + 1
-            noise = torch.normal(mean=mean, std=std).to(self.device)
-            fake, sigmas = self.decoder(noise)
+            sample_fake = self.sample_data(self.psuedo_fake,self._batch_size)
+            fake_knnmtd = sample_fake.to(self.device)
+            mu, std, logvar = self.encoder(fake_knnmtd)
+            eps = torch.randn_like(std)
+            emb = eps * std + mu
+            fake, sigmas = self.decoder(emb)
             fake = self._apply_activate(fake)
             data.append(fake.detach().cpu().numpy())
         data = np.concatenate(data, axis=0)

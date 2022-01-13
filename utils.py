@@ -202,7 +202,8 @@ def regression_model(real,synthetic,class_col,mode='TSTR'):
         return np.round(np.mean(rmse_synth_lst),4),np.round(np.mean(mape_synth_lst),4)
 
 def plot_metrics(predictions, labels):
-    print(labels)
+    print(f"labels:{np.unique(labels)}")
+    print(f"predictions:{np.unique(predictions)}")
     if(len(np.unique(labels)) == 2):
         accuracy = accuracy_score(labels,predictions)
         f1_sco = f1_score(labels,predictions,pos_label=np.unique(labels)[0])
