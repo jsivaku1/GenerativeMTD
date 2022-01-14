@@ -23,7 +23,6 @@ def PCD(real,synthetic):
 
     real = change_dtype(real)
     synthetic = match_dtypes(real,synthetic)
-    synthetic.to_csv('synthetic.csv',index=False)
     return np.round(np.linalg.norm((associations(real,nan_strategy='drop_samples',compute_only=True)['corr'] - associations(synthetic,nan_strategy='drop_samples',compute_only=True)['corr']),ord='fro'), 4)
     # return np.linalg.norm((associations(real,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr'] - associations(synthetic,nan_strategy='replace',nan_replace_value='nan',nominal_columns='auto',nom_nom_assoc='cramer', num_num_assoc='pearson',compute_only=True)['corr']),ord='fro')
 
@@ -94,8 +93,14 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
         X_real = real.drop(class_col,axis=1)
         y_real = real[class_col]
         
+        
         X = synthetic.drop(class_col,axis=1)
         y = synthetic[class_col]
+
+        print(f"y_real:{np.unique(y_real)}")
+        print(f"y_synth:{np.unique(y)}")
+
+
         skf = KFold(n_splits=5, shuffle=True, random_state=1)
         for train_index, test_index in skf.split(X, y):
             xtrain, xtest = X.iloc[train_index], X.iloc[test_index]
@@ -121,6 +126,10 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
         
         X = synthetic.drop(class_col,axis=1)
         y = synthetic[class_col]
+
+        print(f"y_real:{np.unique(y_real)}")
+        print(f"y_synth:{np.unique(y)}")
+
         skf = KFold(n_splits=5, shuffle=True, random_state=1)
         for train_index, test_index in skf.split(X_real, y_real):
             xtrain, xtest = X_real.iloc[train_index], X_real.iloc[test_index]
@@ -152,6 +161,8 @@ def regression_model(real,synthetic,class_col,mode='TSTR'):
         
         X = synthetic.drop(class_col,axis=1)
         y = synthetic[class_col]
+        print(f"y_real:{np.unique(y_real)}")
+        print(f"y_synth:{np.unique(y)}")
         skf = KFold(n_splits=5, shuffle=True, random_state=1)
         for train_index, test_index in skf.split(X, y):
             xtrain, xtest = X.iloc[train_index], X.iloc[test_index]
@@ -180,6 +191,8 @@ def regression_model(real,synthetic,class_col,mode='TSTR'):
         
         X = synthetic.drop(class_col,axis=1)
         y = synthetic[class_col]
+        print(f"y_real:{np.unique(y_real)}")
+        print(f"y_synth:{np.unique(y)}")
         skf = KFold(n_splits=5, shuffle=True, random_state=1)
         for train_index, test_index in skf.split(X_real, y_real):
             xtrain, xtest = X_real.iloc[train_index], X_real.iloc[test_index]

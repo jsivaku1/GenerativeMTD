@@ -27,7 +27,7 @@ conda activate deepmtd
 
 # python3 train.py --model 'veegan' --dataset 'Data/cleveland_heart.csv' --target_col_ix 13 --k 5 --num_obs 10 --epochs 200
 
-# python3 train.py --model 'veegan' --dataset 'Data/urban_land.csv' --target_col_ix 0 --k 10 --num_obs 10 --epochs 200
+python3 train.py --model 'veegan' --dataset 'Data/urban_land.csv' --target_col_ix 0 --k 10 --num_obs 10 --epochs 200
 
 # python3 train.py --model 'veegan' --dataset 'Data/mammography.csv' --target_col_ix 5 --k 5 --num_obs 100 --epochs 200
 
@@ -39,7 +39,7 @@ conda activate deepmtd
 
 # python3 train.py --model 'veegan' --dataset 'Data/cervical.csv' --target_col_ix 19 --k 3 --num_obs 100 --epochs 200
 
-python3 train.py --model 'veegan' --dataset 'Data/breast.csv' --target_col_ix 9 --k 3 --num_obs 100 --epochs 200
+# python3 train.py --model 'veegan' --dataset 'Data/breast.csv' --target_col_ix 9 --k 3 --num_obs 100 --epochs 200
 
 # python3 train.py --model 'veegan' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 6 --num_obs 100 --epochs 200
 

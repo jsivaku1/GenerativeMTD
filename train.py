@@ -22,9 +22,12 @@ from sdv.tabular import TVAE
 from pathlib import Path
 
 def log_and_Save(real,fake,model_name,run,opt):
+
     result_df = pd.DataFrame()
     result_lst = []
     data_name = Path(opt.dataset).stem
+    fake.to_csv('Data/Fake/fake_'+data_name+"_"+model_name+'.csv',index=False)
+
     pcd = utils.PCD(real,fake)
     run['output/Final PCD'] = pcd
     kstest, cstest = utils.stat_test(real,fake)
@@ -83,7 +86,7 @@ def train_GVAE(opt):
     model = GVAE(opt, D_in,run)
     model.fit(df,discrete_columns = opt.cat_col)
     gvae_fake = model.sample(1000)
-    log_and_Save(df,gvae_fake,model_name,run,opt)
+    log_and_Save(df.copy(),gvae_fake.copy(),model_name,run,opt)
     run.stop()
 
 def train_veegan(opt):
@@ -105,7 +108,7 @@ def train_veegan(opt):
     model = VEEGAN(opt,run)
     model.fit(df,categorical_columns = opt.cat_col)
     veegan_fake = model.sample(1000)
-    log_and_Save(df,veegan_fake,model_name,run,opt)
+    log_and_Save(df.copy(),veegan_fake.copy(),model_name,run,opt)
     run.stop()
 
 def train_tablegan(opt):
@@ -124,7 +127,7 @@ def train_tablegan(opt):
     model = TableGAN(opt,run)
     model.fit(df,categorical_columns = opt.cat_col)
     tablegan_fake = model.sample(1000)
-    log_and_Save(df,tablegan_fake,model_name,run,opt)
+    log_and_Save(df.copy(),tablegan_fake.copy(),model_name,run,opt)
     run.stop()
 
 
@@ -144,7 +147,7 @@ def train_ctgan(opt):
     model = CTGANSynthesizer(epochs=opt.epochs)
     model.fit(df,discrete_columns = opt.cat_col)
     ctgan_fake = model.sample(1000)
-    log_and_Save(df,ctgan_fake,model_name,run,opt)
+    log_and_Save(df.copy(),ctgan_fake.copy(),model_name,run,opt)
 
     run.stop()
 
@@ -165,7 +168,7 @@ def train_copulagan(opt):
     model = CopulaGAN(epochs=opt.epochs)
     model.fit(df)
     copulagan_fake = model.sample(1000)
-    log_and_Save(df,copulagan_fake,model_name,run,opt)
+    log_and_Save(df.copy(),copulagan_fake.copy(),model_name,run,opt)
     run.stop()
 
 def train_TVAE(opt):
@@ -184,7 +187,7 @@ def train_TVAE(opt):
     model = TVAESynthesizer(epochs=opt.epochs)
     model.fit(df,discrete_columns=opt.cat_col)
     tvae_fake = model.sample(1000)
-    log_and_Save(df,tvae_fake,model_name,run,opt)
+    log_and_Save(df.copy(),tvae_fake.copy(),model_name,run,opt)
     run.stop()
 
 if __name__ == "__main__":

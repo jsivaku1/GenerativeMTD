@@ -244,25 +244,26 @@ class GVAE():
     def compute_loss(self, recon_x, x,sigmas,mu_fake,mu_real, factor):
             """Compute the cross entropy loss on the fixed discrete column."""
             loss = []
-            
+            conti_col_ix = []
             st = 0
             st_c = 0
             for column_info in self._transformer.output_info_list:
                 for span_info in column_info:
                     if len(column_info) != 1 or span_info.activation_fn != "softmax":
                         ed = st + span_info.dim
-                        recon_error = self.MMD(x[:, st], recon_x[:, st])
+                        conti_col_ix.append(st)
                         st = ed
                     else:
                         ed = st + span_info.dim
                         ed_c = st_c + span_info.dim
-                        tmp = cross_entropy(recon_x[:, st_c:ed_c], torch.argmax(x[:, st:ed], dim=-1), reduction='none')
+                        tmp = cross_entropy(recon_x[:, st_c:ed_c], torch.argmax(x[:, st:ed], dim=1), reduction='none')
                         loss.append(tmp)
                         st = ed
                         st_c = ed_c
 
             assert st == recon_x.size()[1]
             loss = torch.stack(loss, dim=1)
+            recon_error = self.MMD(x[:, conti_col_ix], recon_x[:, conti_col_ix])
             div_error,_,_ = self.div_loss(mu_real, mu_fake)
 
             return recon_error, div_error,(loss * factor).sum() / x.size()[0]
@@ -641,6 +642,7 @@ class GVAE():
     #     return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
     
     def sample(self, samples):
+        self.encoder.eval()
         self.decoder.eval()
         steps = samples // self._batch_size + 1
         data = []
