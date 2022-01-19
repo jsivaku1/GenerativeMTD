@@ -32,7 +32,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from utils import *
 from sinkhorn import *
-
+from neptune.new.types import File
 torch.cuda.empty_cache()
 KERNEL_TYPE = "multiscale"
 
@@ -109,11 +109,11 @@ class CreateDatasetLoader(Dataset):
         self.device = torch.device('cuda:{}'.format(self.opt.gpu_ids[0])) if self.opt.gpu_ids else torch.device('cpu') 
         self.data = self.data.to(self.device)
         # Split into training and test
-        self.train_size = int(0.8 * len(self.data))
+        self.train_size = int(1.0 * len(self.data))
         self.test_size = len(self.data) - self.train_size
-        self.trainset, self.testset = random_split(self.data, [self.train_size, self.test_size])
+        self.trainset, _ = random_split(self.data, [self.train_size, self.test_size])
         self.trainloader = DataLoader(self.trainset, batch_size=self.batch_size, shuffle=True)
-        self.testloader = DataLoader(self.testset, batch_size=self.test_size, shuffle=True)
+        # self.testloader = DataLoader(self.testset, batch_size=self.test_size, shuffle=True)
 
     def __len__(self):
         return len(self.data)
@@ -129,7 +129,7 @@ class CreateDatasetLoader(Dataset):
 
     # Load dataset
     def load_data(self):
-      return self.trainloader,self.testloader
+      return self.trainloader
 
     
 class VAEncoder(Module):
@@ -203,7 +203,7 @@ class Discriminator(Module):
 
 
 class GVAE():
-    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128),decompress_dims=(128, 128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
+    def __init__(self,opt,D_in,run, embedding_dim=128,compress_dims=(128, 128,128),decompress_dims=(128, 128,128),l2scale=1e-5,discriminator_lr=2e-4,discriminator_decay=1e-6,discriminator_dim = (128, 128,128),discriminator_steps=1,generator_lr=2e-4,generator_decay=1e-6,loss_factor=2,batch_size=30,epochs=2,log_frequency=True):
         self.opt = opt
         self.D_in = D_in
         self.embedding_dim = embedding_dim
@@ -241,7 +241,7 @@ class GVAE():
             fake_transformed[:,i] = torch.clamp(fake_transformed[:,i], torch.min(real[:,i]),torch.max(real[:,i]))
         return fake_transformed
 
-    def compute_loss(self, recon_x, x,sigmas,mu_fake,mu_real, factor):
+    def compute_loss(self, recon_x, x,sigmas,mu_fake,mu_real,std_fake,logvar_fake, factor):
             """Compute the cross entropy loss on the fixed discrete column."""
             loss = []
             conti_col_ix = []
@@ -260,13 +260,16 @@ class GVAE():
                         loss.append(tmp)
                         st = ed
                         st_c = ed_c
-
             assert st == recon_x.size()[1]
-            loss = torch.stack(loss, dim=1)
+            if(len(loss) != 0):
+                loss = torch.stack(loss, dim=1)
+                cross_entropy_loss = (loss * factor).sum() / x.size()[0]
+            else:
+                cross_entropy_loss = 0
             recon_error = self.MMD(x[:, conti_col_ix], recon_x[:, conti_col_ix])
-            div_error,_,_ = self.div_loss(mu_real, mu_fake)
-
-            return recon_error, div_error,(loss * factor).sum() / x.size()[0]
+            # div_error,_,_ = self.div_loss(mu_real, mu_fake)
+            div_error = torch.mean(- 0.5 * torch.sum(1 + logvar_fake - mu_fake.pow(2) - logvar_fake.exp(),dim = 1),dim=0)
+            return recon_error, div_error,cross_entropy_loss
 
     def _apply_activate(self, data):
         """Apply proper activation function to the output of the generator."""
@@ -437,15 +440,15 @@ class GVAE():
             eps = torch.randn_like(std)
             emb = eps * std + mu
             fake, sigmas = self.decoder(emb)
-            
             fake = self._apply_activate(fake)
-
             self.optimizerD.zero_grad()
+            print(fake.shape)
+            print(self.real.shape)
             y_fake = self.discriminator(fake)                    
             loss_fake_d = torch.mean(y_fake)
             y_real = self.discriminator(self.real)
             loss_real_d = torch.mean(y_real)
-
+            print(data.shape)
             pen = self.discriminator.calc_gradient_penalty(self.real, fake, self.device)
             pen.backward(retain_graph=True)
             self.loss_d = -(loss_real_d - loss_fake_d)
@@ -467,7 +470,7 @@ class GVAE():
         self.fake = self._apply_activate(self.fake)
         y_fake = self.discriminator(self.fake)
         self.loss_fake_d = -torch.mean(y_fake)
-        self.recon_error, self.div_error,self.cross_entropy = self.compute_loss(self.fake, self.real,self.sigmas,mu_fake,mu_real, factor=2)
+        self.recon_error, self.div_error,self.cross_entropy = self.compute_loss(self.fake, self.real,self.sigmas,mu_fake,mu_real,std_fake,logvar_fake, factor=2)
         self.loss_g = self.div_error + self.recon_error + self.cross_entropy + self.loss_fake_d 
         self.loss_g.backward()
         self.optimizerVAE.step()
@@ -480,20 +483,26 @@ class GVAE():
         """
         self._batch_size = train_data.shape[0]
 
-        self._transformer = DataTransformer()
-        self._transformer.fit(train_data, discrete_columns)
-        train_data_transformed = self._transformer.transform(train_data)
-        self._data_sampler = DataSampler(train_data_transformed,self._transformer.output_info_list,self._transformer._column_transform_info_list, self._log_frequency)
-        data_dim = self._transformer.output_dimensions
         generateFake = kNNMTD(self.opt)
-        self.psuedo_fake, psuedo_fake_numpy = generateFake.generateData(train_data_transformed)
+        # self.psuedo_fake, psuedo_fake_numpy = generateFake.generateData(train_data_transformed)
+        self.psuedo_fake, psuedo_fake_numpy,psuedo_fake_df = generateFake.generateDataDigitized(train_data)
+        self.run["fake data knnmtd"].upload(File.as_html(psuedo_fake_df))
+        self.run["real data"].upload(File.as_html(train_data))
         self.run['knnmtd output shape'] = psuedo_fake_numpy.shape
-        self.fake_data_means = self.psuedo_fake.mean(dim=0)
-        self.fake_data_stds = self.psuedo_fake.std(dim=0)
-        self.psuedo_fake = (self.psuedo_fake - self.fake_data_means) / self.fake_data_stds
+
+
+        self._transformer = DataTransformer()
+        self._transformer.fit(self.psuedo_fake, discrete_columns)
+        self.psuedo_fake_transformed = self._transformer.transform(self.psuedo_fake)
+        self._data_sampler = DataSampler(self.psuedo_fake_transformed,self._transformer.output_info_list,self._transformer._column_transform_info_list, self._log_frequency)
+        data_dim = self._transformer.output_dimensions
+        
+        self.fake_data_means = self.psuedo_fake_transformed.mean(dim=0)
+        self.fake_data_stds = self.psuedo_fake_transformed.std(dim=0)
+        self.psuedo_fake_transformed = (self.psuedo_fake_transformed - self.fake_data_means) / self.fake_data_stds
         fake_df = self._transformer.inverse_transform(psuedo_fake_numpy,self.fake_data_means,self.fake_data_stds)
         fake_dataloader = CreateDatasetLoader(self.psuedo_fake, self._batch_size,self.opt)
-        train_loader, test_loader = fake_dataloader.load_data()
+        train_loader = fake_dataloader.load_data()
 
         self.encoder = VAEncoder(data_dim, self.compress_dims, self.embedding_dim).to(self.device)
         self.decoder = VADecoder(self.embedding_dim, self.compress_dims, data_dim).to(self.device)
@@ -511,6 +520,9 @@ class GVAE():
         # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizerVAE, mode='min',factor=0.1, patience=10, threshold=0.01, threshold_mode='abs')
         
 
+        self._transformer = DataTransformer()
+        self._transformer.fit(train_data, discrete_columns)
+        train_data_transformed = self._transformer.transform(train_data)
         self.real = torch.from_numpy(train_data_transformed.astype('float32')).to(self.device)
         self.real_data_means = self.real.mean(dim=0)
         self.real_data_stds = self.real.std(dim=0)
@@ -642,17 +654,19 @@ class GVAE():
     #     return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
     
     def sample(self, samples):
-        self.encoder.eval()
-        self.decoder.eval()
+        # self.encoder.eval()
+        # self.decoder.eval()
+        best_encoder = torch.load('best_encoder.pt')
+        best_decoder = torch.load('best_decoder.pt')
         steps = samples // self._batch_size + 1
         data = []
         for _ in range(steps):
             sample_fake = self.sample_data(self.psuedo_fake,self._batch_size)
             fake_knnmtd = sample_fake.to(self.device)
-            mu, std, logvar = self.encoder(fake_knnmtd)
+            mu, std, logvar = best_encoder(fake_knnmtd)
             eps = torch.randn_like(std)
             emb = eps * std + mu
-            fake, sigmas = self.decoder(emb)
+            fake, sigmas = best_decoder(emb)
             fake = self._apply_activate(fake)
             data.append(fake.detach().cpu().numpy())
         data = np.concatenate(data, axis=0)

@@ -74,8 +74,8 @@ def train_GVAE(opt):
     # run['config/dataset/transforms'] = data_tfms # dict() object
     # run['config/dataset/size'] = dataset_size # dict() object
     run['config/model'] = model_name
-    run['config/criterion'] = "MMD + KL"
-    run['config/optimizer'] = "Adam"
+    run['config/criterion'] = "MMD + KLD + Cross entropy"
+    run['config/optimizer'] = "SGD"
     # run['config/params'] = hparams # dict() object
     data = LoadFile(opt,run)
     D_in = data.__dim__()
@@ -96,8 +96,7 @@ def train_veegan(opt):
     # run['config/dataset/transforms'] = data_tfms # dict() object
     # run['config/dataset/size'] = dataset_size # dict() object
     run['config/model'] = model_name
-    run['config/criterion'] = "MMD + KL"
-    run['config/optimizer'] = "SGD"
+
     # run['config/params'] = hparams # dict() object
     data = LoadFile(opt,run)
     D_in = data.__dim__()
@@ -116,8 +115,7 @@ def train_tablegan(opt):
     run['config/dataset'] = Path(opt.dataset).stem
     model_name = "TableGAN"
     run['config/model'] = model_name
-    run['config/criterion'] = "MMD + KL"
-    run['config/optimizer'] = "SGD"
+
     data = LoadFile(opt,run)
     D_in = data.__dim__()
     df,opt = data.load_data()
@@ -136,8 +134,7 @@ def train_ctgan(opt):
     run['config/dataset'] = Path(opt.dataset).stem
     model_name = "CTGAN"
     run['config/model'] = model_name
-    run['config/criterion'] = "MMD + KL"
-    run['config/optimizer'] = "SGD"
+
     data = LoadFile(opt,run)
     D_in = data.__dim__()
     df,opt = data.load_data()
@@ -157,8 +154,7 @@ def train_copulagan(opt):
     run['config/dataset'] = Path(opt.dataset).stem
     model_name = "CopulaGAN"
     run['config/model'] = model_name
-    run['config/criterion'] = "MMD + KL"
-    run['config/optimizer'] = "SGD"
+
     data = LoadFile(opt,run)
     D_in = data.__dim__()
     df,opt = data.load_data()
@@ -176,8 +172,7 @@ def train_TVAE(opt):
     run['config/dataset'] = Path(opt.dataset).stem
     model_name = "TVAE"
     run['config/model'] = model_name
-    run['config/criterion'] = "MMD + KL"
-    run['config/optimizer'] = "SGD"
+
     data = LoadFile(opt,run)
     D_in = data.__dim__()
     df,opt = data.load_data()

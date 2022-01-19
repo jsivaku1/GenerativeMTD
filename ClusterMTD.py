@@ -181,4 +181,37 @@ class kNNMTD(Module):
         
         return torch.from_numpy(synthSamples), synthSamples
 
+    def generateDataDigitized(self,train_array):
+        synthSamples = []
+        for ix, value in enumerate(train_array):
+            temp_samples = []
+            for col in range(train_array.shape[1]):
+                X = np.array(train_array[:,col])
+                y = np.array(value[col])
+
+                if(X.dtype == np.int64 or X.dtype == np.int32): 
+                    indices = self.findNeighbors(X,y)
+                    array_to_diffuse = train_array[indices,col]
+                    bin_val =  np.unique(X)
+                    centers = (bin_val[1:]+bin_val[:-1])/2
+                    L,U,x = np.apply_along_axis(self.diffusion, 0, array_to_diffuse)
+                    ind = np.digitize(x, bins=centers , right=True)
+                    new_sample = np.array([bin_val[i] for i in ind])
+                    nn_indices = self.findNeighbors(new_sample,y)
+                    neighbor_val_array = new_sample[nn_indices]
+                    temp_samples.append(neighbor_val_array.tolist())
+                else:
+                    indices = self.findNeighbors(X,y)
+                    array_to_diffuse = train_array[indices,col]
+                    L,U,new_sample = np.apply_along_axis(self.diffusion, 0, array_to_diffuse)
+                    nn_indices = self.findNeighbors(new_sample,y)
+                    neighbor_val_array = new_sample[nn_indices]
+                    temp_samples.append(neighbor_val_array.tolist())
+            temp_samples = np.array(temp_samples).T.reshape(np.array(temp_samples).shape[1],train_array.shape[1])
+            print(temp_samples.shape)
+            synthSamples.append(temp_samples.tolist())
+        synthSamples = np.array(self.flatten(synthSamples,1)).astype('float32')
+        df = pd.DataFrame(synthSamples) #convert to a dataframe
+        
+        return torch.from_numpy(synthSamples), synthSamples,df
         
