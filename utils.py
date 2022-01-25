@@ -84,6 +84,7 @@ def NNDR(real,synthetic):
 
 
 def predictive_model(real,synthetic,class_col,mode='TSTR'):
+    synthetic = match_dtypes(real,synthetic)
     acc_synth_lst = []
     f1_synth_lst = []
 
@@ -150,6 +151,7 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
         return np.round(np.mean(acc_synth_lst),4),np.round(np.mean(f1_synth_lst),4)
 
 def regression_model(real,synthetic,class_col,mode='TSTR'):
+    synthetic = match_dtypes(real,synthetic)
     rmse_synth_lst = []
     mape_synth_lst = []
 

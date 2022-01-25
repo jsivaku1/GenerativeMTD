@@ -187,9 +187,11 @@ class kNNMTD(Module):
             temp_samples = []
             for col in range(train_array.shape[1]):
                 X = np.array(train_array[:,col])
+                print(X)
+                # print(X.dtype)
                 y = np.array(value[col])
 
-                if(X.dtype == np.int64 or X.dtype == np.int32): 
+                if(len(np.unique(X)) < 10): 
                     indices = self.findNeighbors(X,y)
                     array_to_diffuse = train_array[indices,col]
                     bin_val =  np.unique(X)
@@ -208,7 +210,7 @@ class kNNMTD(Module):
                     neighbor_val_array = new_sample[nn_indices]
                     temp_samples.append(neighbor_val_array.tolist())
             temp_samples = np.array(temp_samples).T.reshape(np.array(temp_samples).shape[1],train_array.shape[1])
-            print(temp_samples.shape)
+            # print(temp_samples.shape)
             synthSamples.append(temp_samples.tolist())
         synthSamples = np.array(self.flatten(synthSamples,1)).astype('float32')
         df = pd.DataFrame(synthSamples) #convert to a dataframe

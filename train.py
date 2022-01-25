@@ -64,7 +64,33 @@ def log_and_Save(real,fake,model_name,run,opt):
         result_df = pd.DataFrame(result_lst,columns=["DataName",'Method',"PCD","KSTest","CSTest", "RMSE TSTR","MAPE TSTR","RMSE TRTS","MAPE TRTS","DCR","NNDR"])
     result_df.to_csv('Results/' + data_name + "_" + model_name + ".csv",index=False,float_format='%.4f')
     
-
+def flatten(lst, n):
+    if n == 0:
+        return lst
+    return flatten([j for i in lst for j in i], n - 1)
+    
+def digitize_data(real,synthetic):
+    temp_surr_data = pd.DataFrame(columns = list(real.columns))
+    surrogate_data = pd.DataFrame(columns = list(real.columns))
+    synth_data = pd.DataFrame(columns = list(real.columns))
+    temp = pd.DataFrame(columns = list(real.columns))
+    for col in real.columns:
+        if(len(np.unique(real[[col]])) < 10): 
+            bin_val =  np.unique(real[[col]])
+            centers = (bin_val[1:]+bin_val[:-1])/2
+            ind = np.digitize(synthetic[[col]].values, bins=centers , right=True)
+            x = np.array([bin_val[i] for i in ind])
+            x = np.array(flatten(x,1))
+            print(x)
+            temp[col] = pd.Series(x)  
+        else:
+            x = synthetic[[col]].values
+            x = np.array(flatten(x,1))
+            print(x)
+            temp[col] = pd.Series(x)  
+    temp_surr_data = pd.concat([temp_surr_data, temp])          
+    surrogate_data = pd.concat([surrogate_data, temp_surr_data]) 
+    return surrogate_data                         
 
 
 def train_GVAE(opt):
@@ -86,6 +112,9 @@ def train_GVAE(opt):
     model = GVAE(opt, D_in,run)
     model.fit(df,discrete_columns = opt.cat_col)
     gvae_fake = model.sample(1000)
+    gvae_fake = digitize_data(df,gvae_fake)
+    run["digitized fake"].upload(File.as_html(gvae_fake))
+
     log_and_Save(df.copy(),gvae_fake.copy(),model_name,run,opt)
     run.stop()
 
