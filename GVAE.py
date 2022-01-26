@@ -254,7 +254,7 @@ class GVAE():
                     else:
                         ed = st + span_info.dim
                         ed_c = st_c + span_info.dim
-                        tmp = cross_entropy(recon_x[:, st_c:ed_c], torch.argmax(x[:, st:ed], dim=1), reduction='none')
+                        tmp = cross_entropy(x[:, st:ed], torch.argmax(recon_x[:, st_c:ed_c], dim=1), reduction='none')
                         loss.append(tmp)
                         st = ed
                         st_c = ed_c
@@ -264,8 +264,8 @@ class GVAE():
                 cross_entropy_loss = (loss * factor).sum() / x.size()[0]
             else:
                 cross_entropy_loss = 0
-            # recon_error,_,_ = self.recon_loss(x[:, conti_col_ix], recon_x[:, conti_col_ix])
             recon_error = self.MMD(x[:, conti_col_ix], recon_x[:, conti_col_ix])
+            # recon_error,_,_ = self.recon_loss(x[:, conti_col_ix], recon_x[:, conti_col_ix])
             div_error,_,_ = self.div_loss(mu_real, mu_fake)
             # div_error = torch.mean(- 0.5 * torch.sum(1 + logvar_fake - mu_fake.pow(2) - logvar_fake.exp(),dim = 1),dim=0)
             return recon_error, div_error, cross_entropy_loss
@@ -556,8 +556,8 @@ class GVAE():
         print(self.decoder)
         print(self.discriminator)
 
-        # optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
-        # optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
+        # self.optimizerVAE = Adam(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr,betas=(0.5, 0.9), weight_decay=self._generator_decay)
+        # self.optimizerD = Adam(self.discriminator.parameters(), lr=self._discriminator_lr,betas=(0.5, 0.9), weight_decay=self._discriminator_decay)
 
         self.optimizerVAE = SGD(list(self.encoder.parameters()) + list(self.decoder.parameters()),lr=self._generator_lr, weight_decay=self._generator_decay, momentum=0.9)
         self.optimizerD = SGD(self.discriminator.parameters(), lr=self._discriminator_lr, weight_decay=self._discriminator_decay, momentum=0.9)
@@ -575,7 +575,7 @@ class GVAE():
         self.recon_loss = nn.MSELoss()
         # self.div_loss = SamplesLoss("sinkhorn", blur=0.05,scaling = 0.95,diameter=0.01,debias=True)
         self.div_loss = SinkhornDistance(eps=0.01, max_iter=100,device=self.device)
-        # self.recon_loss = SinkhornDistance(eps=0.001, max_iter=100,device=self.device,reduction='mean')
+        # self.recon_loss = SinkhornDistance(eps=0.01, max_iter=100,device=self.device,reduction='mean')
 
         best_pcd = np.inf
         for i in range(self._epochs):

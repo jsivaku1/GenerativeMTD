@@ -148,12 +148,16 @@ def train_tablegan(opt):
     data = LoadFile(opt,run)
     D_in = data.__dim__()
     df,opt = data.load_data()
+    run["real data"].upload(File.as_html(df))
+
     opt.class_col = df.columns[opt.target_col_ix]
     run['config/class column'] = opt.class_col
     opt.cat_col = find_cateorical_columns(df)
     model = TableGAN(opt,run)
     model.fit(df,categorical_columns = opt.cat_col)
     tablegan_fake = model.sample(1000)
+    run["gen fake data"].upload(File.as_html(tablegan_fake))
+
     log_and_Save(df.copy(),tablegan_fake.copy(),model_name,run,opt)
     run.stop()
 
