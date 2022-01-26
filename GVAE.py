@@ -588,8 +588,8 @@ class GVAE():
 
             if(curr_pcd < best_pcd):
                 best_pcd = curr_pcd
-                torch.save(self.encoder, 'best_encoder.pt')
-                torch.save(self.decoder, 'best_decoder.pt')
+                torch.save(self.encoder, 'Model/best_encoder' + '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
+                torch.save(self.decoder, 'Model/best_decoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
 
             VAEGLoss.append(self.loss_g.item())
             DLoss.append(self.loss_d.item())
@@ -690,8 +690,8 @@ class GVAE():
     def sample(self, samples):
         # self.encoder.eval()
         # self.decoder.eval()
-        best_encoder = torch.load('best_encoder.pt')
-        best_decoder = torch.load('best_decoder.pt')
+        best_encoder = torch.load('Model/best_encoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
+        best_decoder = torch.load('Model/best_decoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
         steps = samples // self._batch_size + 1
         data = []
         for _ in range(steps):

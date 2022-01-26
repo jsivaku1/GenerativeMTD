@@ -96,6 +96,7 @@ def digitize_data(real,synthetic):
 def train_GVAE(opt):
     run = neptune.init(project="jaysivakumar/G-VAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
+    opt.dataname = Path(opt.dataset).stem
     model_name = "GVAE"
     # run['config/dataset/transforms'] = data_tfms # dict() object
     # run['config/dataset/size'] = dataset_size # dict() object
@@ -121,6 +122,7 @@ def train_GVAE(opt):
 def train_veegan(opt):
     run = neptune.init(project="jaysivakumar/VEEGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
+    opt.dataname = Path(opt.dataset).stem
     model_name = "VEEGAN"
     # run['config/dataset/transforms'] = data_tfms # dict() object
     # run['config/dataset/size'] = dataset_size # dict() object
@@ -142,6 +144,7 @@ def train_veegan(opt):
 def train_tablegan(opt):
     run = neptune.init(project="jaysivakumar/TableGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
+    opt.dataname = Path(opt.dataset).stem
     model_name = "TableGAN"
     run['config/model'] = model_name
 
@@ -165,6 +168,7 @@ def train_tablegan(opt):
 def train_ctgan(opt):
     run = neptune.init(project="jaysivakumar/CTGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
+    opt.dataname = Path(opt.dataset).stem
     model_name = "CTGAN"
     run['config/model'] = model_name
 
@@ -185,6 +189,7 @@ def train_ctgan(opt):
 def train_copulagan(opt):
     run = neptune.init(project="jaysivakumar/CopulaGAN", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
+    opt.dataname = Path(opt.dataset).stem
     model_name = "CopulaGAN"
     run['config/model'] = model_name
 
@@ -203,6 +208,7 @@ def train_copulagan(opt):
 def train_TVAE(opt):
     run = neptune.init(project="jaysivakumar/TVAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
+    opt.dataname = Path(opt.dataset).stem
     model_name = "TVAE"
     run['config/model'] = model_name
 
