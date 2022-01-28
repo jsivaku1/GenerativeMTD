@@ -254,7 +254,7 @@ class GVAE():
                     else:
                         ed = st + span_info.dim
                         ed_c = st_c + span_info.dim
-                        tmp = cross_entropy(x[:, st:ed], torch.argmax(recon_x[:, st_c:ed_c], dim=1), reduction='none')
+                        tmp = cross_entropy(torch.argmax(x[:, st:ed], dim=1), torch.argmax(recon_x[:, st_c:ed_c], dim=1), reduction='none')
                         loss.append(tmp)
                         st = ed
                         st_c = ed_c
@@ -572,7 +572,7 @@ class GVAE():
         mmd_loss = []
         coral_loss = []
         enc_loss = []
-        self.recon_loss = nn.MSELoss()
+        # self.recon_loss = nn.MSELoss()
         # self.div_loss = SamplesLoss("sinkhorn", blur=0.05,scaling = 0.95,diameter=0.01,debias=True)
         self.div_loss = SinkhornDistance(eps=0.01, max_iter=100,device=self.device)
         # self.recon_loss = SinkhornDistance(eps=0.01, max_iter=100,device=self.device,reduction='mean')
@@ -707,6 +707,25 @@ class GVAE():
         data = data[:samples]
         return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
     
+    # def sample(self, samples):
+    #     # self.encoder.eval()
+    #     # self.decoder.eval()
+    #     # best_encoder = torch.load('Model/best_encoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
+    #     # best_decoder = torch.load('Model/best_decoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
+    #     steps = samples // self._batch_size + 1
+    #     data = []
+    #     for _ in range(steps):
+    #         sample_fake = self.sample_data(self.psuedo_fake,self._batch_size)
+    #         fake_knnmtd = sample_fake.to(self.device)
+    #         mu, std, logvar = self.encoder(fake_knnmtd)
+    #         eps = torch.randn_like(std)
+    #         emb = eps * std + mu
+    #         fake, sigmas = self.decoder(emb)
+    #         fake = self._apply_activate(fake)
+    #         data.append(fake.detach().cpu().numpy())
+    #     data = np.concatenate(data, axis=0)
+    #     data = data[:samples]
+    #     return self._transformer.inverse_transform(data,self.real_fake_means.detach().cpu().numpy(),self.real_fake_stds.detach().cpu().numpy(),sigmas.detach().cpu().numpy())
     
 
     # def sample(self, samples):

@@ -22,7 +22,6 @@ from sdv.tabular import TVAE
 from pathlib import Path
 
 def log_and_Save(real,fake,model_name,run,opt):
-
     result_df = pd.DataFrame()
     result_lst = []
     data_name = Path(opt.dataset).stem
@@ -48,8 +47,16 @@ def log_and_Save(real,fake,model_name,run,opt):
         run['output/Accuracy TRTS'] = acc_trts
         run['output/F1 TRTS'] = f1_trts
 
-        result_lst.append([data_name,model_name,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(acc_tstr,4),np.round(f1_tstr,4),np.round(acc_trts,4),np.round(f1_trts,4),np.round(dcr,4),np.round(nndr,4)])
-        result_df = pd.DataFrame(result_lst,columns=["DataName",'Method',"PCD","KSTest","CSTest", "Acc TSTR","F1 TSTR","Acc TRTS","F1 TRTS","DCR","NNDR"])
+        acc_trtr, f1_trtr = utils.predictive_model(real,real,opt.class_col,'TRTR')
+        run['output/Accuracy TRTR'] = acc_trtr
+        run['output/F1 TRTR'] = f1_trtr
+
+        acc_tsts, f1_tsts = utils.predictive_model(match_dtypes(real,fake).copy(),match_dtypes(real,fake).copy(),opt.class_col,'TSTS')
+        run['output/Accuracy TSTS'] = acc_tsts
+        run['output/F1 TSTS'] = f1_tsts
+
+        result_lst.append([data_name,model_name,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(acc_tstr,4),np.round(f1_tstr,4),np.round(acc_trts,4),np.round(f1_trts,4),np.round(acc_trtr,4),np.round(f1_trtr,4),np.round(acc_tsts,4),np.round(f1_tsts,4),np.round(dcr,4),np.round(nndr,4)])
+        result_df = pd.DataFrame(result_lst,columns=["DataName",'Method',"PCD","KSTest","CSTest", "Acc TSTR","F1 TSTR","Acc TRTS","F1 TRTS","Acc TRTR","F1 TRTR","Acc TSTS","F1 TSTS","DCR","NNDR"])
 
     else:
         rmse_tstr, mape_tstr = utils.regression_model(real,fake,opt.class_col,'TSTR')
@@ -60,8 +67,16 @@ def log_and_Save(real,fake,model_name,run,opt):
         run['output/RMSE TRTS'] = rmse_trts
         run['output/MAPE TRTS'] = mape_trts
 
-        result_lst.append([data_name,model_name,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(rmse_tstr,4),np.round(mape_tstr,4),np.round(rmse_trts,4),np.round(mape_trts,4),np.round(dcr,4),np.round(nndr,4)])
-        result_df = pd.DataFrame(result_lst,columns=["DataName",'Method',"PCD","KSTest","CSTest", "RMSE TSTR","MAPE TSTR","RMSE TRTS","MAPE TRTS","DCR","NNDR"])
+        rmse_trtr, mape_trtr = utils.regression_model(real,real,opt.class_col,'TRTR')
+        run['output/RMSE TRTR'] = rmse_trtr
+        run['output/MAPE TRTR'] = mape_trtr
+
+        rmse_tsts, mape_tsts = utils.regression_model(match_dtypes(real,fake).copy(),match_dtypes(real,fake).copy(),opt.class_col,'TSTS')
+        run['output/RMSE TSTS'] = rmse_tsts
+        run['output/MAPE TSTS'] = mape_tsts
+
+        result_lst.append([data_name,model_name,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(rmse_tstr,4),np.round(mape_tstr,4),np.round(rmse_trts,4),np.round(mape_trts,4),np.round(rmse_trtr,4),np.round(mape_trtr,4),np.round(rmse_tsts,4),np.round(mape_tsts,4),np.round(dcr,4),np.round(nndr,4)])
+        result_df = pd.DataFrame(result_lst,columns=["DataName",'Method',"PCD","KSTest","CSTest", "RMSE TSTR","MAPE TSTR","RMSE TRTS","MAPE TRTS","RMSE TRTR","MAPE TRTR","RMSE TSTS","MAPE TSTS","DCR","NNDR"])
     result_df.to_csv('Results/' + data_name + "_" + model_name + ".csv",index=False,float_format='%.4f')
     
 def flatten(lst, n):
@@ -96,7 +111,8 @@ def digitize_data(real,synthetic):
 def train_GVAE(opt):
     run = neptune.init(project="jaysivakumar/G-VAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
-    opt.dataname = Path(opt.dataset).stem
+    opt.dataname = str(k) + "_" + Path(opt.dataset).stem
+    # opt.dataname = Path(opt.dataset).stem
     model_name = "GVAE"
     # run['config/dataset/transforms'] = data_tfms # dict() object
     # run['config/dataset/size'] = dataset_size # dict() object
@@ -151,14 +167,22 @@ def train_tablegan(opt):
     data = LoadFile(opt,run)
     D_in = data.__dim__()
     df,opt = data.load_data()
+    
+    
+
     run["real data"].upload(File.as_html(df))
 
     opt.class_col = df.columns[opt.target_col_ix]
     run['config/class column'] = opt.class_col
+    if(opt.dataname == 'breast'):
+        df[[opt.class_col]] = df[[opt.class_col]].replace([2, 4], [0, 1])
     opt.cat_col = find_cateorical_columns(df)
     model = TableGAN(opt,run)
     model.fit(df,categorical_columns = opt.cat_col)
     tablegan_fake = model.sample(1000)
+    if(opt.dataname == 'breast'):
+        df[[opt.class_col]] = df[[opt.class_col]].replace([0, 1], [2, 4])
+        tablegan_fake[[opt.class_col]] = tablegan_fake[[opt.class_col]].replace([0, 1], [2, 4])
     run["gen fake data"].upload(File.as_html(tablegan_fake))
 
     log_and_Save(df.copy(),tablegan_fake.copy(),model_name,run,opt)

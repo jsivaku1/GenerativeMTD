@@ -87,50 +87,34 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
     synthetic = match_dtypes(real,synthetic)
     acc_synth_lst = []
     f1_synth_lst = []
-
     acc_real_lst = []
     f1_real_lst = []
     if(mode=='TSTR'):
         X_real = real.drop(class_col,axis=1)
         y_real = real[class_col]
-        
-        
         X = synthetic.drop(class_col,axis=1)
         y = synthetic[class_col]
-
-        print(f"y_real:{np.unique(y_real)}")
-        print(f"y_synth:{np.unique(y)}")
-
-
         skf = KFold(n_splits=5, shuffle=True, random_state=1)
         for train_index, test_index in skf.split(X, y):
             xtrain, xtest = X.iloc[train_index], X.iloc[test_index]
             ytrain, ytest = y.iloc[train_index], y.iloc[test_index]
             mod = RandomForestClassifier()
             mod.fit(xtrain,ytrain)
-            
             synth_test_pred = mod.predict(xtest)
             accuracy_synth,f1_synth = plot_metrics(synth_test_pred, ytest)
             acc_synth_lst.append(accuracy_synth)
             f1_synth_lst.append(f1_synth)
-            
             real_test_pred = mod.predict(X_real)
             accuracy_real,f1_real = plot_metrics(real_test_pred, y_real)
             acc_real_lst.append(accuracy_real)
             f1_real_lst.append(f1_real)
-            
         return np.round(np.mean(acc_real_lst),4),np.round(np.mean(f1_real_lst),4)
         
     elif(mode=='TRTS'):
         X_real = real.drop(class_col,axis=1)
         y_real = real[class_col]
-        
         X = synthetic.drop(class_col,axis=1)
         y = synthetic[class_col]
-
-        print(f"y_real:{np.unique(y_real)}")
-        print(f"y_synth:{np.unique(y)}")
-
         skf = KFold(n_splits=5, shuffle=True, random_state=1)
         for train_index, test_index in skf.split(X_real, y_real):
             xtrain, xtest = X_real.iloc[train_index], X_real.iloc[test_index]
@@ -141,26 +125,51 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
             accuracy_real,f1_real = plot_metrics(real_test_pred, ytest)
             acc_real_lst.append(accuracy_real)
             f1_real_lst.append(f1_real)
-
-            
             synth_test_pred = mod.predict(X)
             accuracy_synth,f1_synth = plot_metrics(synth_test_pred, y)
             acc_synth_lst.append(accuracy_synth)
             f1_synth_lst.append(f1_synth)
+        return np.round(np.mean(acc_synth_lst),4),np.round(np.mean(f1_synth_lst),4)
+    
+    elif(mode=='TRTR'):
+        X = real.drop(class_col,axis=1)
+        y = real[class_col]
+        skf = KFold(n_splits=5, shuffle=True, random_state=1)
+        for train_index, test_index in skf.split(X, y):
+            xtrain, xtest = X.iloc[train_index], X.iloc[test_index]
+            ytrain, ytest = y.iloc[train_index], y.iloc[test_index]
+            mod = RandomForestClassifier()
+            mod.fit(xtrain,ytrain)
+            real_test_pred = mod.predict(xtest)
+            accuracy_real,f1_real = plot_metrics(real_test_pred, ytest)
+            acc_real_lst.append(accuracy_real)
+            f1_real_lst.append(f1_real)
+        return np.round(np.mean(acc_real_lst),4),np.round(np.mean(f1_real_lst),4)
 
+    elif(mode=='TSTS'):
+        X = synthetic.drop(class_col,axis=1)
+        y = synthetic[class_col]
+        skf = KFold(n_splits=5, shuffle=True, random_state=1)
+        for train_index, test_index in skf.split(X, y):
+            xtrain, xtest = X.iloc[train_index], X.iloc[test_index]
+            ytrain, ytest = y.iloc[train_index], y.iloc[test_index]
+            mod = RandomForestClassifier()
+            mod.fit(xtrain,ytrain)
+            synth_test_pred = mod.predict(xtest)
+            accuracy_synth,f1_synth = plot_metrics(synth_test_pred, ytest)
+            acc_synth_lst.append(accuracy_synth)
+            f1_synth_lst.append(f1_synth)
         return np.round(np.mean(acc_synth_lst),4),np.round(np.mean(f1_synth_lst),4)
 
 def regression_model(real,synthetic,class_col,mode='TSTR'):
     synthetic = match_dtypes(real,synthetic)
     rmse_synth_lst = []
     mape_synth_lst = []
-
     rmse_real_lst = []
     mape_real_lst = []
     if(mode=='TSTR'):
         X_real = real.drop(class_col,axis=1)
         y_real = real[class_col]
-        
         X = synthetic.drop(class_col,axis=1)
         y = synthetic[class_col]
         print(f"y_real:{np.unique(y_real)}")
@@ -171,26 +180,21 @@ def regression_model(real,synthetic,class_col,mode='TSTR'):
             ytrain, ytest = y.iloc[train_index], y.iloc[test_index]
             mod = RandomForestRegressor()
             mod.fit(xtrain,ytrain)
-            
             synth_test_pred = mod.predict(xtest)
             rmse_synth = rmse(synth_test_pred, ytest)
             mape_synth = mape(synth_test_pred, ytest)
             rmse_synth_lst.append(rmse_synth)
             mape_synth_lst.append(mape_synth)
-
-            
             real_test_pred = mod.predict(X_real)
             rmse_real = rmse(real_test_pred, y_real)
             mape_real = mape(real_test_pred, y_real)
             rmse_real_lst.append(rmse_real)
             mape_real_lst.append(mape_real)
-            
         return np.round(np.mean(rmse_real_lst),4),np.round(np.mean(mape_real_lst),4)
         
     elif(mode=='TRTS'):
         X_real = real.drop(class_col,axis=1)
         y_real = real[class_col]
-        
         X = synthetic.drop(class_col,axis=1)
         y = synthetic[class_col]
         print(f"y_real:{np.unique(y_real)}")
@@ -206,14 +210,43 @@ def regression_model(real,synthetic,class_col,mode='TSTR'):
             mape_real = mape(real_test_pred, ytest)
             rmse_real_lst.append(rmse_real)
             mape_real_lst.append(mape_real)
-
-            
             synth_test_pred = mod.predict(X)
             rmse_synth = rmse(synth_test_pred, y)
             mape_synth = mape(synth_test_pred, y)
             rmse_synth_lst.append(rmse_synth)
             mape_synth_lst.append(mape_synth)
-
+        return np.round(np.mean(rmse_synth_lst),4),np.round(np.mean(mape_synth_lst),4)
+    
+    elif(mode=='TRTR'):
+        X = real.drop(class_col,axis=1)
+        y = real[class_col]
+        skf = KFold(n_splits=5, shuffle=True, random_state=1)
+        for train_index, test_index in skf.split(X, y):
+            xtrain, xtest = X.iloc[train_index], X.iloc[test_index]
+            ytrain, ytest = y.iloc[train_index], y.iloc[test_index]
+            mod = RandomForestRegressor()
+            mod.fit(xtrain,ytrain)
+            real_test_pred = mod.predict(xtest)
+            rmse_real = rmse(real_test_pred, ytest)
+            mape_real = mape(real_test_pred, ytest)
+            rmse_real_lst.append(rmse_real)
+            mape_real_lst.append(mape_real)
+        return np.round(np.mean(rmse_real_lst),4),np.round(np.mean(mape_real_lst),4)
+    
+    elif(mode=='TSTS'):
+        X = synthetic.drop(class_col,axis=1)
+        y = synthetic[class_col]
+        skf = KFold(n_splits=5, shuffle=True, random_state=1)
+        for train_index, test_index in skf.split(X, y):
+            xtrain, xtest = X.iloc[train_index], X.iloc[test_index]
+            ytrain, ytest = y.iloc[train_index], y.iloc[test_index]
+            mod = RandomForestRegressor()
+            mod.fit(xtrain,ytrain)
+            synth_test_pred = mod.predict(xtest)
+            rmse_synth = rmse(synth_test_pred, ytest)
+            mape_synth = mape(synth_test_pred, ytest)
+            rmse_synth_lst.append(rmse_synth)
+            mape_synth_lst.append(mape_synth)
         return np.round(np.mean(rmse_synth_lst),4),np.round(np.mean(mape_synth_lst),4)
 
 def plot_metrics(predictions, labels):

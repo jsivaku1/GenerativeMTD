@@ -17,6 +17,7 @@ class Transformer:
         df = pd.DataFrame(data)
         for index in df:
             column = df[index]
+
             if index in categorical_columns:
                 mapper = column.value_counts().index.tolist()
                 meta.append({
@@ -53,6 +54,64 @@ class Transformer:
 
     def inverse_transform(self, data):
         raise NotImplementedError
+
+class TableganTransformer(Transformer):
+
+    def __init__(self, side):
+        self.height = side
+
+
+    def fit(self, data, categorical_columns=tuple(), ordinal_columns=tuple()):
+        
+        self.col_names = data.columns
+
+        self.meta = self.get_metadata(data, categorical_columns, ordinal_columns)
+        self.minn = np.zeros(len(self.meta))
+        self.maxx = np.zeros(len(self.meta))
+        for i in range(len(self.meta)):
+            if self.meta[i]['type'] == CONTINUOUS:
+                self.minn[i] = self.meta[i]['min'] - 1e-3
+                self.maxx[i] = self.meta[i]['max'] + 1e-3
+            else:
+                self.minn[i] = -1e-3
+                self.maxx[i] = self.meta[i]['size'] - 1 + 1e-3
+
+    def transform(self, data):
+        data = data.copy().astype('float32')
+        data = (data - self.minn) / (self.maxx - self.minn) * 2 - 1
+        if self.height * self.height > len(data.iloc[0]):
+            padding = np.zeros((len(data), self.height * self.height - len(data.iloc[0])))
+            data = np.concatenate([data, padding], axis=1)
+
+        return data.reshape(-1, 1, self.height, self.height)
+
+    def inverse_transform(self, data):
+        data = data.reshape(-1, self.height * self.height)
+        data_t = np.zeros([len(data), len(self.meta)])
+        for id_, info in enumerate(self.meta):
+            numerator = (data[:, id_].reshape([-1]) + 1)
+            data_t[:, id_] = (numerator / 2) * (self.maxx[id_] - self.minn[id_]) + self.minn[id_]
+            if info['type'] in [CATEGORICAL, ORDINAL]:
+                data_t[:, id_] = np.round(data_t[:, id_])
+
+        data = pd.DataFrame(data_t, columns = self.col_names)
+        
+        return data
+
+    # def inverse_transform(self, data):
+    #     data = data.reshape(-1, self.height * self.height)
+    #     data_t = np.zeros([len(data), len(self.meta)])
+    #     data_t = ((data + 1) / 2) * (self.maxx - self.minn) + self.minn
+
+    #     for id_, info in enumerate(self.meta):
+    #         # numerator = (data[:, id_] + 1).reshape([-1])
+
+    #         # data_t[:, id_] = (numerator / 2) * (self.maxx[id_] - self.minn[id_]) + self.minn[id_]
+    #         if info['type'] in [CATEGORICAL, ORDINAL]:
+    #             data_t[:, id_] = np.round(data_t[:, id_])
+    #             # print(data_t)
+
+    #     return pd.DataFrame(data_t, columns = self.col_names)
 
 
 class DiscretizeTransformer(Transformer):
@@ -401,46 +460,7 @@ class BGMTransformer(Transformer):
         return pd.DataFrame(data_t, columns = self.col_names)
 
 
-class TableganTransformer(Transformer):
 
-    def __init__(self, side):
-        self.height = side
-
-    def fit(self, data, categorical_columns=tuple(), ordinal_columns=tuple()):
-        self.col_names = data.columns
-
-        self.meta = self.get_metadata(data, categorical_columns, ordinal_columns)
-        self.minn = np.zeros(len(self.meta))
-        self.maxx = np.zeros(len(self.meta))
-        for i in range(len(self.meta)):
-            if self.meta[i]['type'] == CONTINUOUS:
-                self.minn[i] = self.meta[i]['min'] - 1e-3
-                self.maxx[i] = self.meta[i]['max'] + 1e-3
-            else:
-                self.minn[i] = -1e-3
-                self.maxx[i] = self.meta[i]['size'] - 1 + 1e-3
-
-    def transform(self, data):
-        data = data.copy().astype('float32')
-        data = (data - self.minn) / (self.maxx - self.minn) * 2 - 1
-        if self.height * self.height > len(data.iloc[0]):
-            padding = np.zeros((len(data), self.height * self.height - len(data.iloc[0])))
-            data = np.concatenate([data, padding], axis=1)
-
-        return data.reshape(-1, 1, self.height, self.height)
-
-    def inverse_transform(self, data):
-        data = data.reshape(-1, self.height * self.height)
-
-        data_t = np.zeros([len(data), len(self.meta)])
-
-        for id_, info in enumerate(self.meta):
-            numerator = (data[:, id_].reshape([-1]) + 1)
-            data_t[:, id_] = (numerator / 2) * (self.maxx[id_] - self.minn[id_]) + self.minn[id_]
-            if info['type'] in [CATEGORICAL, ORDINAL]:
-                data_t[:, id_] = np.round(data_t[:, id_])
-
-        return pd.DataFrame(data_t, columns = self.col_names)
 
 
 def get_num_gpus():
