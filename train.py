@@ -247,9 +247,6 @@ def train_TVAE(opt):
 
 if __name__ == "__main__":
     opt = TrainOptions().parse()
-    # opt.cat_col = literal_eval(opt.cat_col)
-    
-    # opt.device = torch.device('cuda:{}'.format(opt.gpu_ids[0])) if opt.gpu_ids else torch.device('cpu') 
     if(opt.model == 'veegan'):
         train_veegan(opt)
     if(opt.model == 'tablegan'):
@@ -262,93 +259,3 @@ if __name__ == "__main__":
         train_TVAE(opt)
     if(opt.model == 'GenerativeMTD'):
         train_GenerativeMTD(opt)
-
-
-
-    # if(opt.model == 'GMTD'):
-    #     train_GMTD(opt)
-    
-    # if(opt.model == 'GAE'):
-    #     train_GAE(opt)
-    # if(opt.model == 'VAE'):
-    #     train_VAE(opt)
-    # if(opt.model == 'AE'):
-    #     train_AE(opt)
-    
-
-
-
-
-
-
-
-####################################################################################
-# def train_GMTD(opt):
-#     run = neptune.init(project="jaysivakumar/GMTD", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-#     run['config/dataset/path'] = opt.dataset
-#     # run['config/dataset/transforms'] = data_tfms # dict() object
-#     # run['config/dataset/size'] = dataset_size # dict() object
-#     run['config/model'] = "G-MTD"
-#     run['config/criterion'] = "MMD"
-#     run['config/optimizer'] = "Adam"
-#     # run['config/params'] = hparams # dict() object
-#     data = LoadFile(opt,run)
-#     D_in = data.__dim__()
-#     df,opt = data.load_data()
-#     model = GMTD(opt, D_in,run)
-#     model.fit(df,discrete_columns = opt.cat_col)
-
-
-
-# def train_GAE(opt):
-#     run = neptune.init(project="jaysivakumar/G-AE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-#     run['config/dataset/path'] = opt.dataset
-#     # run['config/dataset/transforms'] = data_tfms # dict() object
-#     # run['config/dataset/size'] = dataset_size # dict() object
-#     run['config/model'] = "G-AE"
-#     run['config/criterion'] = "MMD + CORAL + KL"
-#     run['config/optimizer'] = "Adam"
-#     # run['config/params'] = hparams # dict() object
-#     data = LoadFile(opt,run)
-#     D_in = data.__dim__()
-#     df,opt = data.load_data()
-#     opt.cat_col = find_cateorical_columns(df)
-
-#     model = GAE(opt, D_in,run)
-#     model.fit(df,discrete_columns = opt.cat_col)
-
-
-# def train_AE(opt):
-#     run = neptune.init(project="jaysivakumar/AutoE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-#     run['config/dataset/path'] = opt.dataset
-#     # run['config/dataset/transforms'] = data_tfms # dict() object
-#     # run['config/dataset/size'] = dataset_size # dict() object
-#     run['config/model'] = "AutoE"
-#     run['config/criterion'] = "MMD + CORAL + KL"
-#     run['config/optimizer'] = "Adam"
-#     # run['config/params'] = hparams # dict() object
-#     data = LoadFile(opt,run)
-#     D_in = data.__dim__()
-#     df,opt = data.load_data()
-#     opt.cat_col = find_cateorical_columns(df)
-
-#     model = AE(opt, D_in,run)
-#     model.fit(df,discrete_columns = opt.cat_col)
-
-
-# def train_VAE(opt):
-#     run = neptune.init(project="jaysivakumar/VAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
-#     run['config/dataset/path'] = opt.dataset
-#     # run['config/dataset/transforms'] = data_tfms # dict() object
-#     # run['config/dataset/size'] = dataset_size # dict() object
-#     run['config/model'] = "VAE"
-#     run['config/criterion'] = "MMD + CORAL + KL"
-#     run['config/optimizer'] = "Adam"
-#     # run['config/params'] = hparams # dict() object
-#     data = LoadFile(opt,run)
-#     D_in = data.__dim__()
-#     df,opt = data.load_data()
-#     opt.cat_col = find_cateorical_columns(df)
-
-#     model = VAE(opt, D_in,run)
-#     model.fit(df,discrete_columns = opt.cat_col)
