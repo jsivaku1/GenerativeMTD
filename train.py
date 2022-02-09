@@ -1,8 +1,5 @@
 from ClusterMTD import *
 from VAE import *
-from GVAE import *
-from AE import *
-from GAE import *
 from GenerativeMTD import *
 import torch
 from train_options import *
@@ -108,12 +105,12 @@ def digitize_data(real,synthetic):
     return surrogate_data                         
 
 
-def train_GVAE(opt):
+def train_GenerativeMTD(opt):
     run = neptune.init(project="jaysivakumar/G-VAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
     opt.dataname = Path(opt.dataset).stem
     # opt.dataname = Path(opt.dataset).stem
-    model_name = "GVAE"
+    model_name = "GenerativeMTD"
     # run['config/dataset/transforms'] = data_tfms # dict() object
     # run['config/dataset/size'] = dataset_size # dict() object
     run['config/model'] = model_name
@@ -126,7 +123,7 @@ def train_GVAE(opt):
     opt.class_col = df.columns[opt.target_col_ix]
     run['config/class column'] = opt.class_col
     opt.cat_col = find_cateorical_columns(df)
-    model = GVAE(opt, D_in,run)
+    model = GenerativeMTD(opt, D_in,run)
     model.fit(df,discrete_columns = opt.cat_col)
     gvae_fake = model.sample(1000)
     gvae_fake = digitize_data(df,gvae_fake)
@@ -263,8 +260,8 @@ if __name__ == "__main__":
         train_copulagan(opt)
     if(opt.model == 'TVAE'):
         train_TVAE(opt)
-    if(opt.model == 'GVAE'):
-        train_GVAE(opt)
+    if(opt.model == 'GenerativeMTD'):
+        train_GenerativeMTD(opt)
 
 
 
