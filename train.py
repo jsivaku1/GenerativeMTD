@@ -1,5 +1,4 @@
 from ClusterMTD import *
-from VAE import *
 from GenerativeMTD import *
 import torch
 from train_options import *

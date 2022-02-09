@@ -5,25 +5,17 @@
 ```python3
 import pandas as pd
 import numpy as np
-from kNNMTD import *
+from GenerativeMTD import *
 from utils import *
+from gvae_data_transformer import *
+from preprocess import find_cateorical_columns, match_dtypes
 
 # Generate samples for unsupervised learning task
-real = pd.read_csv('../Data/wisconsin_breast.csv')
-model = kNNMTD(n_obs = 300,k=3,mode=-1)
-synthetic = model.fit(real)
-pcd = PCD(real,synthetic)
-
-# Generate samples for classification task
-real = pd.read_csv('../Data/cervical.csv')
-model = kNNMTD(n_obs = 100,k=3,mode=0)
-synthetic = model.fit(real,class_col='ca_cervix')
-pcd = PCD(real,synthetic)
-
-# Generate samples for classification task
-real = pd.read_csv('../Data/prostate.csv')
-model = kNNMTD(n_obs = 100,k=4,mode=1)
-synthetic = model.fit(real,class_col='lpsa')
-pcd = PCD(real,synthetic)
+real = pd.read_csv('Data/wisconsin_breast.csv')
+cat_col = find_cateorical_columns(real)
+model = GenerativeMTD(real)
+model.fit(df,discrete_columns = cat_col)
+fake = model.sample(1000)
+fake = digitize_data(df,fake)
 ```
 
