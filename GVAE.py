@@ -254,7 +254,7 @@ class GVAE():
                     else:
                         ed = st + span_info.dim
                         ed_c = st_c + span_info.dim
-                        tmp = cross_entropy(torch.argmax(x[:, st:ed], dim=1), torch.argmax(recon_x[:, st_c:ed_c], dim=1), reduction='none')
+                        tmp = cross_entropy(x[:, st:ed], torch.argmax(recon_x[:, st_c:ed_c], dim=1), reduction='none')
                         loss.append(tmp)
                         st = ed
                         st_c = ed_c

@@ -24,7 +24,7 @@ from pathlib import Path
 def log_and_Save(real,fake,model_name,run,opt):
     result_df = pd.DataFrame()
     result_lst = []
-    data_name = Path(opt.dataset).stem
+    data_name = str(opt.k) + "_" + Path(opt.dataset).stem
     fake.to_csv('Data/Fake/fake_'+data_name+"_"+model_name+'.csv',index=False)
 
     pcd = utils.PCD(real,fake)
@@ -111,7 +111,7 @@ def digitize_data(real,synthetic):
 def train_GVAE(opt):
     run = neptune.init(project="jaysivakumar/G-VAE", api_token='eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiIzZTE3OWZiNS0xNzkyLTQ0ZjYtYmVjMC1hOWE1NjE4MGQ3MzcifQ==')  # your credentials
     run['config/dataset'] = Path(opt.dataset).stem
-    opt.dataname = str(k) + "_" + Path(opt.dataset).stem
+    opt.dataname = Path(opt.dataset).stem
     # opt.dataname = Path(opt.dataset).stem
     model_name = "GVAE"
     # run['config/dataset/transforms'] = data_tfms # dict() object

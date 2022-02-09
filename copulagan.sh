@@ -48,7 +48,7 @@ python3 train.py --model 'copulagan' --dataset 'Data/post_operative.csv' --targe
 
 python3 train.py --model 'copulagan' --dataset 'Data/community_crime.csv' --target_col_ix 122 --ml_utility regression --k 5 --num_obs 10 --epochs 200
 
-python3 train.py --model 'copulagan' --dataset 'Data/sweat_ordinal.csv' --target_col_ix 18 --ml_utility regression --k 3 --num_obs 10 --epochs 200
+python3 train.py --model 'copulagan' --dataset 'Data/sweat_ordinal.csv' --target_col_ix 18 --ml_utility regression --k 3 --num_obs 100 --epochs 200
 
 python3 train.py --model 'copulagan' --dataset 'Data/fertility.csv' --target_col_ix 8 --ml_utility regression --k 4 --num_obs 100 --epochs 200
 
