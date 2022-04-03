@@ -94,14 +94,14 @@ conda activate deepmtd
 # python3 train.py --model 'GVAE' --dataset 'Data/cervical.csv' --target_col_ix 19 --k 9 --num_obs 100 --epochs 200
 # python3 train.py --model 'GVAE' --dataset 'Data/cervical.csv' --target_col_ix 19 --k 10 --num_obs 100 --epochs 200
 
-# python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 3 --num_obs 100 --epochs 200
-# python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 4 --num_obs 100 --epochs 200
-# python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 5 --num_obs 100 --epochs 200
-# python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 6 --num_obs 100 --epochs 200
-# python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 7 --num_obs 100 --epochs 200
-# python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 8 --num_obs 100 --epochs 200
-# python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 9 --num_obs 100 --epochs 200
-# python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 10 --num_obs 100 --epochs 200
+python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 3 --num_obs 100 --epochs 200
+python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 4 --num_obs 100 --epochs 200
+python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 5 --num_obs 100 --epochs 200
+python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 6 --num_obs 100 --epochs 200
+python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 7 --num_obs 100 --epochs 200
+python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 8 --num_obs 100 --epochs 200
+python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 9 --num_obs 100 --epochs 200
+python3 train.py --model 'GVAE' --dataset 'Data/breast.csv' --target_col_ix 9 --k 10 --num_obs 100 --epochs 200
 
 # python3 train.py --model 'GVAE' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 3 --num_obs 100 --epochs 200
 # python3 train.py --model 'GVAE' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 4 --num_obs 100 --epochs 200
@@ -131,14 +131,14 @@ conda activate deepmtd
 # python3 train.py --model 'GVAE' --dataset 'Data/community_crime.csv' --target_col_ix 122 --ml_utility regression --k 9 --num_obs 10 --epochs 200
 # python3 train.py --model 'GVAE' --dataset 'Data/community_crime.csv' --target_col_ix 122 --ml_utility regression --k 10 --num_obs 10 --epochs 200
 
-python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 3 --num_obs 100 --epochs 200
-python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 4 --num_obs 100 --epochs 200
-python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 5 --num_obs 100 --epochs 200
-python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 6 --num_obs 100 --epochs 200
-python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 7 --num_obs 100 --epochs 200
-python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 8 --num_obs 100 --epochs 200
-python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 9 --num_obs 100 --epochs 200
-python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 10 --num_obs 100 --epochs 200
+# python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 3 --num_obs 100 --epochs 200
+# python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 4 --num_obs 100 --epochs 200
+# python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 5 --num_obs 100 --epochs 200
+# python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 6 --num_obs 100 --epochs 200
+# python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 7 --num_obs 100 --epochs 200
+# python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 8 --num_obs 100 --epochs 200
+# python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 9 --num_obs 100 --epochs 200
+# python3 train.py --model 'GVAE' --dataset 'Data/parkinsons.csv' --target_col_ix 22 --ml_utility regression --k 10 --num_obs 100 --epochs 200
 
 # python3 train.py --model 'GVAE' --dataset 'Data/fertility.csv' --target_col_ix 8 --ml_utility regression --k 3 --num_obs 100 --epochs 200
 # python3 train.py --model 'GVAE' --dataset 'Data/fertility.csv' --target_col_ix 8 --ml_utility regression --k 4 --num_obs 100 --epochs 200
