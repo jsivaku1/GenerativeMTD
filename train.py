@@ -21,7 +21,7 @@ def log_and_Save(real,fake,model_name,run,opt):
     result_df = pd.DataFrame()
     result_lst = []
     data_name = str(opt.k) + "_" + Path(opt.dataset).stem
-    fake.to_csv('Data/Fake/fake_'+data_name+"_"+model_name+'.csv',index=False)
+    # fake.to_csv('Data/Fake/fake_'+data_name+"_"+model_name+'.csv',index=False)
 
     pcd = utils.PCD(real,fake)
     run['output/Final PCD'] = pcd
@@ -51,8 +51,8 @@ def log_and_Save(real,fake,model_name,run,opt):
         run['output/Accuracy TSTS'] = acc_tsts
         run['output/F1 TSTS'] = f1_tsts
 
-        result_lst.append([data_name,model_name,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(acc_tstr,4),np.round(f1_tstr,4),np.round(acc_trts,4),np.round(f1_trts,4),np.round(acc_trtr,4),np.round(f1_trtr,4),np.round(acc_tsts,4),np.round(f1_tsts,4),np.round(dcr,4),np.round(nndr,4)])
-        result_df = pd.DataFrame(result_lst,columns=["DataName",'Method',"PCD","KSTest","CSTest", "Acc TSTR","F1 TSTR","Acc TRTS","F1 TRTS","Acc TRTR","F1 TRTR","Acc TSTS","F1 TSTS","DCR","NNDR"])
+        result_lst.append([data_name,model_name,opt.k,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(acc_tstr,4),np.round(f1_tstr,4),np.round(acc_trts,4),np.round(f1_trts,4),np.round(acc_trtr,4),np.round(f1_trtr,4),np.round(acc_tsts,4),np.round(f1_tsts,4),np.round(dcr,4),np.round(nndr,4)])
+        result_df = pd.DataFrame(result_lst,columns=["DataName",'Method','k',"PCD","KSTest","CSTest", "Acc TSTR","F1 TSTR","Acc TRTS","F1 TRTS","Acc TRTR","F1 TRTR","Acc TSTS","F1 TSTS","DCR","NNDR"])
 
     else:
         rmse_tstr, mape_tstr = utils.regression_model(real,fake,opt.class_col,'TSTR')
@@ -71,8 +71,8 @@ def log_and_Save(real,fake,model_name,run,opt):
         run['output/RMSE TSTS'] = rmse_tsts
         run['output/MAPE TSTS'] = mape_tsts
 
-        result_lst.append([data_name,model_name,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(rmse_tstr,4),np.round(mape_tstr,4),np.round(rmse_trts,4),np.round(mape_trts,4),np.round(rmse_trtr,4),np.round(mape_trtr,4),np.round(rmse_tsts,4),np.round(mape_tsts,4),np.round(dcr,4),np.round(nndr,4)])
-        result_df = pd.DataFrame(result_lst,columns=["DataName",'Method',"PCD","KSTest","CSTest", "RMSE TSTR","MAPE TSTR","RMSE TRTS","MAPE TRTS","RMSE TRTR","MAPE TRTR","RMSE TSTS","MAPE TSTS","DCR","NNDR"])
+        result_lst.append([data_name,model_name,opt.k,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(rmse_tstr,4),np.round(mape_tstr,4),np.round(rmse_trts,4),np.round(mape_trts,4),np.round(rmse_trtr,4),np.round(mape_trtr,4),np.round(rmse_tsts,4),np.round(mape_tsts,4),np.round(dcr,4),np.round(nndr,4)])
+        result_df = pd.DataFrame(result_lst,columns=["DataName",'Method',"k","PCD","KSTest","CSTest", "RMSE TSTR","MAPE TSTR","RMSE TRTS","MAPE TRTS","RMSE TRTR","MAPE TRTR","RMSE TSTS","MAPE TSTS","DCR","NNDR"])
     result_df.to_csv('Results/' + data_name + "_" + model_name + ".csv",index=False,float_format='%.4f')
     
 def flatten(lst, n):
@@ -127,7 +127,6 @@ def train_GenerativeMTD(opt):
     gvae_fake = model.sample(1000)
     gvae_fake = digitize_data(df,gvae_fake)
     run["digitized fake"].upload(File.as_html(gvae_fake))
-
     log_and_Save(df.copy(),gvae_fake.copy(),model_name,run,opt)
     run.stop()
 
@@ -246,6 +245,7 @@ def train_TVAE(opt):
 
 if __name__ == "__main__":
     opt = TrainOptions().parse()
+    print(opt)
     if(opt.model == 'veegan'):
         train_veegan(opt)
     if(opt.model == 'tablegan'):

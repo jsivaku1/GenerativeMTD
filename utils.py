@@ -47,28 +47,28 @@ def wass_distance(real,synthetic):
 
 def DCR(real,synthetic):
     neigh = NearestNeighbors(n_neighbors=1,algorithm='ball_tree')
-    neigh.fit(synthetic.values)
+    neigh.fit(real.values)
     total_dist = []
-    for ix,row in real.iterrows():
+    for ix,row in synthetic.iterrows():
         dist,ix = neigh.kneighbors([row.values],return_distance=True)
         total_dist.append(dist)
     return np.round(np.mean(total_dist),4), np.round(np.std(total_dist),4)
 
 def DCkR(real,synthetic,k=3):
     neigh = NearestNeighbors(n_neighbors=k,algorithm='ball_tree')
-    neigh.fit(synthetic.values)
+    neigh.fit(real.values)
     total_dist = []
     dist_lst = []
-    for ix,row in real.iterrows():
+    for ix,row in synthetic.iterrows():
         dist,ix = neigh.kneighbors([row.values],return_distance=True)
         dist_lst.append(np.squeeze(dist))
     return np.array(dist_lst).mean(axis=0)
 
 def NNDR(real,synthetic):
     neigh = NearestNeighbors(n_neighbors=2,algorithm='ball_tree')
-    neigh.fit(synthetic.values)
+    neigh.fit(real.values)
     total_dist = []
-    for ix,row in real.iterrows():
+    for ix,row in synthetic.iterrows():
         dist,ix = neigh.kneighbors([row.values],return_distance=True)
         first = np.squeeze(dist)[0]
         second = np.squeeze(dist)[1]
@@ -94,7 +94,7 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
         y_real = real[class_col]
         X = synthetic.drop(class_col,axis=1)
         y = synthetic[class_col]
-        skf = KFold(n_splits=5, shuffle=True, random_state=1)
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
         for train_index, test_index in skf.split(X, y):
             xtrain, xtest = X.iloc[train_index], X.iloc[test_index]
             ytrain, ytest = y.iloc[train_index], y.iloc[test_index]
@@ -115,7 +115,7 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
         y_real = real[class_col]
         X = synthetic.drop(class_col,axis=1)
         y = synthetic[class_col]
-        skf = KFold(n_splits=5, shuffle=True, random_state=1)
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
         for train_index, test_index in skf.split(X_real, y_real):
             xtrain, xtest = X_real.iloc[train_index], X_real.iloc[test_index]
             ytrain, ytest = y_real.iloc[train_index], y_real.iloc[test_index]
@@ -134,7 +134,7 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
     elif(mode=='TRTR'):
         X = real.drop(class_col,axis=1)
         y = real[class_col]
-        skf = KFold(n_splits=5, shuffle=True, random_state=1)
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
         for train_index, test_index in skf.split(X, y):
             xtrain, xtest = X.iloc[train_index], X.iloc[test_index]
             ytrain, ytest = y.iloc[train_index], y.iloc[test_index]
@@ -149,7 +149,7 @@ def predictive_model(real,synthetic,class_col,mode='TSTR'):
     elif(mode=='TSTS'):
         X = synthetic.drop(class_col,axis=1)
         y = synthetic[class_col]
-        skf = KFold(n_splits=5, shuffle=True, random_state=1)
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
         for train_index, test_index in skf.split(X, y):
             xtrain, xtest = X.iloc[train_index], X.iloc[test_index]
             ytrain, ytest = y.iloc[train_index], y.iloc[test_index]
