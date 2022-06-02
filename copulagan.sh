@@ -8,7 +8,7 @@
 # Number of Nodes to Use
 #SBATCH --nodes=1
 # Number of Tasks per Node
-#SBATCH --tasks-per-node=2
+#SBATCH --tasks-per-node=1
 # Which Partition to Use
 #SBATCH --partition=gpucompute
 # Memory to allocate in Each Node
