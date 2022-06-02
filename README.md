@@ -1,4 +1,4 @@
-# A Privacy-Preserving Synthetic Data from Small Datasets Using Deep Generative Approach
+# GenerativeMTD: Synthetic Data Generation from Small Datasets Using Deep Generative Approach
 
 
 ## Usage 
