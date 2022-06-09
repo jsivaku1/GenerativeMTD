@@ -53,6 +53,7 @@ def log_and_Save(real,fake,model_name,run,opt):
 
         result_lst.append([data_name,model_name,opt.k,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(acc_tstr,4),np.round(f1_tstr,4),np.round(acc_trts,4),np.round(f1_trts,4),np.round(acc_trtr,4),np.round(f1_trtr,4),np.round(acc_tsts,4),np.round(f1_tsts,4),np.round(dcr,4),np.round(nndr,4)])
         result_df = pd.DataFrame(result_lst,columns=["DataName",'Method','k',"PCD","KSTest","CSTest", "Acc TSTR","F1 TSTR","Acc TRTS","F1 TRTS","Acc TRTR","F1 TRTR","Acc TSTS","F1 TSTS","DCR","NNDR"])
+        result_df.to_csv('Results/'+ "class" + data_name + "_" + model_name + ".csv",index=False,float_format='%.4f')
 
     else:
         rmse_tstr, mape_tstr = utils.regression_model(real,fake,opt.class_col,'TSTR')
@@ -73,7 +74,7 @@ def log_and_Save(real,fake,model_name,run,opt):
 
         result_lst.append([data_name,model_name,opt.k,np.round(pcd,4),np.round(kstest,4),np.round(cstest,4),np.round(rmse_tstr,4),np.round(mape_tstr,4),np.round(rmse_trts,4),np.round(mape_trts,4),np.round(rmse_trtr,4),np.round(mape_trtr,4),np.round(rmse_tsts,4),np.round(mape_tsts,4),np.round(dcr,4),np.round(nndr,4)])
         result_df = pd.DataFrame(result_lst,columns=["DataName",'Method',"k","PCD","KSTest","CSTest", "RMSE TSTR","MAPE TSTR","RMSE TRTS","MAPE TRTS","RMSE TRTR","MAPE TRTR","RMSE TSTS","MAPE TSTS","DCR","NNDR"])
-    result_df.to_csv('Results/' + data_name + "_" + model_name + ".csv",index=False,float_format='%.4f')
+        result_df.to_csv('Results/' + "regress" + data_name + "_" + model_name + ".csv",index=False,float_format='%.4f')
     
 def flatten(lst, n):
     if n == 0:
@@ -220,7 +221,8 @@ def train_copulagan(opt):
     run['config/class column'] = opt.class_col
     model = CopulaGAN(epochs=opt.epochs)
     model.fit(df)
-    copulagan_fake = model.sample(1000)
+    copulagan_fake = model.sample(num_rows=1000)
+    print(copulagan_fake.isna().sum())
     log_and_Save(df.copy(),copulagan_fake.copy(),model_name,run,opt)
     run.stop()
 
