@@ -1,4 +1,4 @@
-
+#%%
 from numpy.lib.function_base import diff
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -19,21 +19,20 @@ plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 sns.set_style("darkgrid", {"axes.facecolor": ".9"})
 
 datasets = {
-    'mammo': 'Mammographic Mass',
+    'mammography': 'Mammographic Mass',
             'caesarian': 'Caesarean',
-            'cryo': 'Cryotherapy',
-            'immuno':'Immunotherapy',
-            'postop': 'Post-operative',
+            'cryotherapy': 'Cryotherapy',
+            'immunotherapy':'Immunotherapy',
+            'post_operative': 'Post-operative',
             'breast': 'Wisconsin Breast Cancer',
-            'clev_heart': 'Cleveland Heart Disease',
+            'cleveland_heart': 'Cleveland Heart Disease',
             'cervical': 'Cervical',
             'urban_land': 'Urban Land Cover',
-            'sweat': 'Sweat Study'}
+            'imputed_SweatBinary': 'Sweat Study'}
 # palette = sns.color_palette("Set1", 13)
 
 df = diff_data.copy()
 
-print(df.head())
 
 df.reset_index(inplace=True,drop=True)
 df = df.replace({"DataName": datasets})
@@ -46,7 +45,7 @@ fig, axes = plt.subplots(7,2, squeeze=True,figsize = (19, 25),frameon = True)
 for data,ax in zip(datasets.items(),axes.flat):
     label,name = data
     result = df[df.DataName==name]
-    
+    print(result.head())
     ax = sns.lineplot('k','PCD',color="black",marker='o',data=result,ci=None,lw=1,ax=ax)
 
 
@@ -65,6 +64,7 @@ for data,ax in zip(datasets.items(),axes.flat):
     
 axes.flat[-1].set_visible(False)
 plt.tight_layout()
-plt.savefig('../Figures/classification-sensitivity-diffdata.eps',dpi=500)
-plt.close('all')
-plt.clf()
+plt.savefig('Figures/classification-sensitivity-diffdata.eps',dpi=500)
+plt.show()
+
+# %%

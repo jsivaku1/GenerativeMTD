@@ -22,20 +22,17 @@ plt.rcParams['text.usetex'] = True
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 sns.set_style("darkgrid", {"axes.facecolor": ".9"})
 
-datasets = {'ContData':'Continuous-only (Simulated)',
-            'MixData': 'Mixed (Simulated)',
-            'DiscData': 'Discrete-only (Simulated)',
-            'thyroid':'Thyroid',
+datasets = {'thyroid':'Thyroid',
             'liver': 'Liver',
             'pima': 'Pima',
             'prostate': 'Prostate',
             'fertility': 'Fertility',
-            'bio':'Bioconcentration',
+            'bioconcentration':'Bioconcentration',
             'heartfail': 'Heart Failure',
             'fat': 'Fat',
             'parkinsons': "Parkinson's",
-            'community and crimes': 'Communities and Crimes',
-            'sweat-ordinal': "Sweat Study (Ordinal)"}
+            'community_crime': 'Communities and Crimes',
+            'sweat_ordinal': "Sweat Study (Ordinal)"}
 
 
 cont_df = cont_res[cont_res["surr n_cols"] == 50][['DataName', 'Method', 'num_neighbors', 'surr n_cols', 'PCD', 'KSTest',
