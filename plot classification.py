@@ -38,7 +38,7 @@ df.reset_index(inplace=True,drop=True)
 df = df.replace({"DataName": datasets})
 
 
-fig, axes = plt.subplots(7,2, squeeze=True,figsize = (19, 25),frameon = True)
+fig, axes = plt.subplots(5,2, squeeze=True,figsize = (19, 25),frameon = True)
 
 # plt.suptitle(r"PCD for benchmark datasets with different $\mathit{k}$ for $\mathit{k}$NNMTD")
 
@@ -64,7 +64,6 @@ for data,ax in zip(datasets.items(),axes.flat):
     
 axes.flat[-1].set_visible(False)
 plt.tight_layout()
-plt.savefig('Figures/classification-sensitivity-diffdata.eps',dpi=500)
-plt.show()
+plt.savefig('Figures/GenMTD-classification-sensitivity-diffdata.eps',dpi=500)
 
 # %%
