@@ -34,15 +34,15 @@ df.reset_index(inplace=True,drop=True)
 df = df.replace({"DataName": datasets})
 
 
-fig, axes = plt.subplots(5,2, squeeze=True,figsize = (19, 25),frameon = True)
+fig, axes = plt.subplots(6,2, squeeze=True,figsize = (19, 25),frameon = True)
 
 # plt.suptitle(r"PCD for benchmark datasets with different $\mathit{k}$ for $\mathit{k}$NNMTD")
 
 for data,ax in zip(datasets.items(),axes.flat):
     label,name = data
-    result = df[(df.DataName==name) & (df.Method=='kNNMTD')]
-    ax = sns.lineplot('num_neighbors','PCD',color="black",marker="o",data=result,ci=None,lw=1,ax=ax)
-    ax.set(xlabel=r'$\mathit{k}$', ylabel=r'Mean PCD',title=r"{%s}" % name)
+    result = df[df.DataName==name]
+    ax = sns.lineplot('k','PCD',color="black",marker="o",data=result,ci=None,lw=1,ax=ax)
+    ax.set(xlabel=r'$\mathit{k}$', ylabel=r'PCD',title=r"{%s}" % name)
     ax.set(xlim=(2.9,10.1),ylim=(0, np.max(df['PCD'])))
     ax.set_xticks([3,4,5,6,7,8,9,10])
     ax.autoscale()
@@ -52,6 +52,38 @@ for data,ax in zip(datasets.items(),axes.flat):
     ax.spines['right'].set_color('0.5')
     ax.spines['left'].set_color('0.5')
     ax.get_yaxis().set_label_coords(-0.08,0.55)
+axes.flat[-1].set_visible(False)
 
 plt.tight_layout()
 plt.savefig('Figures/GenMTD-regression-sensitivity-diffdata.eps',dpi=500)
+
+# %%
+fig, axes = plt.subplots(6,2, squeeze=True,figsize = (19, 25),frameon = True)
+
+
+
+for data,ax in zip(datasets.items(),axes.flat):
+    label,name = data
+    result = df[df.DataName==name]
+    result['nndr_means'] = [float(' '.join(inner_list.strip('][').split(' ')).split()[0]) for inner_list in result['NNDR']]
+    result['nndr_std'] = [float(' '.join(inner_list.strip('][').split(' ')).split()[1]) for inner_list in result['NNDR']]
+    ax = sns.lineplot('k','nndr_means',color="black",data=result,marker='o',ci='nndr_std', err_style='bars',lw=1,ax=ax)
+
+    sns.despine()
+    ax.set(xlabel=r'$\mathit{k}$', ylabel=r'NNDR',title=r"{%s}" % name)
+    ax.set(xlim=(2.9,10.1),ylim=(0, 1))
+    ax.set_xticks([3,4,5,6,7,8,9,10])
+    ax.autoscale()
+    ax.legend([],[], frameon=False)
+    ax.spines['bottom'].set_color('0.5')
+    ax.spines['top'].set_color('0.5')
+    ax.spines['right'].set_color('0.5')
+    ax.spines['left'].set_color('0.5')
+    ax.get_yaxis().set_label_coords(-0.08,0.55)
+
+    
+axes.flat[-1].set_visible(False)
+plt.tight_layout()
+plt.savefig('Figures/GenMTD-regression-priv.eps',dpi=500)
+plt.show()
+# %%
