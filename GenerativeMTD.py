@@ -402,8 +402,8 @@ class GenerativeMTD():
 
             if(curr_pcd < best_pcd):
                 best_pcd = curr_pcd
-                torch.save(self.encoder, 'Model/best_encoder' + '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
-                torch.save(self.decoder, 'Model/best_decoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
+                torch.save(self.encoder, 'Model/'+ self.opt.k + 'best_encoder' + '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
+                torch.save(self.decoder, 'Model/'+ self.opt.k + 'best_decoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
 
             VAEGLoss.append(self.loss_g.item())
             DLoss.append(self.loss_d.item())

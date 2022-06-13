@@ -103,14 +103,14 @@ conda activate deepmtd
 # python3 train.py --model 'GenerativeMTD' --dataset 'Data/breast.csv' --target_col_ix 9 --k 9 --num_obs 100 --epochs 200
 # python3 train.py --model 'GenerativeMTD' --dataset 'Data/breast.csv' --target_col_ix 9 --k 10 --num_obs 100 --epochs 200
 
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 3 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 4 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 5 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 6 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 7 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 8 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 9 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 10 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 3 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 4 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 5 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 6 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 7 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 8 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 9 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/post_operative.csv' --target_col_ix 8 --k 10 --num_obs 100 --epochs 200
 
 
 # python3 train.py --model 'GenerativeMTD' --dataset 'Data/sweat_ordinal.csv' --target_col_ix 18 --ml_utility regression --k 3 --num_obs 100 --epochs 200
@@ -203,12 +203,12 @@ conda activate deepmtd
 # python3 train.py --model 'GenerativeMTD' --dataset 'Data/bioconcentration.csv' --target_col_ix 10 --ml_utility regression --k 9 --num_obs 100 --epochs 200
 # python3 train.py --model 'GenerativeMTD' --dataset 'Data/bioconcentration.csv' --target_col_ix 10 --ml_utility regression --k 10 --num_obs 100 --epochs 200
 
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 3 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 4 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 5 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 6 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 7 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 8 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 9 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 10 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 3 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 4 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 5 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 6 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 7 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 8 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 9 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/heartfail.csv' --target_col_ix 12 --ml_utility regression --k 10 --num_obs 100 --epochs 200
 
