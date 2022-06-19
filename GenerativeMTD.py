@@ -231,8 +231,8 @@ class GenerativeMTD():
             # recon_error,_,_ = self.recon_loss(x[:, conti_col_ix], recon_x[:, conti_col_ix])
             div_error,_,_ = self.div_loss(mu_fake, mu_real)
             # div_error = torch.mean(- 0.5 * torch.sum(1 + logvar_fake - mu_fake.pow(2) - logvar_fake.exp(),dim = 1),dim=0)
-            # return recon_error, div_error, cross_entropy_loss
-            return (recon_error * factor).sum() / x.size()[0], div_error, cross_entropy_loss
+            return recon_error, div_error, cross_entropy_loss
+            # return (recon_error * factor).sum() / x.size()[0], div_error, cross_entropy_loss
 
     def _apply_activate(self, data):
         """Apply proper activation function to the output of the generator."""
