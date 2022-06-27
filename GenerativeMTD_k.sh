@@ -22,14 +22,14 @@ module load cuda11.1/toolkit/11.1.1
 # Activate Conda Env
 conda activate deepmtd
 
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 3 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 4 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 5 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 6 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 7 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 8 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 9 --num_obs 100 --epochs 200
-python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 10 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 3 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 4 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 5 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 6 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 7 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 8 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 9 --num_obs 100 --epochs 200
+# python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv' --target_col_ix 18 --k 10 --num_obs 100 --epochs 200
 
 # python3 train.py --model 'GenerativeMTD' --dataset 'Data/urban_land.csv' --target_col_ix 0 --k 3 --num_obs 10 --epochs 200
 # python3 train.py --model 'GenerativeMTD' --dataset 'Data/urban_land.csv' --target_col_ix 0 --k 4 --num_obs 10 --epochs 200
@@ -176,14 +176,14 @@ python3 train.py --model 'GenerativeMTD' --dataset 'Data/imputed_SweatBinary.csv
 # python3 train.py --model 'GenerativeMTD' --dataset 'Data/fat.csv' --target_col_ix 0 --ml_utility regression --k 9 --num_obs 100 --epochs 200
 # python3 train.py --model 'GenerativeMTD' --dataset 'Data/fat.csv' --target_col_ix 0 --ml_utility regression --k 10 --num_obs 100 --epochs 200
 
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 3 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 4 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 5 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 6 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 7 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 8 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 9 --num_obs 100 --epochs 200
-# python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 10 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 3 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 4 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 5 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 6 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 7 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 8 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 9 --num_obs 100 --epochs 200
+python3 train.py --model 'GenerativeMTD' --dataset 'Data/pima.csv' --target_col_ix 6 --ml_utility regression --k 10 --num_obs 100 --epochs 200
 
 # python3 train.py --model 'GenerativeMTD' --dataset 'Data/prostate.csv' --target_col_ix 8 --ml_utility regression --k 3 --num_obs 100 --epochs 200
 # python3 train.py --model 'GenerativeMTD' --dataset 'Data/prostate.csv' --target_col_ix 8 --ml_utility regression --k 4 --num_obs 100 --epochs 200
