@@ -68,9 +68,8 @@ for data,ax in zip(datasets.items(),axes.flat):
     ax.spines['left'].set_color('0.5')
     ax.get_yaxis().set_label_coords(-0.08,0.55)
 
-plt.legend()
     
-axes.flat[-1].set_visible(False)
+# axes.flat[-1].set_visible(False)
 plt.tight_layout()
 plt.savefig('/home/jay/Insync/jsivaku1@binghamton.edu/Google Drive/SS/Dissertation/Images/GenMTD-classification-sensitivity-diffdata.eps',dpi=500)
 # fig.savefig('/Volumes/GoogleDrive/My Drive/SS/Dissertation/Images/GenMTD-classification-sensitivity-diffdata.eps',dpi=500)
