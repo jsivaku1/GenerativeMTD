@@ -26,7 +26,7 @@ datasets = {'thyroid':'Thyroid',
             'fat': 'Fat',
             'parkinsons': "Parkinson's",
             'community_crime': 'Communities and Crimes',
-            'sweat_ordinal': "Sweat Study (Ordinal)"}
+            'sweat_ordinal': "Sweat Study (Regression)"}
 
 diff_data = diff_data.replace({"DataName": datasets})
 
