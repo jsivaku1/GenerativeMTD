@@ -5,16 +5,16 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-diff_data = pd.read_csv('Results/GenerativeMTD regression FinalResults.csv')
-
+diff_data = pd.concat([pd.read_csv('Results/regress-GenerativeMTD-FinalResults.csv'),
+                    pd.read_csv('Results/regress-knnmtd-FinalResults.csv')])
         
-plt.rcParams['axes.edgecolor'] = "0.01"
+# plt.rcParams['axes.edgecolor'] = "0.01"
 # plt.rcParams['axes.linewidth'] = 0.01
 plt.rcParams['font.size'] = 20
 plt.rcParams['figure.figsize'] = 17, 8
 plt.rcParams['text.usetex'] = True
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
-sns.set_style("darkgrid", {"axes.facecolor": ".9"})
+# sns.set_style("darkgrid", {"axes.facecolor": ".9"})
 
 datasets = {'thyroid':'Thyroid',
             'liver': 'Liver',
@@ -28,10 +28,9 @@ datasets = {'thyroid':'Thyroid',
             'community_crime': 'Communities and Crimes',
             'sweat_ordinal': "Sweat Study (Ordinal)"}
 
+diff_data = diff_data.replace({"DataName": datasets})
 
-df = diff_data.copy()
-df.reset_index(inplace=True,drop=True)
-df = df.replace({"DataName": datasets})
+df = diff_data[diff_data.Method == 'GenerativeMTD']
 
 
 fig, axes = plt.subplots(6,2, squeeze=True,figsize = (19, 25),frameon = True)
@@ -40,8 +39,8 @@ fig, axes = plt.subplots(6,2, squeeze=True,figsize = (19, 25),frameon = True)
 
 for data,ax in zip(datasets.items(),axes.flat):
     label,name = data
-    result = df[df.DataName==name]
-    ax = sns.lineplot('k','PCD',color="black",marker="o",data=result,ci=None,lw=1,ax=ax)
+    result = df[df.DataName==name].reset_index()
+    ax = sns.lineplot('k','PCD',color="#1f77b4",marker="o",data=result,ci=None,lw=1,ax=ax)
     ax.set(xlabel=r'$\mathit{k}$', ylabel=r'PCD',title=r"{%s}" % name)
     ax.set(xlim=(2.9,10.1),ylim=(0, np.max(df['PCD'])))
     ax.set_xticks([3,4,5,6,7,8,9,10])
@@ -55,8 +54,10 @@ for data,ax in zip(datasets.items(),axes.flat):
 axes.flat[-1].set_visible(False)
 
 plt.tight_layout()
-plt.savefig('Figures/GenMTD-regression-sensitivity-diffdata.eps',dpi=500)
-
+# plt.savefig('/Volumes/GoogleDrive/My Drive/SS/Dissertation/Images/GenMTD-regression-sensitivity-diffdata.eps',dpi=500)
+plt.savefig('/home/jay/Insync/jsivaku1@binghamton.edu/Google Drive/SS/Dissertation/Images/GenMTD-regression-sensitivity-diffdata.eps',dpi=500)
+plt.close('all')
+plt.clf()
 # %%
 fig, axes = plt.subplots(6,2, squeeze=True,figsize = (19, 25),frameon = True)
 
@@ -64,10 +65,10 @@ fig, axes = plt.subplots(6,2, squeeze=True,figsize = (19, 25),frameon = True)
 
 for data,ax in zip(datasets.items(),axes.flat):
     label,name = data
-    result = df[df.DataName==name]
+    result = diff_data[diff_data.DataName==name].reset_index()
     result['nndr_means'] = [float(' '.join(inner_list.strip('][').split(' ')).split()[0]) for inner_list in result['NNDR']]
     result['nndr_std'] = [float(' '.join(inner_list.strip('][').split(' ')).split()[1]) for inner_list in result['NNDR']]
-    ax = sns.lineplot('k','nndr_means',color="black",data=result,marker='o',ci='nndr_std', err_style='bars',lw=1,ax=ax)
+    ax = sns.lineplot('k','nndr_means',color="#1f77b4",data=result,marker='o',ci='nndr_std', err_style='bars',lw=1,ax=ax)
 
     sns.despine()
     ax.set(xlabel=r'$\mathit{k}$', ylabel=r'NNDR',title=r"{%s}" % name)
@@ -84,6 +85,6 @@ for data,ax in zip(datasets.items(),axes.flat):
     
 axes.flat[-1].set_visible(False)
 plt.tight_layout()
-plt.savefig('Figures/GenMTD-regression-priv.eps',dpi=500)
+plt.savefig('/Volumes/GoogleDrive/My Drive/SS/Dissertation/Images/GenMTD-regression-priv.eps',dpi=500)
 plt.show()
 # %%
