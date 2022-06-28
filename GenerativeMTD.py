@@ -229,9 +229,10 @@ class GenerativeMTD():
                 cross_entropy_loss = 0
             recon_error = self.MMD(x[:, conti_col_ix], recon_x[:, conti_col_ix])
             # recon_error,_,_ = self.recon_loss(x[:, conti_col_ix], recon_x[:, conti_col_ix])
-            div_error,_,_ = self.div_loss(mu_real, mu_fake)
+            div_error,_,_ = self.div_loss(mu_fake, mu_real)
             # div_error = torch.mean(- 0.5 * torch.sum(1 + logvar_fake - mu_fake.pow(2) - logvar_fake.exp(),dim = 1),dim=0)
             return recon_error, div_error, cross_entropy_loss
+            # return (recon_error * factor).sum() / x.size()[0], div_error, cross_entropy_loss
 
     def _apply_activate(self, data):
         """Apply proper activation function to the output of the generator."""
@@ -402,8 +403,8 @@ class GenerativeMTD():
 
             if(curr_pcd < best_pcd):
                 best_pcd = curr_pcd
-                torch.save(self.encoder, 'Model/best_encoder' + '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
-                torch.save(self.decoder, 'Model/best_decoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
+                torch.save(self.encoder, 'Model/'+ str(self.opt.k) + 'best_encoder' + '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
+                torch.save(self.decoder, 'Model/'+ str(self.opt.k) + 'best_decoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
 
             VAEGLoss.append(self.loss_g.item())
             DLoss.append(self.loss_d.item())
@@ -478,8 +479,8 @@ class GenerativeMTD():
     def sample(self, samples):
         # self.encoder.eval()
         # self.decoder.eval()
-        best_encoder = torch.load('Model/best_encoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
-        best_decoder = torch.load('Model/best_decoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
+        best_encoder = torch.load('Model/'+ str(self.opt.k) + 'best_encoder' + '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
+        best_decoder = torch.load('Model/'+ str(self.opt.k) + 'best_decoder'+ '_' + self.opt.dataname + '_' + self.opt.model +'.pt')
         steps = samples // self._batch_size + 1
         data = []
         for _ in range(steps):
