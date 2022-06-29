@@ -11,7 +11,7 @@ diff_data = pd.concat([pd.read_csv('Results/regress-GenerativeMTD-FinalResults.c
 # plt.rcParams['axes.edgecolor'] = "0.01"
 # plt.rcParams['axes.linewidth'] = 0.01
 plt.rcParams['font.size'] = 20
-plt.rcParams['figure.figsize'] = 17, 8
+plt.rcParams['figure.figsize'] = 20, 12
 plt.rcParams['text.usetex'] = True
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 # sns.set_style("darkgrid", {"axes.facecolor": ".9"})
@@ -33,7 +33,7 @@ diff_data = diff_data.replace({"DataName": datasets})
 df = diff_data[diff_data.Method == 'GenerativeMTD']
 
 
-fig, axes = plt.subplots(6,2, squeeze=True,figsize = (19, 25),frameon = True)
+fig, axes = plt.subplots(6,2, squeeze=True,figsize = (14, 16),frameon = True)
 
 # plt.suptitle(r"PCD for benchmark datasets with different $\mathit{k}$ for $\mathit{k}$NNMTD")
 
