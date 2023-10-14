@@ -19,3 +19,21 @@ fake = model.sample(1000)
 fake = digitize_data(df,fake)
 ```
 
+
+# Citing GenerativeMTD
+
+Please cite the following work if you are using the source code:
+
+- Sivakumar, Jayanth, et al. "GenerativeMTD: A deep synthetic data generation framework for small datasets." Knowledge-Based Systems 280 (2023): 110956.
+
+```LaTeX
+@article{sivakumar2023generativemtd,
+  title={GenerativeMTD: A deep synthetic data generation framework for small datasets},
+  author={Sivakumar, Jayanth and Ramamurthy, Karthik and Radhakrishnan, Menaka and Won, Daehan},
+  journal={Knowledge-Based Systems},
+  volume={280},
+  pages={110956},
+  year={2023},
+  publisher={Elsevier}
+}
+```
