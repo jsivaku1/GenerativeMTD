@@ -9,7 +9,12 @@
 
 The following illustration shows how the algorithm generates artificial samples. For more information, refer the original [paper](https://doi.org/10.1016/j.knosys.2023.110956).
 
-![genMTD.pdf](https://github.com/jsivaku1/GenerativeMTD/blob/main/genMTD.pdf)
+<div align="left">
+<br/>
+<p align="center">
+<img align="center" width=90% src="https://github.com/jsivaku1/GenerativeMTD/blob/main/genMTD.jpg"></img>
+</p>
+</div>
 
 ## Usage 
 ```python3
