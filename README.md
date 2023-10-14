@@ -1,4 +1,4 @@
-# GenerativeMTD: Synthetic Data Generation from Small Datasets Using Deep Generative Approach
+# GenerativeMTD: A deep synthetic data generation framework for small datasets
 
 # # Overview
 - Deep learning-based synthetic data generation frameworks for small tabular data are limited
