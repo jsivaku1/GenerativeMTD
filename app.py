@@ -17,7 +17,7 @@ from werkzeug.utils import secure_filename
 from data_pipeline import DataPipeline
 from GenerativeMTD import GenerativeMTD
 from kNNMTD import kNNMTD
-from mtd_utils import stat_tests, predictive_model, regression_model, analyze_columns, unsupervised_clustering_utility
+from mtd_utils import stat_tests, predictive_model, regression_model, analyze_columns, unsupervised_clustering_utility, get_pca_plot_data
 
 # --- Configuration ---
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
@@ -109,7 +109,6 @@ def generate():
             real_df_imputed = pipeline.inverse_transform(pipeline.transform(real_df))
             app.logger.info(f"Task {task_id}: Data pipeline fitted successfully.")
 
-            # --- Optimal k Selection for kNNMTD ---
             yield from progress_callback({'status': 'Optimizing k for kNNMTD...'})
             k_options = [3, 5, 7, 10]
             best_k, best_pcd = 3, float('inf')
@@ -142,7 +141,6 @@ def generate():
                     try:
                         initial_ml[mode] = eval_func(real_df_imputed, pseudo_real_df, class_col, mode)
                     except Exception as e:
-                        app.logger.warning(f"Could not compute initial ML utility for mode {mode}: {e}")
                         initial_ml[mode] = (np.nan, np.nan, np.nan)
 
             yield from progress_callback({'status': 'Initializing GenerativeMTD model...'})
@@ -167,9 +165,10 @@ def generate():
                     try:
                         final_ml[mode] = eval_func(real_df_imputed, synthetic_df, class_col, mode)
                     except Exception as e:
-                        app.logger.error(f"Final ML evaluation failed for mode {mode}: {e}")
                         final_ml[mode] = (np.nan, np.nan, np.nan)
             
+            pca_plot_data = get_pca_plot_data(real_df_imputed, synthetic_df)
+
             yield from progress_callback({'status': 'Finalizing results...'})
             generated_filename = f"{task_id}_synthetic.csv"
             synthetic_df.to_csv(os.path.join(app.config['UPLOAD_FOLDER'], generated_filename), index=False)
@@ -179,10 +178,11 @@ def generate():
                 'input_options': {**opts, 'Filename': filename, 'Runtime (s)': f"{time.time() - start_time:.2f}", 'Target': class_col or "None"},
                 'initial_metrics': {k.upper(): f"{v:.4f}" if isinstance(v, (float, np.floating)) and not np.isnan(v) else "N/A" for k, v in initial_stats.items()},
                 'final_metrics': {k.upper(): f"{v:.4f}" if isinstance(v, (float, np.floating)) and not np.isnan(v) else "N/A" for k, v in final_stats.items()},
-                'initial_ml_utility_scores': initial_ml,
-                'final_ml_utility_scores': final_ml,
+                'initial_ml_utility_scores': {k: list(v) if isinstance(v, tuple) else v for k, v in initial_ml.items()},
+                'final_ml_utility_scores': {k: list(v) if isinstance(v, tuple) else v for k, v in final_ml.items()},
                 'training_logs': logs,
-                'task_type': task_type
+                'task_type': task_type,
+                'pca_plot_data': pca_plot_data
             }
             
             with open(os.path.join(app.config['UPLOAD_FOLDER'], f"{task_id}_results.json"), 'w') as f:

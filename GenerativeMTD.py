@@ -108,6 +108,10 @@ class GenerativeMTD:
         sinkhorn = SinkhornDistance(eps=0.1, max_iter=100, device=self.device)
         batch_size = min(self.opt['batch_size'], X_pseudo.shape[0])
         
+        best_loss = float('inf')
+        patience_counter = 0
+        patience = 10 # Number of epochs to wait for improvement
+
         for epoch in range(self.opt['epochs']):
             self.encoder.train(); self.decoder.train(); self.critic.train()
             
@@ -185,6 +189,18 @@ class GenerativeMTD:
             
             if callback:
                 yield from callback(log_entry)
+
+            # Early stopping check
+            current_loss = epoch_losses['Overall Loss'] / num_batches
+            if current_loss < best_loss:
+                best_loss = current_loss
+                patience_counter = 0
+            else:
+                patience_counter += 1
+            
+            if patience_counter >= patience:
+                print(f"Early stopping at epoch {epoch + 1}")
+                break
         
         self.is_trained = True
 

@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, r2_score, mean_squared_error, mean_absolute_error, silhouette_score, calinski_harabasz_score
 from sklearn.neighbors import NearestNeighbors
+from sklearn.decomposition import PCA
 from dython.nominal import associations
 
 def analyze_columns(df):
@@ -123,7 +124,6 @@ def unsupervised_clustering_utility(real_df, synth_df):
     """Calculates clustering utility for unsupervised tasks."""
     results = {}
     try:
-        # Preprocess data for clustering
         real_processed = pd.get_dummies(real_df).fillna(0)
         synth_processed = pd.get_dummies(synth_df).fillna(0)
         real_processed, synth_processed = real_processed.align(synth_processed, join='inner', axis=1)
@@ -131,31 +131,75 @@ def unsupervised_clustering_utility(real_df, synth_df):
         if len(real_processed) < 2 or len(synth_processed) < 2:
             return {'Real Silhouette': np.nan, 'Synth Silhouette': np.nan, 'Real Calinski-Harabasz': np.nan, 'Synth Calinski-Harabasz': np.nan}
 
-        # Determine a reasonable number of clusters (heuristic)
         n_clusters = max(2, min(8, len(real_processed) // 25))
         
-        # Cluster real data and get metrics
         kmeans_real = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
         labels_real = kmeans_real.fit_predict(real_processed)
         if len(np.unique(labels_real)) > 1:
             results['Real Silhouette'] = silhouette_score(real_processed, labels_real)
             results['Real Calinski-Harabasz'] = calinski_harabasz_score(real_processed, labels_real)
         else:
-            results['Real Silhouette'] = np.nan
-            results['Real Calinski-Harabasz'] = np.nan
+            results['Real Silhouette'], results['Real Calinski-Harabasz'] = np.nan, np.nan
 
-        # Cluster synthetic data and get metrics
         kmeans_synth = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
         labels_synth = kmeans_synth.fit_predict(synth_processed)
         if len(np.unique(labels_synth)) > 1:
             results['Synth Silhouette'] = silhouette_score(synth_processed, labels_synth)
             results['Synth Calinski-Harabasz'] = calinski_harabasz_score(synth_processed, labels_synth)
         else:
-            results['Synth Silhouette'] = np.nan
-            results['Synth Calinski-Harabasz'] = np.nan
+            results['Synth Silhouette'], results['Synth Calinski-Harabasz'] = np.nan, np.nan
             
     except Exception as e:
         print(f"Could not calculate clustering utility: {e}")
         results = {'Real Silhouette': np.nan, 'Synth Silhouette': np.nan, 'Real Calinski-Harabasz': np.nan, 'Synth Calinski-Harabasz': np.nan}
         
     return results
+
+def get_distribution_plots(real_df, synth_df, max_plots=6):
+    """Prepares data for column distribution plots, showing a max of 6."""
+    plot_data = {}
+    
+    cols_to_plot = real_df.select_dtypes(exclude=np.number).columns.tolist()
+    cols_to_plot += real_df.select_dtypes(include=np.number).columns.tolist()
+    cols_to_plot = cols_to_plot[:max_plots]
+
+    for col in cols_to_plot:
+        if pd.api.types.is_numeric_dtype(real_df[col].dtype):
+            real_hist, bins = np.histogram(real_df[col].dropna(), bins=10)
+            synth_hist, _ = np.histogram(synth_df[col].dropna(), bins=bins)
+            plot_data[col] = {
+                'labels': [f'{b:.2f}' for b in bins[:-1]],
+                'real': real_hist.tolist(),
+                'synth': synth_hist.tolist()
+            }
+        else:
+            real_counts = real_df[col].value_counts()
+            synth_counts = synth_df[col].value_counts()
+            all_labels = sorted(list(set(real_counts.index) | set(synth_counts.index)))
+            plot_data[col] = {
+                'labels': all_labels,
+                'real': [real_counts.get(l, 0) for l in all_labels],
+                'synth': [synth_counts.get(l, 0) for l in all_labels]
+            }
+    return plot_data
+
+def get_pca_plot_data(real_df, synth_df):
+    """Performs PCA and returns data for a 2D scatter plot."""
+    try:
+        real_processed = pd.get_dummies(real_df).fillna(0)
+        synth_processed = pd.get_dummies(synth_df).fillna(0)
+        real_processed, synth_processed = real_processed.align(synth_processed, join='inner', axis=1)
+
+        if real_processed.shape[1] < 2: return None
+
+        pca = PCA(n_components=2)
+        real_pca = pca.fit_transform(real_processed)
+        synth_pca = pca.transform(synth_processed)
+
+        return {
+            'real': [{'x': r[0], 'y': r[1]} for r in real_pca],
+            'synth': [{'x': s[0], 'y': s[1]} for s in synth_pca]
+        }
+    except Exception as e:
+        print(f"Could not generate PCA plot data: {e}")
+        return None

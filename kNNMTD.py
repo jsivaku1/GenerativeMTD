@@ -8,7 +8,7 @@ class kNNMTD():
     This is a corrected and optimized version that follows the iterative logic of the
     original paper but uses vectorization to significantly speed up the process.
     """
-    def __init__(self, n_obs=100, k=5, random_state=None, n_epochs=10):
+    def __init__(self, n_obs=100, k=5, random_state=None, n_epochs=1):
         if k < 2:
             raise ValueError("k must be at least 2.")
         self.n_obs = n_obs
@@ -56,13 +56,10 @@ class kNNMTD():
 
     def _get_pam_samples(self, lb, ub, u_set, pool_size):
         """Generates samples using PAM in a vectorized way."""
-        # Shape of lb, ub, u_set is (n_features,)
-        # We generate candidates for each feature independently
         candidate_samples = self.rng.uniform(lb, ub, size=(pool_size, len(lb)))
         
         mf_vals = np.zeros_like(candidate_samples)
         
-        # Calculate MF for each feature's candidates
         for i in range(len(lb)):
             col_candidates = candidate_samples[:, i]
             
@@ -89,71 +86,45 @@ class kNNMTD():
         full_real_df = pd.concat([X, y.to_frame(name=y.name)], axis=1) if y is not None else X
         
         all_synthetic_data = []
-        obs_per_epoch = int(np.ceil(self.n_obs / self.n_epochs))
-
-        # Pre-fit nearest neighbor models to speed up the loop
+        
         nn_models = {}
         if task_mode == 'classification':
             for class_label in y.unique():
                 class_data = full_real_df[y == class_label]
                 if len(class_data) >= self.k:
-                    # Use .values to avoid feature name warnings
                     nn_models[class_label] = NearestNeighbors(n_neighbors=self.k).fit(class_data.values)
         else:
             nn_models['all'] = NearestNeighbors(n_neighbors=self.k).fit(full_real_df.values)
 
-        for epoch in range(self.n_epochs):
-            surrogate_rows = []
-            for i in range(len(full_real_df)):
-                real_row_df = full_real_df.iloc[[i]]
-                
-                model, search_data = None, full_real_df
-                if task_mode == 'classification':
-                    current_class = y.iloc[i]
-                    if current_class in nn_models:
-                        model = nn_models[current_class]
-                        search_data = full_real_df[y == current_class]
-                else:
-                    model = nn_models.get('all')
-                
-                if model is None: continue
-
-                _, indices = model.kneighbors(real_row_df.values)
-                neighbor_df = search_data.iloc[indices[0]]
-                
-                lb, ub = self._diffusion(neighbor_df.values.T)
-                u_set = (neighbor_df.min(axis=0) + neighbor_df.max(axis=0)) / 2.0
-                
-                pool = self._get_pam_samples(lb, ub, u_set.values, pool_size=100)
-                
-                if len(pool) > 0:
-                    distances = np.linalg.norm(pool - real_row_df.values, axis=1)
-                    best_sample = pool[np.argmin(distances)]
-                    surrogate_rows.append(best_sample)
-                else:
-                    surrogate_rows.append(real_row_df.values[0])
-
-            if not surrogate_rows: continue
+        for _ in range(self.n_obs):
+            # Pick a random point from the real data
+            rand_idx = self.rng.integers(0, len(full_real_df))
+            real_row_df = full_real_df.iloc[[rand_idx]]
             
-            surrogate_df = pd.DataFrame(surrogate_rows, columns=full_real_df.columns)
-            
+            model, search_data = None, full_real_df
             if task_mode == 'classification':
-                surrogate_y = surrogate_df[y.name].round().astype(int)
-                n_classes = y.nunique()
-                samples_per_class = int(np.ceil(obs_per_epoch / n_classes)) if n_classes > 0 else obs_per_epoch
-                epoch_samples_list = []
-                for class_label in y.unique():
-                    class_surrogates = surrogate_df[surrogate_y == class_label]
-                    if not class_surrogates.empty:
-                        epoch_samples_list.append(
-                            class_surrogates.sample(n=samples_per_class, replace=True, random_state=self.rng)
-                        )
-                if epoch_samples_list:
-                    epoch_samples = pd.concat(epoch_samples_list)
-                else:
-                    epoch_samples = pd.DataFrame(columns=full_real_df.columns)
+                current_class = y.iloc[rand_idx]
+                if current_class in nn_models:
+                    model = nn_models[current_class]
+                    search_data = full_real_df[y == current_class]
             else:
-                epoch_samples = surrogate_df.sample(n=obs_per_epoch, replace=True, random_state=self.rng)
+                model = nn_models.get('all')
             
-            all_synthetic_data.append(epoch_samples)
-            yield pd.concat(all_synthetic_data, ignore_index=True)
+            if model is None: continue
+
+            _, indices = model.kneighbors(real_row_df.values)
+            neighbor_df = search_data.iloc[indices[0]]
+            
+            lb, ub = self._diffusion(neighbor_df.values.T)
+            u_set = (neighbor_df.min(axis=0) + neighbor_df.max(axis=0)) / 2.0
+            
+            pool = self._get_pam_samples(lb, ub, u_set.values, pool_size=100)
+            
+            if len(pool) > 0:
+                distances = np.linalg.norm(pool - real_row_df.values, axis=1)
+                best_sample = pool[np.argmin(distances)]
+                all_synthetic_data.append(best_sample)
+            else:
+                all_synthetic_data.append(real_row_df.values[0])
+
+        yield pd.DataFrame(all_synthetic_data, columns=full_real_df.columns)

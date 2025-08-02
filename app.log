@@ -783,3 +783,214 @@ ValueError: 'inverse_transform' works only when 'SimpleImputer' is instantiated 
 2025-08-02 18:49:26,354 - INFO - [app.py:153] - Task 6ab7f877-f5f1-4b56-8498-b360c3012ade: Model training completed.
 2025-08-02 18:49:26,362 - INFO - [app.py:157] - Task 6ab7f877-f5f1-4b56-8498-b360c3012ade: Generated 1000 final synthetic samples.
 2025-08-02 18:49:26,926 - INFO - [app.py:192] - --- Task 6ab7f877-f5f1-4b56-8498-b360c3012ade completed in 12.03 seconds ---
+2025-08-02 18:57:30,615 - INFO - [app.py:89] - --- Starting Task 6186fe0b-348c-4089-b48c-a73757a39bc5 for file heartfail.csv ---
+2025-08-02 18:57:30,618 - INFO - [app.py:90] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: Diabetes, Task: regression
+2025-08-02 18:57:30,646 - INFO - [app.py:110] - Task 6186fe0b-348c-4089-b48c-a73757a39bc5: Data pipeline fitted successfully.
+2025-08-02 18:57:32,462 - INFO - [app.py:132] - Task 6186fe0b-348c-4089-b48c-a73757a39bc5: Generated 50 pseudo-real samples.
+2025-08-02 18:57:43,385 - INFO - [app.py:153] - Task 6186fe0b-348c-4089-b48c-a73757a39bc5: Model training completed.
+2025-08-02 18:57:43,393 - INFO - [app.py:157] - Task 6186fe0b-348c-4089-b48c-a73757a39bc5: Generated 1000 final synthetic samples.
+2025-08-02 18:57:43,959 - INFO - [app.py:192] - --- Task 6186fe0b-348c-4089-b48c-a73757a39bc5 completed in 13.34 seconds ---
+2025-08-02 19:02:33,137 - INFO - [app.py:89] - --- Starting Task 501b0672-7c2c-44cb-8107-5afa0cc95868 for file cleveland_heart.csv ---
+2025-08-02 19:02:33,138 - INFO - [app.py:90] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: 13, Task: regression
+2025-08-02 19:02:33,159 - INFO - [app.py:110] - Task 501b0672-7c2c-44cb-8107-5afa0cc95868: Data pipeline fitted successfully.
+2025-08-02 19:02:35,172 - INFO - [app.py:132] - Task 501b0672-7c2c-44cb-8107-5afa0cc95868: Generated 50 pseudo-real samples.
+2025-08-02 19:02:47,736 - INFO - [app.py:153] - Task 501b0672-7c2c-44cb-8107-5afa0cc95868: Model training completed.
+2025-08-02 19:02:47,743 - INFO - [app.py:157] - Task 501b0672-7c2c-44cb-8107-5afa0cc95868: Generated 1000 final synthetic samples.
+2025-08-02 19:02:48,350 - INFO - [app.py:192] - --- Task 501b0672-7c2c-44cb-8107-5afa0cc95868 completed in 15.21 seconds ---
+2025-08-02 19:04:30,597 - ERROR - [app.py:219] - Failed to load results for task 501b0672-7c2c-44cb-8107-5afa0cc95868: Object of type Undefined is not JSON serializable
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 215, in results
+    return render_template('results.html', **data, pipeline_stages=pipeline_stages)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/templates/results.html", line 202, in top-level template code
+    const distData = {{ distribution_plots_data | tojson }};
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/filters.py", line 1721, in do_tojson
+    return htmlsafe_json_dumps(value, dumps=dumps, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/utils.py", line 669, in htmlsafe_json_dumps
+    dumps(obj, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/json/provider.py", line 179, in dumps
+    return json.dumps(obj, **kwargs)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/__init__.py", line 234, in dumps
+    return cls(
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/json/provider.py", line 121, in _default
+    raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+TypeError: Object of type Undefined is not JSON serializable
+
+2025-08-02 19:04:43,117 - INFO - [app.py:89] - --- Starting Task afbda177-fda0-4ce5-a56c-ce11b589b532 for file cervical.csv ---
+2025-08-02 19:04:43,117 - INFO - [app.py:90] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: ca_cervix, Task: regression
+2025-08-02 19:04:43,148 - INFO - [app.py:110] - Task afbda177-fda0-4ce5-a56c-ce11b589b532: Data pipeline fitted successfully.
+2025-08-02 19:04:46,141 - INFO - [app.py:132] - Task afbda177-fda0-4ce5-a56c-ce11b589b532: Generated 50 pseudo-real samples.
+2025-08-02 19:05:16,140 - INFO - [app.py:153] - Task afbda177-fda0-4ce5-a56c-ce11b589b532: Model training completed.
+2025-08-02 19:05:16,156 - INFO - [app.py:157] - Task afbda177-fda0-4ce5-a56c-ce11b589b532: Generated 1000 final synthetic samples.
+2025-08-02 19:05:17,223 - INFO - [app.py:192] - --- Task afbda177-fda0-4ce5-a56c-ce11b589b532 completed in 34.10 seconds ---
+2025-08-02 19:05:17,242 - ERROR - [app.py:219] - Failed to load results for task afbda177-fda0-4ce5-a56c-ce11b589b532: Object of type Undefined is not JSON serializable
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 215, in results
+    return render_template('results.html', **data, pipeline_stages=pipeline_stages)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/templates/results.html", line 202, in top-level template code
+    const distData = {{ distribution_plots_data | tojson }};
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/filters.py", line 1721, in do_tojson
+    return htmlsafe_json_dumps(value, dumps=dumps, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/utils.py", line 669, in htmlsafe_json_dumps
+    dumps(obj, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/json/provider.py", line 179, in dumps
+    return json.dumps(obj, **kwargs)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/__init__.py", line 234, in dumps
+    return cls(
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/json/provider.py", line 121, in _default
+    raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+TypeError: Object of type Undefined is not JSON serializable
+
+2025-08-02 19:05:43,875 - ERROR - [app.py:253] - Failed to load results for task afbda177-fda0-4ce5-a56c-ce11b589b532: Object of type Undefined is not JSON serializable
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 249, in results
+    return render_template('results.html', **data, pipeline_stages=pipeline_stages)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/templates/results.html", line 202, in top-level template code
+    const distData = {{ distribution_plots_data | tojson }};
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/filters.py", line 1721, in do_tojson
+    return htmlsafe_json_dumps(value, dumps=dumps, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/utils.py", line 669, in htmlsafe_json_dumps
+    dumps(obj, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/json/provider.py", line 179, in dumps
+    return json.dumps(obj, **kwargs)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/__init__.py", line 234, in dumps
+    return cls(
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/json/provider.py", line 121, in _default
+    raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+TypeError: Object of type Undefined is not JSON serializable
+
+2025-08-02 19:05:54,305 - INFO - [app.py:124] - --- Starting Task 3845b10d-e145-4136-9125-b40d6a65fd42 for file caesarian.csv ---
+2025-08-02 19:05:54,307 - INFO - [app.py:125] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: Caesarian, Task: regression
+2025-08-02 19:05:54,334 - INFO - [app.py:145] - Task 3845b10d-e145-4136-9125-b40d6a65fd42: Data pipeline fitted successfully.
+2025-08-02 19:05:54,713 - INFO - [app.py:165] - Task 3845b10d-e145-4136-9125-b40d6a65fd42: Generated 50 pseudo-real samples.
+2025-08-02 19:06:01,209 - INFO - [app.py:185] - Task 3845b10d-e145-4136-9125-b40d6a65fd42: Model training completed.
+2025-08-02 19:06:01,216 - INFO - [app.py:189] - Task 3845b10d-e145-4136-9125-b40d6a65fd42: Generated 1000 final synthetic samples.
+2025-08-02 19:06:01,554 - INFO - [app.py:226] - --- Task 3845b10d-e145-4136-9125-b40d6a65fd42 completed in 7.25 seconds ---
+2025-08-02 19:15:00,453 - INFO - [app.py:124] - --- Starting Task 3eef8d15-c11b-488a-b73d-c07c9b012d37 for file heartfail.csv ---
+2025-08-02 19:15:00,453 - INFO - [app.py:125] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: Diabetes, Task: regression
+2025-08-02 19:15:00,477 - INFO - [app.py:145] - Task 3eef8d15-c11b-488a-b73d-c07c9b012d37: Data pipeline fitted successfully.
+2025-08-02 19:15:02,287 - INFO - [app.py:165] - Task 3eef8d15-c11b-488a-b73d-c07c9b012d37: Generated 50 pseudo-real samples.
+2025-08-02 19:15:11,835 - INFO - [app.py:185] - Task 3eef8d15-c11b-488a-b73d-c07c9b012d37: Model training completed.
+2025-08-02 19:15:11,841 - INFO - [app.py:189] - Task 3eef8d15-c11b-488a-b73d-c07c9b012d37: Generated 1000 final synthetic samples.
+2025-08-02 19:15:12,431 - INFO - [app.py:226] - --- Task 3eef8d15-c11b-488a-b73d-c07c9b012d37 completed in 11.98 seconds ---
+2025-08-02 19:18:11,722 - INFO - [app.py:124] - --- Starting Task acd3c143-43ab-4ce0-9bad-2d9917beaa6d for file heartfail.csv ---
+2025-08-02 19:18:11,723 - INFO - [app.py:125] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: Diabetes, Task: regression
+2025-08-02 19:18:11,745 - INFO - [app.py:145] - Task acd3c143-43ab-4ce0-9bad-2d9917beaa6d: Data pipeline fitted successfully.
+2025-08-02 19:18:13,628 - INFO - [app.py:165] - Task acd3c143-43ab-4ce0-9bad-2d9917beaa6d: Generated 50 pseudo-real samples.
+2025-08-02 19:18:24,947 - INFO - [app.py:185] - Task acd3c143-43ab-4ce0-9bad-2d9917beaa6d: Model training completed.
+2025-08-02 19:18:24,956 - INFO - [app.py:189] - Task acd3c143-43ab-4ce0-9bad-2d9917beaa6d: Generated 1000 final synthetic samples.
+2025-08-02 19:18:25,556 - INFO - [app.py:226] - --- Task acd3c143-43ab-4ce0-9bad-2d9917beaa6d completed in 13.83 seconds ---
+2025-08-02 19:24:45,793 - ERROR - [app.py:221] - Failed to load results for task acd3c143-43ab-4ce0-9bad-2d9917beaa6d: Object of type Undefined is not JSON serializable
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 217, in results
+    return render_template('results.html', **data, pipeline_stages=pipeline_stages)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/templates/results.html", line 194, in top-level template code
+    const pcaData = {{ pca_plot_data | tojson }};
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/filters.py", line 1721, in do_tojson
+    return htmlsafe_json_dumps(value, dumps=dumps, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/jinja2/utils.py", line 669, in htmlsafe_json_dumps
+    dumps(obj, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/json/provider.py", line 179, in dumps
+    return json.dumps(obj, **kwargs)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/__init__.py", line 234, in dumps
+    return cls(
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/encoder.py", line 199, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/json/encoder.py", line 257, in iterencode
+    return _iterencode(o, 0)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/flask/json/provider.py", line 121, in _default
+    raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+TypeError: Object of type Undefined is not JSON serializable
+
+2025-08-02 19:24:57,393 - INFO - [app.py:89] - --- Starting Task 749be2f0-4e3b-4b7b-8f5b-34ec0b6586a9 for file caesarian.csv ---
+2025-08-02 19:24:57,393 - INFO - [app.py:90] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: Caesarian, Task: regression
+2025-08-02 19:24:57,413 - INFO - [app.py:110] - Task 749be2f0-4e3b-4b7b-8f5b-34ec0b6586a9: Data pipeline fitted successfully.
+2025-08-02 19:24:57,771 - INFO - [app.py:131] - Task 749be2f0-4e3b-4b7b-8f5b-34ec0b6586a9: Generated 50 pseudo-real samples.
+2025-08-02 19:25:02,412 - INFO - [app.py:151] - Task 749be2f0-4e3b-4b7b-8f5b-34ec0b6586a9: Model training completed.
+2025-08-02 19:25:02,418 - INFO - [app.py:155] - Task 749be2f0-4e3b-4b7b-8f5b-34ec0b6586a9: Generated 1000 final synthetic samples.
+2025-08-02 19:25:02,708 - INFO - [app.py:194] - --- Task 749be2f0-4e3b-4b7b-8f5b-34ec0b6586a9 completed in 5.31 seconds ---
+2025-08-02 19:25:57,629 - INFO - [app.py:89] - --- Starting Task ed887db8-1824-4695-a8ee-877f9d16f9af for file caesarian.csv ---
+2025-08-02 19:25:57,629 - INFO - [app.py:90] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: Caesarian, Task: regression
+2025-08-02 19:25:57,646 - INFO - [app.py:110] - Task ed887db8-1824-4695-a8ee-877f9d16f9af: Data pipeline fitted successfully.
+2025-08-02 19:25:58,003 - INFO - [app.py:131] - Task ed887db8-1824-4695-a8ee-877f9d16f9af: Generated 50 pseudo-real samples.
+2025-08-02 19:26:01,952 - INFO - [app.py:151] - Task ed887db8-1824-4695-a8ee-877f9d16f9af: Model training completed.
+2025-08-02 19:26:01,957 - INFO - [app.py:155] - Task ed887db8-1824-4695-a8ee-877f9d16f9af: Generated 1000 final synthetic samples.
+2025-08-02 19:26:02,234 - INFO - [app.py:194] - --- Task ed887db8-1824-4695-a8ee-877f9d16f9af completed in 4.60 seconds ---
+2025-08-02 19:39:57,614 - INFO - [app.py:89] - --- Starting Task 4effcf3a-91b8-4df0-ac96-3b67e06aa1e9 for file cervical.csv ---
+2025-08-02 19:39:57,616 - INFO - [app.py:90] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: ca_cervix, Task: regression
+2025-08-02 19:39:57,636 - INFO - [app.py:110] - Task 4effcf3a-91b8-4df0-ac96-3b67e06aa1e9: Data pipeline fitted successfully.
+2025-08-02 19:39:59,448 - INFO - [app.py:131] - Task 4effcf3a-91b8-4df0-ac96-3b67e06aa1e9: Generated 50 pseudo-real samples.
+2025-08-02 19:40:19,728 - INFO - [app.py:151] - Task 4effcf3a-91b8-4df0-ac96-3b67e06aa1e9: Model training completed.
+2025-08-02 19:40:19,737 - INFO - [app.py:155] - Task 4effcf3a-91b8-4df0-ac96-3b67e06aa1e9: Generated 1000 final synthetic samples.
+2025-08-02 19:40:20,528 - INFO - [app.py:194] - --- Task 4effcf3a-91b8-4df0-ac96-3b67e06aa1e9 completed in 22.91 seconds ---
+2025-08-02 19:41:17,048 - INFO - [app.py:89] - --- Starting Task 571e21e3-fa34-47a1-b789-6543e021123b for file cervical.csv ---
+2025-08-02 19:41:17,049 - INFO - [app.py:90] - Parameters: {'n_samples': 10000, 'pseudo_n_obs': 1000, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 256, 'lr': 0.0002, 'seed': 42}, Target: ca_cervix, Task: regression
+2025-08-02 19:41:17,074 - INFO - [app.py:110] - Task 571e21e3-fa34-47a1-b789-6543e021123b: Data pipeline fitted successfully.
+2025-08-02 19:41:18,585 - INFO - [app.py:131] - Task 571e21e3-fa34-47a1-b789-6543e021123b: Generated 100 pseudo-real samples.
+2025-08-02 19:41:40,857 - INFO - [app.py:151] - Task 571e21e3-fa34-47a1-b789-6543e021123b: Model training completed.
+2025-08-02 19:41:40,923 - INFO - [app.py:155] - Task 571e21e3-fa34-47a1-b789-6543e021123b: Generated 10000 final synthetic samples.
+2025-08-02 19:41:49,128 - INFO - [app.py:194] - --- Task 571e21e3-fa34-47a1-b789-6543e021123b completed in 32.08 seconds ---
+2025-08-02 19:42:38,594 - INFO - [app.py:89] - --- Starting Task 28a9fd25-43e3-4b37-a4eb-4d2a9599a5a3 for file cervical.csv ---
+2025-08-02 19:42:38,594 - INFO - [app.py:90] - Parameters: {'n_samples': 10000, 'pseudo_n_obs': 1000, 'epochs': 1000, 'batch_size': 500, 'embedding_dim': 96, 'lr': 0.0002, 'seed': 42}, Target: ca_cervix, Task: regression
+2025-08-02 19:42:38,615 - INFO - [app.py:110] - Task 28a9fd25-43e3-4b37-a4eb-4d2a9599a5a3: Data pipeline fitted successfully.
+2025-08-02 19:42:40,182 - INFO - [app.py:131] - Task 28a9fd25-43e3-4b37-a4eb-4d2a9599a5a3: Generated 100 pseudo-real samples.
+2025-08-02 19:46:32,843 - INFO - [app.py:151] - Task 28a9fd25-43e3-4b37-a4eb-4d2a9599a5a3: Model training completed.
+2025-08-02 19:46:32,893 - INFO - [app.py:155] - Task 28a9fd25-43e3-4b37-a4eb-4d2a9599a5a3: Generated 10000 final synthetic samples.
+2025-08-02 19:46:43,374 - INFO - [app.py:194] - --- Task 28a9fd25-43e3-4b37-a4eb-4d2a9599a5a3 completed in 244.78 seconds ---
+2025-08-02 19:49:28,284 - INFO - [app.py:89] - --- Starting Task bdae1f69-71da-466f-b9fb-0ab0ad5fe59b for file cervical.csv ---
+2025-08-02 19:49:28,285 - INFO - [app.py:90] - Parameters: {'n_samples': 10000, 'pseudo_n_obs': 10000, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 256, 'lr': 0.0002, 'seed': 42}, Target: ca_cervix, Task: regression
+2025-08-02 19:49:28,309 - INFO - [app.py:110] - Task bdae1f69-71da-466f-b9fb-0ab0ad5fe59b: Data pipeline fitted successfully.
+2025-08-02 19:49:30,047 - INFO - [app.py:131] - Task bdae1f69-71da-466f-b9fb-0ab0ad5fe59b: Generated 1000 pseudo-real samples.
+2025-08-02 19:51:20,574 - INFO - [app.py:151] - Task bdae1f69-71da-466f-b9fb-0ab0ad5fe59b: Model training completed.
+2025-08-02 19:51:20,670 - INFO - [app.py:155] - Task bdae1f69-71da-466f-b9fb-0ab0ad5fe59b: Generated 10000 final synthetic samples.
+2025-08-02 19:51:28,244 - INFO - [app.py:194] - --- Task bdae1f69-71da-466f-b9fb-0ab0ad5fe59b completed in 119.96 seconds ---
+2025-08-02 20:01:05,918 - INFO - [app.py:89] - --- Starting Task 18f9fdd3-f6d7-4e3f-9ef1-1ef085d9e597 for file fertility.csv ---
+2025-08-02 20:01:05,920 - INFO - [app.py:90] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: 9, Task: regression
+2025-08-02 20:01:05,939 - INFO - [app.py:110] - Task 18f9fdd3-f6d7-4e3f-9ef1-1ef085d9e597: Data pipeline fitted successfully.
+2025-08-02 20:01:06,798 - INFO - [app.py:131] - Task 18f9fdd3-f6d7-4e3f-9ef1-1ef085d9e597: Generated 500 pseudo-real samples.
+2025-08-02 20:01:36,565 - INFO - [app.py:151] - Task 18f9fdd3-f6d7-4e3f-9ef1-1ef085d9e597: Model training completed.
+2025-08-02 20:01:36,572 - INFO - [app.py:155] - Task 18f9fdd3-f6d7-4e3f-9ef1-1ef085d9e597: Generated 1000 final synthetic samples.
+2025-08-02 20:01:37,041 - INFO - [app.py:192] - --- Task 18f9fdd3-f6d7-4e3f-9ef1-1ef085d9e597 completed in 31.12 seconds ---

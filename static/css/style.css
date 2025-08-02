@@ -52,7 +52,7 @@ body {
 .custom-gradient-title {
     font-size: 2.5em;
     font-weight: 700;
-    background: linear-gradient(90deg, var(--accent-secondary), var(--accent-primary));
+    background: linear-gradient(90deg, #8A2BE2, #4169E1, #5F9EA0, #FFC0CB);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -316,6 +316,7 @@ input:focus, select:focus {
     margin-bottom: 10px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
+    text-align: left;
 }
 .explanations p:last-child {
     border-bottom: none;
@@ -361,6 +362,11 @@ input:focus, select:focus {
     bottom: 15px;
     width: calc(100% - 30px) !important;
     height: calc(100% - 65px) !important;
+}
+.chart-card-single {
+    height: 400px;
+    position: relative;
+    padding: 20px;
 }
 
 .link-back {

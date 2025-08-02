@@ -80,31 +80,59 @@
             targetSelect.addEventListener('change', function() { taskTypeInput.value = this.options[this.selectedIndex].dataset.task; });
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
-                generateBtn.classList.add('hidden'); progressContainer.classList.remove('hidden'); progressBarFill.style.width = '0%';
+                generateBtn.disabled = true;
+                generateBtn.textContent = 'Generating...';
+                progressContainer.classList.remove('hidden');
+                progressBarFill.style.width = '0%';
+                
                 const sseFormData = new FormData(form);
-                fetch('/generate', { method: 'POST', body: sseFormData }).then(response => {
-                    const reader = response.body.getReader(), decoder = new TextDecoder();
+                
+                fetch('/generate', {
+                    method: 'POST',
+                    body: sseFormData
+                }).then(response => {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+
                     function push() {
                         reader.read().then(({ done, value }) => {
-                            if (done) return;
-                            const chunk = decoder.decode(value, {stream: true}), lines = chunk.split('\n\n');
+                            if (done) {
+                                generateBtn.disabled = false;
+                                generateBtn.textContent = 'Generate Data';
+                                return;
+                            }
+                            const chunk = decoder.decode(value, { stream: true });
+                            const lines = chunk.split('\n\n');
                             lines.forEach(line => {
                                 if (line.startsWith('data:')) {
                                     try {
                                         const data = JSON.parse(line.substring(5));
-                                        if (data.status === 'complete') { window.location.href = `/results/${data.task_id}`; }
-                                        else if (data.status === 'error') { alert('An error occurred: ' + data.message); window.location.reload(); }
-                                        else if (data.status === 'training') {
-                                            progressBarFill.style.width = `${(data.epoch / data.total_epochs) * 100}%`;
-                                            progressStatus.textContent = `Epoch ${data.epoch}/${data.total_epochs} - Loss: ${data['Overall Loss'].toFixed(4)}`;
-                                        } else { progressStatus.textContent = data.status; }
-                                    } catch (e) { console.error("SSE parse error:", line); }
+                                        if (data.status === 'complete') {
+                                            window.location.href = `/results/${data.task_id}`;
+                                        } else if (data.status === 'error') {
+                                            alert('An error occurred: ' + data.message);
+                                            window.location.reload();
+                                        } else if (data.status === 'training') {
+                                            const progress = (data.epoch / data.total_epochs) * 100;
+                                            progressBarFill.style.width = `${progress}%`;
+                                            const loss = data['Overall Loss'] ? data['Overall Loss'].toFixed(4) : '...';
+                                            progressStatus.textContent = `Epoch ${data.epoch}/${data.total_epochs} - Loss: ${loss}`;
+                                        } else {
+                                            progressStatus.textContent = data.status;
+                                        }
+                                    } catch (e) {
+                                        console.error("SSE parse error:", line, e);
+                                    }
                                 }
                             });
                             push();
                         });
                     }
                     push();
+                }).catch(err => {
+                    console.error('Fetch error:', err);
+                    alert('Failed to start generation process.');
+                    window.location.reload();
                 });
             });
         });

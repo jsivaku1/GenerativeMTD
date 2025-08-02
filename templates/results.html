@@ -55,6 +55,15 @@
                 </div>
             </div>
 
+            {% if pca_plot_data %}
+            <h2 class="section-header">PCA: Real vs. Synthetic Data</h2>
+            <div class="summary-card full-width">
+                <div class="chart-card-single">
+                    <canvas id="pca-chart"></canvas>
+                </div>
+            </div>
+            {% endif %}
+
             {% if initial_ml_utility_scores or final_ml_utility_scores %}
             <h2 class="section-header">Machine Learning Utility Comparison</h2>
             <div class="summary-card full-width">
@@ -62,7 +71,7 @@
                     <thead>
                         <tr>
                             <th>Metric</th>
-                            <th>Scenario</th>
+                            {% if task_type != 'unsupervised' %}<th>Scenario</th>{% endif %}
                             <th>Initial (Pseudo-Real)</th>
                             <th>Final (Synthetic)</th>
                         </tr>
@@ -73,7 +82,7 @@
                         {% for metric_name, idx in metrics %}
                             {% for mode in ['TSTR', 'TRTS', 'TRTR', 'TSTS'] %}
                             <tr>
-                                {% if loop.first %}<td rowspan="{{ loop.length }}">{{ metric_name }}</td>{% endif %}
+                                {% if loop.first %}<td rowspan="4">{{ metric_name }}</td>{% endif %}
                                 <td>{{ mode }}</td>
                                 <td>{{ '%.2f%%' % (initial_ml_utility_scores[mode][idx] * 100) if initial_ml_utility_scores[mode] and initial_ml_utility_scores[mode][idx] is not none and not initial_ml_utility_scores[mode][idx] | string == 'nan' else 'N/A' }}</td>
                                 <td>{{ '%.2f%%' % (final_ml_utility_scores[mode][idx] * 100) if final_ml_utility_scores[mode] and final_ml_utility_scores[mode][idx] is not none and not final_ml_utility_scores[mode][idx] | string == 'nan' else 'N/A' }}</td>
@@ -85,7 +94,7 @@
                          {% for metric_name, idx in metrics %}
                             {% for mode in ['TSTR', 'TRTS', 'TRTR', 'TSTS'] %}
                             <tr>
-                                {% if loop.first %}<td rowspan="{{ loop.length }}">{{ metric_name }}</td>{% endif %}
+                                {% if loop.first %}<td rowspan="4">{{ metric_name }}</td>{% endif %}
                                 <td>{{ mode }}</td>
                                 <td>{{ '%.4f' % initial_ml_utility_scores[mode][idx] if initial_ml_utility_scores[mode] and initial_ml_utility_scores[mode][idx] is not none and not initial_ml_utility_scores[mode][idx] | string == 'nan' else 'N/A' }}</td>
                                 <td>{{ '%.4f' % final_ml_utility_scores[mode][idx] if final_ml_utility_scores[mode] and final_ml_utility_scores[mode][idx] is not none and not final_ml_utility_scores[mode][idx] | string == 'nan' else 'N/A' }}</td>
@@ -107,8 +116,8 @@
             {% endif %}
 
             <h2 class="section-header plots-header">Training Metrics Over Time</h2>
-            <div class="chart-grid" id="chart-grid">
-                <!-- Charts will be dynamically inserted here by JavaScript -->
+            <div class="chart-grid" id="training-chart-grid">
+                <!-- Training charts will be dynamically inserted here -->
             </div>
 
             <a href="{{ url_for('download_file', filename=generated_filename) }}" class="btn download-btn">Download Synthetic Data (.csv)</a>
@@ -143,64 +152,68 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            // --- Training Plots ---
             const trainingLogs = {{ training_logs | tojson }};
-            if (!trainingLogs || trainingLogs.length === 0) return;
-
-            const epochs = trainingLogs.map(log => `Epoch ${log.epoch}`);
-            
-            const chartMetrics = {
-                'Overall Loss': { color: '#57A0D3', data: [] },
-                'Reconstruction Loss': { color: '#588157', data: [] },
-                'Sinkhorn Loss': { color: '#FF6384', data: [] },
-                'PCD': { color: '#F59E0B', data: [] },
-                'NNDR': { color: '#E56B6F', data: [] },
-                'DCR': { color: '#00C49F', data: [] }
-            };
-
-            trainingLogs.forEach(log => {
-                for (const key in chartMetrics) {
-                    if (log[key] !== undefined && log[key] !== null) {
-                        chartMetrics[key].data.push(log[key]);
+            if (trainingLogs && trainingLogs.length > 0) {
+                const epochs = trainingLogs.map(log => `Epoch ${log.epoch}`);
+                const chartMetrics = {
+                    'Overall Loss': { color: '#57A0D3', data: [] },
+                    'Reconstruction Loss': { color: '#588157', data: [] },
+                    'Sinkhorn Loss': { color: '#FF6384', data: [] },
+                    'PCD': { color: '#F59E0B', data: [] },
+                    'NNDR': { color: '#E56B6F', data: [] },
+                    'DCR': { color: '#00C49F', data: [] }
+                };
+                trainingLogs.forEach(log => {
+                    for (const key in chartMetrics) {
+                        if (log[key] !== undefined && log[key] !== null) {
+                            chartMetrics[key].data.push(log[key]);
+                        }
+                    }
+                });
+                const chartGrid = document.getElementById('training-chart-grid');
+                for (const [metricName, properties] of Object.entries(chartMetrics)) {
+                    if (properties.data.length > 0) {
+                        const chartCard = document.createElement('div');
+                        chartCard.className = 'chart-card';
+                        const canvas = document.createElement('canvas');
+                        chartCard.innerHTML = `<h2>${metricName}</h2>`;
+                        chartCard.appendChild(canvas);
+                        chartGrid.appendChild(chartCard);
+                        new Chart(canvas.getContext('2d'), {
+                            type: 'line', 
+                            data: { labels: epochs, datasets: [{ label: metricName, data: properties.data, borderColor: properties.color, backgroundColor: `${properties.color}33`, fill: true, tension: 0.3, pointRadius: 0 }] },
+                            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false }, x: {} }, plugins: { legend: { display: false } } }
+                        });
                     }
                 }
-            });
+            }
 
-            const chartGrid = document.getElementById('chart-grid');
-
-            for (const [metricName, properties] of Object.entries(chartMetrics)) {
-                if (properties.data.length > 0) {
-                    const chartCard = document.createElement('div');
-                    chartCard.className = 'chart-card';
-                    const canvas = document.createElement('canvas');
-                    chartCard.innerHTML = `<h2>${metricName}</h2>`;
-                    chartCard.appendChild(canvas);
-                    chartGrid.appendChild(chartCard);
-                    
-                    new Chart(canvas.getContext('2d'), {
-                        type: 'line', 
-                        data: { 
-                            labels: epochs, 
-                            datasets: [{ 
-                                label: metricName, 
-                                data: properties.data, 
-                                borderColor: properties.color, 
-                                backgroundColor: `${properties.color}33`, 
-                                fill: true, 
-                                tension: 0.3,
-                                pointRadius: 0
-                            }] 
+            // --- PCA Plot ---
+            const pcaData = {{ pca_plot_data | tojson }};
+            if (pcaData) {
+                const ctx = document.getElementById('pca-chart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            { label: 'Real Data', data: pcaData.real, backgroundColor: '#57A0D399' },
+                            { label: 'Synthetic Data', data: pcaData.synth, backgroundColor: '#E56B6F99' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: { display: true, text: '2D PCA of Real vs. Synthetic Data' },
+                            legend: { position: 'top' }
                         },
-                        options: { 
-                            responsive: true, 
-                            maintainAspectRatio: false, 
-                            scales: { 
-                                y: { beginAtZero: false, title: { display: true, text: 'Score' } }, 
-                                x: { title: { display: true, text: 'Epoch' } } 
-                            }, 
-                            plugins: { legend: { display: false } } 
+                        scales: {
+                            x: { title: { display: true, text: 'Principal Component 1' } },
+                            y: { title: { display: true, text: 'Principal Component 2' } }
                         }
-                    });
-                }
+                    }
+                });
             }
         });
     </script>
