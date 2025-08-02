@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenerativeMTD - Synthetic Data Generation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="main-grid">
+        <div class="info-container">
+            <div class="info-header">
+                <h1 class="custom-gradient-title">GenerativeMTD</h1>
+            </div>
+            <p class="tagline">A deep learning framework for generating high-fidelity synthetic tabular data, optimized for small datasets.</p>
+            <div class="feature-box">
+                <h3>Key Features</h3>
+                <ul>
+                    <li><span class="highlight">Intelligent Pipeline:</span> Automatically cleans data, optimizes kNN parameters, and trains a VAE model.</li>
+                    <li><span class="highlight">Configurable Architecture:</span> Adjust the VAE's embedding dimension to control model complexity.</li>
+                    <li><span class="highlight">Live Training Metrics:</span> Monitor Loss, PCD, NNDR, and DCR in real-time as the model trains.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="container action-container">
+            <h2>Start Generating</h2>
+            <form id="generate-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="dataset">1. Upload Dataset (.csv)</label>
+                    <input type="file" id="dataset" name="dataset" accept=".csv" required>
+                </div>
+
+                <div id="analysis-spinner" class="hidden"><div class="spinner"></div><p>Analyzing columns...</p></div>
+
+                <div class="form-group">
+                    <label for="class_col">2. Select Target Column (Optional)</label>
+                    <select id="class_col" name="class_col">
+                        <option value="none">None (Unsupervised Task)</option>
+                    </select>
+                </div>
+                
+                <h2>3. Configure Generation Parameters</h2>
+                <div class="form-group">
+                    <label for="n_samples">Number of Synthetic Samples</label>
+                    <input type="number" id="n_samples" name="n_samples" value="1000" min="10" required>
+                </div>
+                <div class="form-group">
+                    <label for="epochs">Training Epochs</label>
+                    <input type="number" id="epochs" name="epochs" value="100" min="1" max="1000" required>
+                </div>
+                <div class="form-group">
+                    <label for="embedding_dim">VAE Embedding Dimension</label>
+                    <input type="number" id="embedding_dim" name="embedding_dim" value="128" min="16" max="512" step="16" required>
+                </div>
+
+                <div class="progress-container hidden" id="progress-container">
+                    <div class="progress-bar-label" id="progress-status">Initializing...</div>
+                    <div class="progress-bar"><div class="progress-bar-fill" id="progress-bar-fill"></div></div>
+                </div>
+
+                <button type="submit" class="btn" id="generate-btn">Generate Data</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('dataset');
+            const targetSelect = document.getElementById('class_col');
+            const spinner = document.getElementById('analysis-spinner');
+            const form = document.getElementById('generate-form');
+            const generateBtn = document.getElementById('generate-btn');
+            const progressContainer = document.getElementById('progress-container');
+            const progressBarFill = document.getElementById('progress-bar-fill');
+            const progressStatus = document.getElementById('progress-status');
+
+            fileInput.addEventListener('change', async function() {
+                const file = this.files[0];
+                if (!file) return;
+                spinner.classList.remove('hidden');
+                targetSelect.innerHTML = '<option value="none">None (Unsupervised Task)</option>';
+                
+                const formData = new FormData();
+                formData.append('dataset', file);
+
+                try {
+                    const response = await fetch('/info', { method: 'POST', body: formData });
+                    if (!response.ok) throw new Error('Server error during analysis.');
+                    
+                    const columnData = await response.json();
+                    if (columnData.error) throw new Error(columnData.error);
+
+                    if (columnData.categorical && columnData.categorical.length > 0) {
+                        const optgroupCat = document.createElement('optgroup');
+                        optgroupCat.label = 'Categorical (for Classification)';
+                        columnData.categorical.forEach(col => {
+                            optgroupCat.innerHTML += `<option value="${col.name}">${col.name}</option>`;
+                        });
+                        targetSelect.appendChild(optgroupCat);
+                    }
+                } catch (error) {
+                    alert(`Error analyzing file: ${error.message}`);
+                } finally {
+                    spinner.classList.add('hidden');
+                }
+            });
+            
+            form.addEventListener('submit', (e) => {
+                e.preventDefault(); // This is the critical line that was missing
+                generateBtn.classList.add('hidden');
+                progressContainer.classList.remove('hidden');
+                progressBarFill.style.width = '0%';
+                
+                const sseFormData = new FormData(form);
+
+                // This fetch call correctly starts the backend process
+                fetch('/generate', {
+                    method: 'POST',
+                    body: sseFormData,
+                }).then(response => {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    function push() {
+                        reader.read().then(({ done, value }) => {
+                            if (done) { return; }
+                            const chunk = decoder.decode(value, {stream: true});
+                            const lines = chunk.split('\n\n');
+                            lines.forEach(line => {
+                                if (line.startsWith('data:')) {
+                                    try {
+                                        const data = JSON.parse(line.substring(5));
+                                        if (data.status === 'complete') {
+                                            window.location.href = `/results/${data.task_id}`;
+                                        } else if (data.status === 'error') {
+                                            alert('An error occurred: ' + data.message);
+                                            window.location.reload();
+                                        } else if (data.status === 'training') {
+                                            const percent = (data.epoch / data.total_epochs) * 100;
+                                            progressBarFill.style.width = `${percent}%`;
+                                            progressStatus.textContent = `Epoch ${data.epoch}/${data.total_epochs} - Loss: ${data.loss.toFixed(4)}`;
+                                        } else {
+                                            progressStatus.textContent = data.status;
+                                        }
+                                    } catch (e) { console.error("SSE parse error:", line); }
+                                }
+                            });
+                            push();
+                        });
+                    }
+                    push();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

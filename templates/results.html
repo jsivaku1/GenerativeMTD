@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generation Complete</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container results-container">
+        <div class="header-flex">
+            <h1>Generation Complete! ✅</h1>
+        </div>
+        <p>Your synthetic dataset and performance analysis are ready.</p>
+        
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h2>Pipeline Summary</h2>
+                <ul class="pipeline-list">
+                    {% for title, description in pipeline_stages %}
+                        <li>
+                            <div class="pipeline-icon">✓</div>
+                            <div class="pipeline-text">
+                                <span class="pipeline-title">{{ title }}</span>
+                                <span class="pipeline-description">{{ description }}</span>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="summary-card">
+                <h2>Run Overview</h2>
+                <table class="summary-table">
+                    {% for key, value in input_options.items() %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <h2 class="section-header">Statistical Metric Comparison</h2>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3>Initial Metrics <span class="epoch-label">(Pseudo-Real Data)</span></h3>
+                <table class="summary-table">
+                    {% for key, value in initial_metrics.items() %}
+                    <tr>
+                        <td>{{ key | upper }}</td>
+                        <td><span class="metric-value">{{ value }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="summary-card">
+                <h3>Final Metrics <span class="epoch-label">(Final Synthetic Data)</span></h3>
+                <table class="summary-table">
+                    {% for key, value in final_metrics.items() %}
+                    <tr>
+                        <td>{{ key | upper }}</td>
+                        <td><span class="metric-value final">{{ value }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        {% if initial_ml_utility_scores or final_ml_utility_scores %}
+        <h2 class="section-header">Machine Learning Utility Comparison</h2>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3>Initial Utility <span class="epoch-label">(Pseudo-Real Data)</span></h3>
+                <table class="summary-table">
+                    {% for key, value in initial_ml_utility_scores.items() %}
+                    <tr>
+                        <td>{{ key.replace('_', ' ') }}</td>
+                        <td><span class="metric-value">{{ value }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="summary-card">
+                <h3>Final Utility <span class="epoch-label">(Final Synthetic Data)</span></h3>
+                <table class="summary-table">
+                    {% for key, value in final_ml_utility_scores.items() %}
+                    <tr>
+                        <td>{{ key.replace('_', ' ') }}</td>
+                        <td><span class="metric-value final">{{ value }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <h2 class="section-header plots-header">Training Metrics Over Time</h2>
+        <div class="chart-grid">
+            <div class="chart-card"><h2>Overall VAE Loss</h2><canvas id="lossChart"></canvas></div>
+            <div class="chart-card"><h2>Reconstruction Loss</h2><canvas id="reconLossChart"></canvas></div>
+            <div class="chart-card"><h2>KLD Loss</h2><canvas id="kldLossChart"></canvas></div>
+            <div class="chart-card"><h2>Pairwise Correlation Difference (PCD)</h2><canvas id="pcdChart"></canvas></div>
+            <div class="chart-card"><h2>Nearest Neighbor Distance Ratio (NNDR)</h2><canvas id="nndrChart"></canvas></div>
+            <div class="chart-card"><h2>Distance to Closest Record (DCR)</h2><canvas id="dcrChart"></canvas></div>
+        </div>
+
+        <a href="{{ url_for('download_file', filename=generated_filename) }}" class="btn download-btn">Download Synthetic Data (.csv)</a>
+        <br>
+        <a href="{{ url_for('index') }}" class="link-back">Generate another dataset</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const trainingLogs = {{ training_logs | tojson }};
+            if (!trainingLogs || trainingLogs.length === 0) {
+                console.error("No training logs found to generate charts.");
+                return;
+            }
+
+            const epochs = trainingLogs.map(log => `Epoch ${log.epoch}`);
+            
+            const chartData = {
+                loss: trainingLogs.map(log => log.loss),
+                recon_loss: trainingLogs.map(log => log.recon_loss),
+                kld_loss: trainingLogs.map(log => log.kld_loss),
+                pcd: trainingLogs.map(log => log.pcd),
+                nndr: trainingLogs.map(log => log.nndr),
+                dcr: trainingLogs.map(log => log.dcr)
+            };
+
+            function createLineChart(canvasId, label, data, color) {
+                const ctx = document.getElementById(canvasId);
+                if (!ctx) {
+                    console.error(`Canvas with ID ${canvasId} not found.`);
+                    return;
+                }
+                new Chart(ctx.getContext('2d'), {
+                    type: 'line', 
+                    data: { 
+                        labels: epochs, 
+                        datasets: [{ 
+                            label: label, 
+                            data: data, 
+                            borderColor: color, 
+                            backgroundColor: `${color}33`,
+                            fill: true, 
+                            tension: 0.3 
+                        }] 
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        scales: { 
+                            y: { beginAtZero: false, title: { display: true, text: 'Score' } }, 
+                            x: { title: { display: true, text: 'Epoch' } } 
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            createLineChart('lossChart', 'Overall Loss', chartData.loss, '#57A0D3');
+            createLineChart('reconLossChart', 'Reconstruction Loss', chartData.recon_loss, '#588157');
+            createLineChart('kldLossChart', 'KLD Loss', chartData.kld_loss, '#B983FF');
+            createLineChart('pcdChart', 'PCD', chartData.pcd, '#F59E0B');
+            createLineChart('nndrChart', 'NNDR', chartData.nndr, '#E56B6F');
+            createLineChart('dcrChart', 'DCR', chartData.dcr, '#00C49F');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{% extends "_layout.html" %}
+{% block title %}Error{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 style="color: #e74c3c;">Oops! Something went wrong. 😟</h1>
+    
+    <div class="results-box" style="background-color: #3f3232; border: 1px solid #7f3e3e; padding: 20px; border-radius: 8px;">
+        <h2>Error Details</h2>
+        <p style="color: #fca5a5;">{{ error_message }}</p>
+    </div>
+
+    <a href="{{ url_for('index') }}" class="link-back" style="margin-top:30px;">Return to the homepage</a>
+</div>
+{% endblock %}

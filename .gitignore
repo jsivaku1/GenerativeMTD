@@ -1,7 +1,18 @@
-.neptune/
+# Python
 __pycache__/
-*.log
-*.txt
-Code logs
-Results/*.csv
-Model/*.pt
+*.py[cod]
+*$py.class
+*.so
+.env
+
+# Flask
+instance/
+.webassets-cache
+/static/uploads/*
+!/static/uploads/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+
+static/uploads/
