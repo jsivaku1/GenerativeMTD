@@ -776,3 +776,10 @@ ValueError: 'inverse_transform' works only when 'SimpleImputer' is instantiated 
 2025-08-02 18:39:09,810 - INFO - [app.py:153] - Task dfbadb46-710a-4dc3-aace-271bd01d9f0c: Model training completed.
 2025-08-02 18:39:09,815 - INFO - [app.py:157] - Task dfbadb46-710a-4dc3-aace-271bd01d9f0c: Generated 1000 final synthetic samples.
 2025-08-02 18:39:10,129 - INFO - [app.py:192] - --- Task dfbadb46-710a-4dc3-aace-271bd01d9f0c completed in 5.67 seconds ---
+2025-08-02 18:49:14,892 - INFO - [app.py:89] - --- Starting Task 6ab7f877-f5f1-4b56-8498-b360c3012ade for file heartfail.csv ---
+2025-08-02 18:49:14,893 - INFO - [app.py:90] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: Diabetes, Task: regression
+2025-08-02 18:49:14,920 - INFO - [app.py:110] - Task 6ab7f877-f5f1-4b56-8498-b360c3012ade: Data pipeline fitted successfully.
+2025-08-02 18:49:16,759 - INFO - [app.py:132] - Task 6ab7f877-f5f1-4b56-8498-b360c3012ade: Generated 50 pseudo-real samples.
+2025-08-02 18:49:26,354 - INFO - [app.py:153] - Task 6ab7f877-f5f1-4b56-8498-b360c3012ade: Model training completed.
+2025-08-02 18:49:26,362 - INFO - [app.py:157] - Task 6ab7f877-f5f1-4b56-8498-b360c3012ade: Generated 1000 final synthetic samples.
+2025-08-02 18:49:26,926 - INFO - [app.py:192] - --- Task 6ab7f877-f5f1-4b56-8498-b360c3012ade completed in 12.03 seconds ---
