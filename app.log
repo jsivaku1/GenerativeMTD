@@ -1,0 +1,465 @@
+2025-08-02 06:28:39,350 - INFO - [_internal.py:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-08-02 06:28:39,350 - INFO - [_internal.py:97] - [33mPress CTRL+C to quit[0m
+2025-08-02 06:28:39,350 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:28:40,896 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:28:40,907 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:28:47,450 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:28:47] "GET / HTTP/1.1" 200 -
+2025-08-02 06:28:47,462 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:28:47] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:29:16,356 - INFO - [app.py:100] - Task 63e8d609-17dc-4f23-83fb-45ba19f26836: Loading data from bioconcentration.csv
+2025-08-02 06:29:16,367 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:29:16] "POST /generate HTTP/1.1" 200 -
+2025-08-02 06:29:18,552 - INFO - [app.py:118] - Task 63e8d609-17dc-4f23-83fb-45ba19f26836: Training complete. Sampling 1000 rows.
+2025-08-02 06:29:18,562 - ERROR - [app.py:172] - Task 63e8d609-17dc-4f23-83fb-45ba19f26836: An error occurred: Input contains NaN.
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 119, in training_stream
+    synthetic_df = model.sample(opts['n_samples'])
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 196, in sample
+    return self.transformer.inverse_transform(X_fake)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 63, in inverse_transform
+    inversed = col_meta['ohe'].inverse_transform(col_data)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/preprocessing/_encoders.py", line 1111, in inverse_transform
+    X = check_array(X, accept_sparse="csr")
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/validation.py", line 1107, in check_array
+    _assert_all_finite(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/validation.py", line 120, in _assert_all_finite
+    _assert_all_finite_element_wise(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/validation.py", line 169, in _assert_all_finite_element_wise
+    raise ValueError(msg_err)
+ValueError: Input contains NaN.
+
+2025-08-02 06:29:20,838 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:29:20] "GET / HTTP/1.1" 200 -
+2025-08-02 06:29:20,848 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:29:20] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:34:08,459 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py', reloading
+2025-08-02 06:34:08,883 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:34:10,865 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:34:10,878 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:34:11,040 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py', reloading
+2025-08-02 06:34:11,263 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:34:12,998 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:34:13,008 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:34:18,774 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:34:18] "GET / HTTP/1.1" 200 -
+2025-08-02 06:34:18,780 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:34:18] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-08-02 06:35:29,257 - INFO - [app.py:95] - --- Starting Task 23fffe8d-4d3b-4db3-a440-7c164742f001 for file bioconcentration.csv ---
+2025-08-02 06:35:29,258 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:35:29] "POST /generate HTTP/1.1" 200 -
+2025-08-02 06:35:29,258 - INFO - [app.py:99] - Task 23fffe8d-4d3b-4db3-a440-7c164742f001: Loading and cleaning data.
+2025-08-02 06:35:29,274 - INFO - [app.py:106] - Task 23fffe8d-4d3b-4db3-a440-7c164742f001: Generating pseudo-real data with kNN-MTD.
+2025-08-02 06:35:29,748 - INFO - [app.py:113] - Task 23fffe8d-4d3b-4db3-a440-7c164742f001: Starting VAE model training.
+2025-08-02 06:35:30,596 - INFO - [app.py:119] - Task 23fffe8d-4d3b-4db3-a440-7c164742f001: Generating final synthetic data.
+2025-08-02 06:35:30,598 - ERROR - [app.py:151] - Task 23fffe8d-4d3b-4db3-a440-7c164742f001: FAILED. An unexpected error occurred: 'ColumnTransformer' object has no attribute 'inverse_transform'
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 120, in training_stream
+    synthetic_df = knnmtd_model.sample(opts['n_samples'], pipeline)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 127, in sample
+    return pipeline.inverse_transform(X_fake_transformed)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 71, in inverse_transform
+    inversed_data = self.preprocessor.inverse_transform(data_transformed)
+AttributeError: 'ColumnTransformer' object has no attribute 'inverse_transform'
+
+2025-08-02 06:35:33,758 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:35:33] "GET / HTTP/1.1" 200 -
+2025-08-02 06:35:33,763 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:35:33] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:37:15,456 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:37:15] "GET / HTTP/1.1" 200 -
+2025-08-02 06:37:15,463 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:37:15] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-08-02 06:38:24,348 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py', reloading
+2025-08-02 06:38:24,881 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:38:27,188 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:38:27,202 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:39:03,116 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:39:03] "GET / HTTP/1.1" 200 -
+2025-08-02 06:39:03,127 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:39:03] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-08-02 06:39:15,148 - INFO - [app.py:95] - --- Starting Task 1a137dfd-c3ac-4b4f-971f-750b50063118 for file parkinsons.csv ---
+2025-08-02 06:39:15,149 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:39:15] "POST /generate HTTP/1.1" 200 -
+2025-08-02 06:39:15,149 - INFO - [app.py:99] - Task 1a137dfd-c3ac-4b4f-971f-750b50063118: Loading and cleaning data.
+2025-08-02 06:39:15,170 - INFO - [app.py:106] - Task 1a137dfd-c3ac-4b4f-971f-750b50063118: Generating pseudo-real data with kNN-MTD.
+2025-08-02 06:39:15,692 - INFO - [app.py:113] - Task 1a137dfd-c3ac-4b4f-971f-750b50063118: Starting VAE model training.
+2025-08-02 06:39:16,587 - INFO - [app.py:119] - Task 1a137dfd-c3ac-4b4f-971f-750b50063118: Generating final synthetic data.
+2025-08-02 06:39:16,595 - ERROR - [app.py:151] - Task 1a137dfd-c3ac-4b4f-971f-750b50063118: FAILED. An unexpected error occurred: This OneHotEncoder instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator.
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 120, in training_stream
+    synthetic_df = knnmtd_model.sample(opts['n_samples'], pipeline)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 127, in sample
+    return pipeline.inverse_transform(X_fake_transformed)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 88, in inverse_transform
+    inversed_cat = pd.DataFrame(cat_transformer.inverse_transform(cat_data), columns=self.categorical_cols)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/preprocessing/_encoders.py", line 1110, in inverse_transform
+    check_is_fitted(self)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/validation.py", line 1757, in check_is_fitted
+    raise NotFittedError(msg % {"name": type(estimator).__name__})
+sklearn.exceptions.NotFittedError: This OneHotEncoder instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator.
+
+2025-08-02 06:39:23,788 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:39:23] "GET / HTTP/1.1" 200 -
+2025-08-02 06:39:23,793 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:39:23] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:41:02,377 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py', reloading
+2025-08-02 06:41:02,781 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:41:05,132 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:41:05,147 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:41:17,486 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py', reloading
+2025-08-02 06:41:17,812 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:41:19,804 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:41:19,813 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:42:25,805 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:42:25] "GET / HTTP/1.1" 200 -
+2025-08-02 06:42:25,815 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:42:25] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:42:37,491 - INFO - [app.py:95] - --- Starting Task 33c031eb-3b1b-49bd-9355-37bcf00edc32 for file bioconcentration.csv ---
+2025-08-02 06:42:37,491 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:42:37] "POST /generate HTTP/1.1" 200 -
+2025-08-02 06:42:37,491 - INFO - [app.py:99] - Task 33c031eb-3b1b-49bd-9355-37bcf00edc32: Loading and cleaning data.
+2025-08-02 06:42:37,509 - INFO - [app.py:106] - Task 33c031eb-3b1b-49bd-9355-37bcf00edc32: Generating pseudo-real data with kNN-MTD.
+2025-08-02 06:42:38,020 - INFO - [app.py:113] - Task 33c031eb-3b1b-49bd-9355-37bcf00edc32: Starting VAE model training.
+2025-08-02 06:42:38,898 - INFO - [app.py:119] - Task 33c031eb-3b1b-49bd-9355-37bcf00edc32: Generating final synthetic data.
+2025-08-02 06:42:38,902 - ERROR - [app.py:151] - Task 33c031eb-3b1b-49bd-9355-37bcf00edc32: FAILED. An unexpected error occurred: 'ColumnTransformer' object has no attribute 'inverse_transform'
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 120, in training_stream
+    synthetic_df = knnmtd_model.sample(opts['n_samples'], pipeline)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 130, in sample
+    return pipeline.inverse_transform(X_fake_transformed)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 78, in inverse_transform
+    inversed_data = self.preprocessor.inverse_transform(data_transformed)
+AttributeError: 'ColumnTransformer' object has no attribute 'inverse_transform'
+
+2025-08-02 06:42:41,600 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:42:41] "GET / HTTP/1.1" 200 -
+2025-08-02 06:42:41,608 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:42:41] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:45:56,915 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py', reloading
+2025-08-02 06:45:57,227 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:45:59,207 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:45:59,217 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:46:00,528 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py', reloading
+2025-08-02 06:46:00,775 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:46:02,612 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:46:02,627 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:46:07,164 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:46:07] "GET / HTTP/1.1" 200 -
+2025-08-02 06:46:07,172 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:46:07] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:46:14,302 - INFO - [app.py:80] - --- Starting Task 595cba25-41ea-445b-9e61-8d6dbc35e051 for file bioconcentration.csv ---
+2025-08-02 06:46:14,302 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:46:14] "POST /generate HTTP/1.1" 200 -
+2025-08-02 06:46:14,303 - INFO - [app.py:84] - Task 595cba25-41ea-445b-9e61-8d6dbc35e051: Loading data and fitting pipeline.
+2025-08-02 06:46:14,307 - ERROR - [app.py:136] - Task 595cba25-41ea-445b-9e61-8d6dbc35e051: FAILED. An unexpected error occurred: 'DataPipeline' object has no attribute 'fit'
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 87, in training_stream
+    pipeline.fit(real_df) # Fit the pipeline on the original raw data
+AttributeError: 'DataPipeline' object has no attribute 'fit'
+
+2025-08-02 06:46:17,010 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:46:17] "GET / HTTP/1.1" 200 -
+2025-08-02 06:46:17,021 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:46:17] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:47:50,485 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py', reloading
+2025-08-02 06:47:50,755 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:47:53,397 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:47:53,412 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:48:20,158 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py', reloading
+2025-08-02 06:48:20,388 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:48:23,229 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:48:23,244 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:48:44,496 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py', reloading
+2025-08-02 06:48:44,712 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:48:46,818 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:48:46,827 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:48:46,920 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:48:46] "GET / HTTP/1.1" 200 -
+2025-08-02 06:48:46,930 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:48:46] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:48:52,822 - INFO - [app.py:80] - --- Starting Task d0d8b6b3-7e91-4eed-bb4c-c563f56c1ea5 for file cervical.csv ---
+2025-08-02 06:48:52,823 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:48:52] "POST /generate HTTP/1.1" 200 -
+2025-08-02 06:48:52,823 - INFO - [app.py:84] - Task d0d8b6b3-7e91-4eed-bb4c-c563f56c1ea5: Loading data and fitting pipeline.
+2025-08-02 06:48:52,831 - INFO - [app.py:91] - Task d0d8b6b3-7e91-4eed-bb4c-c563f56c1ea5: Generating pseudo-real data with kNN-MTD.
+2025-08-02 06:48:52,835 - ERROR - [app.py:136] - Task d0d8b6b3-7e91-4eed-bb4c-c563f56c1ea5: FAILED. An unexpected error occurred: 'ColumnTransformer' object has no attribute 'inverse_transform'
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 93, in training_stream
+    pseudo_real_df = model.generate_pseudo_real_data(pipeline)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 55, in generate_pseudo_real_data
+    imputed_df = pipeline.inverse_transform(imputed_transformed)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 73, in inverse_transform
+    inversed_data = self.preprocessor.inverse_transform(data_transformed)
+AttributeError: 'ColumnTransformer' object has no attribute 'inverse_transform'
+
+2025-08-02 06:48:56,020 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:48:56] "GET / HTTP/1.1" 200 -
+2025-08-02 06:48:56,025 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:48:56] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:50:44,609 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py', reloading
+2025-08-02 06:50:44,991 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:50:47,329 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:50:47,348 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:51:06,536 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py', reloading
+2025-08-02 06:51:06,767 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:51:08,517 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:51:08,528 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:51:14,482 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:51:14] "GET / HTTP/1.1" 200 -
+2025-08-02 06:51:14,498 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:51:14] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:51:22,884 - INFO - [app.py:80] - --- Starting Task e64bbd1c-50a3-4df9-b75d-fa788a58f9c5 for file cervical.csv ---
+2025-08-02 06:51:22,884 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:51:22] "POST /generate HTTP/1.1" 200 -
+2025-08-02 06:51:22,885 - INFO - [app.py:84] - Task e64bbd1c-50a3-4df9-b75d-fa788a58f9c5: Loading data and fitting pipeline.
+2025-08-02 06:51:22,901 - INFO - [app.py:91] - Task e64bbd1c-50a3-4df9-b75d-fa788a58f9c5: Generating pseudo-real data with kNN-MTD.
+2025-08-02 06:51:22,909 - ERROR - [app.py:136] - Task e64bbd1c-50a3-4df9-b75d-fa788a58f9c5: FAILED. An unexpected error occurred: 'ColumnTransformer' object has no attribute 'inverse_transform'
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 93, in training_stream
+    pseudo_real_df = model.generate_pseudo_real_data(pipeline)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 55, in generate_pseudo_real_data
+    imputed_df = pipeline.inverse_transform(imputed_transformed)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 75, in inverse_transform
+    inversed_data = self.preprocessor.inverse_transform(data_transformed)
+AttributeError: 'ColumnTransformer' object has no attribute 'inverse_transform'
+
+2025-08-02 06:51:28,551 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:51:28] "GET / HTTP/1.1" 200 -
+2025-08-02 06:51:28,556 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:51:28] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:52:36,612 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py', reloading
+2025-08-02 06:52:36,953 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:52:39,010 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:52:39,021 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:52:47,534 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:52:47] "GET / HTTP/1.1" 200 -
+2025-08-02 06:52:47,546 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:52:47] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:52:56,686 - INFO - [app.py:80] - --- Starting Task c1f1ba8c-b8c1-43fa-90b7-23dfe94d9735 for file cryotherapy.csv ---
+2025-08-02 06:52:56,687 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:52:56] "POST /generate HTTP/1.1" 200 -
+2025-08-02 06:52:56,687 - INFO - [app.py:84] - Task c1f1ba8c-b8c1-43fa-90b7-23dfe94d9735: Loading data and fitting pipeline.
+2025-08-02 06:52:56,700 - INFO - [app.py:91] - Task c1f1ba8c-b8c1-43fa-90b7-23dfe94d9735: Generating pseudo-real data with kNN-MTD.
+2025-08-02 06:52:56,711 - ERROR - [app.py:136] - Task c1f1ba8c-b8c1-43fa-90b7-23dfe94d9735: FAILED. An unexpected error occurred: This OneHotEncoder instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator.
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 93, in training_stream
+    pseudo_real_df = model.generate_pseudo_real_data(pipeline)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 55, in generate_pseudo_real_data
+    imputed_df = pipeline.inverse_transform(imputed_transformed)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 91, in inverse_transform
+    inversed_cat = pd.DataFrame(cat_onehot.inverse_transform(cat_data), columns=self.categorical_cols)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/preprocessing/_encoders.py", line 1110, in inverse_transform
+    check_is_fitted(self)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/validation.py", line 1757, in check_is_fitted
+    raise NotFittedError(msg % {"name": type(estimator).__name__})
+sklearn.exceptions.NotFittedError: This OneHotEncoder instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator.
+
+2025-08-02 06:55:21,652 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py', reloading
+2025-08-02 06:55:21,887 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:55:24,171 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:55:24,181 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 06:55:24,274 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:55:24] "GET / HTTP/1.1" 200 -
+2025-08-02 06:55:24,287 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:55:24] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:55:29,478 - INFO - [app.py:80] - --- Starting Task b11d134f-00b3-4884-86b5-11e8a4cde883 for file cervical.csv ---
+2025-08-02 06:55:29,479 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:55:29] "POST /generate HTTP/1.1" 200 -
+2025-08-02 06:55:29,479 - INFO - [app.py:84] - Task b11d134f-00b3-4884-86b5-11e8a4cde883: Loading data and fitting pipeline.
+2025-08-02 06:55:29,484 - INFO - [app.py:91] - Task b11d134f-00b3-4884-86b5-11e8a4cde883: Generating pseudo-real data with kNN-MTD.
+2025-08-02 06:55:29,600 - INFO - [app.py:97] - Task b11d134f-00b3-4884-86b5-11e8a4cde883: Starting VAE model training.
+2025-08-02 06:55:30,513 - INFO - [app.py:102] - Task b11d134f-00b3-4884-86b5-11e8a4cde883: Generating final synthetic data.
+2025-08-02 06:55:30,518 - INFO - [app.py:107] - Task b11d134f-00b3-4884-86b5-11e8a4cde883: Calculating final metrics.
+2025-08-02 06:55:31,047 - INFO - [app.py:118] - --- Task b11d134f-00b3-4884-86b5-11e8a4cde883 completed in 1.57 seconds ---
+2025-08-02 06:55:31,060 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:55:31] "GET /results/b11d134f-00b3-4884-86b5-11e8a4cde883 HTTP/1.1" 200 -
+2025-08-02 06:55:31,081 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 06:55:31] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 06:59:25,836 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py', reloading
+2025-08-02 06:59:26,286 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 06:59:28,503 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 06:59:28,516 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:01:54,523 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:01:54] "GET /results/b11d134f-00b3-4884-86b5-11e8a4cde883 HTTP/1.1" 200 -
+2025-08-02 07:01:54,538 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:01:54] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:02:14,781 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:02:14] "GET / HTTP/1.1" 200 -
+2025-08-02 07:02:14,787 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:02:14] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:02:34,290 - INFO - [app.py:80] - --- Starting Task 6f76deb1-b5fd-47d5-899c-60750fad12c8 for file breast.csv ---
+2025-08-02 07:02:34,291 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:02:34] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:02:34,291 - INFO - [app.py:84] - Task 6f76deb1-b5fd-47d5-899c-60750fad12c8: Loading data and fitting pipeline.
+2025-08-02 07:02:34,306 - INFO - [app.py:91] - Task 6f76deb1-b5fd-47d5-899c-60750fad12c8: Generating pseudo-real data with kNN-MTD.
+2025-08-02 07:02:34,920 - INFO - [app.py:97] - Task 6f76deb1-b5fd-47d5-899c-60750fad12c8: Starting VAE model training.
+2025-08-02 07:02:35,889 - INFO - [app.py:102] - Task 6f76deb1-b5fd-47d5-899c-60750fad12c8: Generating final synthetic data.
+2025-08-02 07:02:35,895 - INFO - [app.py:107] - Task 6f76deb1-b5fd-47d5-899c-60750fad12c8: Calculating final metrics.
+2025-08-02 07:02:36,231 - INFO - [app.py:118] - --- Task 6f76deb1-b5fd-47d5-899c-60750fad12c8 completed in 1.94 seconds ---
+2025-08-02 07:02:36,243 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:02:36] "GET /results/6f76deb1-b5fd-47d5-899c-60750fad12c8 HTTP/1.1" 200 -
+2025-08-02 07:02:36,269 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:02:36] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:04:27,829 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py', reloading
+2025-08-02 07:04:28,218 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:05:53,332 - INFO - [_internal.py:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-08-02 07:05:53,332 - INFO - [_internal.py:97] - [33mPress CTRL+C to quit[0m
+2025-08-02 07:05:53,333 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:05:55,391 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:05:55,407 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:05:57,467 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:05:57] "GET / HTTP/1.1" 200 -
+2025-08-02 07:05:57,478 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:05:57] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:06:04,986 - INFO - [app.py:80] - --- Starting Task 6ecec9d7-9e8c-4f48-859a-9ee4f51cf8ce for file breast.csv ---
+2025-08-02 07:06:04,987 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:06:04] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:06:04,987 - INFO - [app.py:83] - Task 6ecec9d7-9e8c-4f48-859a-9ee4f51cf8ce: Loading data and fitting pipeline.
+2025-08-02 07:06:05,004 - INFO - [app.py:89] - Task 6ecec9d7-9e8c-4f48-859a-9ee4f51cf8ce: Generating pseudo-real data with kNN-MTD.
+2025-08-02 07:06:05,588 - INFO - [app.py:94] - Task 6ecec9d7-9e8c-4f48-859a-9ee4f51cf8ce: Starting VAE model training.
+2025-08-02 07:06:06,490 - INFO - [app.py:98] - Task 6ecec9d7-9e8c-4f48-859a-9ee4f51cf8ce: Generating final synthetic data.
+2025-08-02 07:06:06,495 - INFO - [app.py:102] - Task 6ecec9d7-9e8c-4f48-859a-9ee4f51cf8ce: Calculating final metrics.
+2025-08-02 07:06:06,705 - INFO - [app.py:112] - Task 6ecec9d7-9e8c-4f48-859a-9ee4f51cf8ce: Found target column '1' for ML utility tests.
+2025-08-02 07:06:06,870 - INFO - [app.py:123] - --- Task 6ecec9d7-9e8c-4f48-859a-9ee4f51cf8ce completed in 1.88 seconds ---
+2025-08-02 07:06:06,883 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:06:06] "GET /results/6ecec9d7-9e8c-4f48-859a-9ee4f51cf8ce HTTP/1.1" 200 -
+2025-08-02 07:06:06,902 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:06:06] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:08:28,028 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py', reloading
+2025-08-02 07:08:28,545 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:08:31,216 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:08:31,233 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:09:37,655 - INFO - [app.py:80] - --- Starting Task 9b9a943c-7dd1-4df0-8c2b-0807fa14a709 for file cervical.csv ---
+2025-08-02 07:09:37,655 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:09:37] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:09:37,655 - INFO - [app.py:83] - Task 9b9a943c-7dd1-4df0-8c2b-0807fa14a709: Loading data and fitting pipeline.
+2025-08-02 07:09:37,662 - INFO - [app.py:89] - Task 9b9a943c-7dd1-4df0-8c2b-0807fa14a709: Generating pseudo-real data with kNN-MTD.
+2025-08-02 07:09:37,763 - INFO - [app.py:94] - Task 9b9a943c-7dd1-4df0-8c2b-0807fa14a709: Starting VAE model training.
+2025-08-02 07:09:55,580 - INFO - [app.py:98] - Task 9b9a943c-7dd1-4df0-8c2b-0807fa14a709: Generating final synthetic data.
+2025-08-02 07:09:55,585 - INFO - [app.py:102] - Task 9b9a943c-7dd1-4df0-8c2b-0807fa14a709: Calculating final metrics.
+2025-08-02 07:09:55,999 - INFO - [app.py:112] - Task 9b9a943c-7dd1-4df0-8c2b-0807fa14a709: Found target column 'behavior_sexualRisk' for ML utility tests.
+2025-08-02 07:09:56,127 - INFO - [app.py:123] - --- Task 9b9a943c-7dd1-4df0-8c2b-0807fa14a709 completed in 18.47 seconds ---
+2025-08-02 07:09:56,141 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:09:56] "GET /results/9b9a943c-7dd1-4df0-8c2b-0807fa14a709 HTTP/1.1" 200 -
+2025-08-02 07:09:56,166 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:09:56] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:13:23,764 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py', reloading
+2025-08-02 07:13:24,282 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:16:25,253 - INFO - [_internal.py:97] - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-08-02 07:16:25,255 - INFO - [_internal.py:97] - [33mPress CTRL+C to quit[0m
+2025-08-02 07:16:25,255 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:16:27,066 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:16:27,078 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:16:32,356 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:16:32] "[33mPOST /upload HTTP/1.1[0m" 404 -
+2025-08-02 07:16:37,243 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:16:37] "GET / HTTP/1.1" 200 -
+2025-08-02 07:16:37,250 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:16:37] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:16:41,735 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:16:41] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:16:49,480 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:16:49] "GET /?dataset=cryotherapy.csv&class_col=Result_of_Treatment&n_samples=1000&epochs=100&embedding_dim=128 HTTP/1.1" 200 -
+2025-08-02 07:16:49,491 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:16:49] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:17:08,255 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:17:08] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:17:09,052 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:17:09] "GET /?dataset=immunotherapy.csv&class_col=none&n_samples=1000&epochs=100&embedding_dim=128 HTTP/1.1" 200 -
+2025-08-02 07:17:09,069 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:17:09] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:17:19,824 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:17:19] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:17:24,145 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:17:24] "GET /?dataset=immunotherapy.csv&class_col=Result_of_Treatment&n_samples=1000&epochs=100&embedding_dim=128 HTTP/1.1" 200 -
+2025-08-02 07:17:24,159 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:17:24] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:18:07,337 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:18:07] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:18:08,623 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:18:08] "GET /?dataset=fertility.csv&class_col=none&n_samples=1000&epochs=100&embedding_dim=128 HTTP/1.1" 200 -
+2025-08-02 07:18:08,640 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:18:08] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:18:11,470 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:18:11] "GET /?dataset=fertility.csv&class_col=none&n_samples=1000&epochs=100&embedding_dim=128 HTTP/1.1" 200 -
+2025-08-02 07:18:11,475 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:18:11] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:19:33,456 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:19:33] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:19:35,904 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:19:35] "GET /?dataset=cryotherapy.csv&class_col=Result_of_Treatment&n_samples=1000&epochs=100&embedding_dim=128 HTTP/1.1" 200 -
+2025-08-02 07:19:35,916 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:19:35] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:20:40,669 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:20:40] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:20:44,049 - INFO - [app.py:101] - --- Starting Task 3accef21-4fdf-409e-8db9-3ba2ced637b7 for file fertility.csv ---
+2025-08-02 07:20:44,050 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:20:44] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:20:44,172 - ERROR - [app.py:194] - Task 3accef21-4fdf-409e-8db9-3ba2ced637b7: FAILED. An unexpected error occurred: Model has not been trained. Call train_vae() first.
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 125, in training_stream
+    synth_df_test = model_test.sample(50, pipeline) # Small sample for testing
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 125, in sample
+    raise RuntimeError("Model has not been trained. Call train_vae() first.")
+RuntimeError: Model has not been trained. Call train_vae() first.
+
+2025-08-02 07:21:33,593 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py', reloading
+2025-08-02 07:21:33,887 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:21:36,297 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:21:36,308 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:21:40,035 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:21:40] "GET /?dataset=cryotherapy.csv&class_col=Result_of_Treatment&n_samples=1000&epochs=100&embedding_dim=128 HTTP/1.1" 200 -
+2025-08-02 07:21:40,045 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:21:40] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:21:43,556 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:21:43] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:21:46,513 - INFO - [app.py:101] - --- Starting Task c9e4b666-949e-4723-ba4c-ef66bf2cfba5 for file fertility.csv ---
+2025-08-02 07:21:46,513 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:21:46] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:21:46,614 - ERROR - [app.py:192] - Task c9e4b666-949e-4723-ba4c-ef66bf2cfba5: FAILED. An unexpected error occurred: Model has not been trained. Call train_vae() first.
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 124, in training_stream
+    synth_df_test = model_test.sample(50, pipeline)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 125, in sample
+    raise RuntimeError("Model has not been trained. Call train_vae() first.")
+RuntimeError: Model has not been trained. Call train_vae() first.
+
+2025-08-02 07:22:41,509 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py', reloading
+2025-08-02 07:22:41,835 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:22:44,296 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:22:44,307 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:22:46,243 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:22:46] "GET /?dataset=cryotherapy.csv&class_col=Result_of_Treatment&n_samples=1000&epochs=100&embedding_dim=128 HTTP/1.1" 200 -
+2025-08-02 07:22:46,254 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:22:46] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:22:49,320 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:22:49] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:22:54,153 - INFO - [app.py:101] - --- Starting Task e40abf96-9112-48ad-9f2e-260d08f516ec for file cryotherapy.csv ---
+2025-08-02 07:22:54,154 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:22:54] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:22:57,757 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:22:57] "GET /results/e40abf96-9112-48ad-9f2e-260d08f516ec HTTP/1.1" 200 -
+2025-08-02 07:22:57,771 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:22:57] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:27:26,944 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py', reloading
+2025-08-02 07:27:27,350 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:27:29,859 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:27:29,881 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:28:19,687 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py', reloading
+2025-08-02 07:28:19,957 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:28:22,602 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:28:22,628 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:28:25,982 - INFO - [app.py:101] - --- Starting Task 82d875ed-71d9-451e-8880-9773cc348e10 for file cryotherapy.csv ---
+2025-08-02 07:28:25,983 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:28:25] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:28:26,399 - ERROR - [app.py:198] - Task 82d875ed-71d9-451e-8880-9773cc348e10: FAILED. An unexpected error occurred: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 145, in training_stream
+    acc, f1 = predictive_model(real_df_imputed, pseudo_real_df, target_col, mode=mode)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py", line 89, in predictive_model
+    model.fit(X_train, y_train)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 419, in fit
+    y, expanded_class_weight = self._validate_y_class_weight(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 831, in _validate_y_class_weight
+    check_classification_targets(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/multiclass.py", line 222, in check_classification_targets
+    raise ValueError(
+ValueError: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+
+2025-08-02 07:28:31,220 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:28:31] "GET /?dataset=cryotherapy.csv&class_col=Result_of_Treatment&n_samples=1000&epochs=100&embedding_dim=128 HTTP/1.1" 200 -
+2025-08-02 07:28:31,230 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:28:31] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:28:35,373 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:28:35] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:28:38,085 - INFO - [app.py:101] - --- Starting Task 366e51e6-9f71-4ef1-964f-4f309b3a3a98 for file cryotherapy.csv ---
+2025-08-02 07:28:38,086 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:28:38] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:28:38,446 - ERROR - [app.py:198] - Task 366e51e6-9f71-4ef1-964f-4f309b3a3a98: FAILED. An unexpected error occurred: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 145, in training_stream
+    acc, f1 = predictive_model(real_df_imputed, pseudo_real_df, target_col, mode=mode)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py", line 89, in predictive_model
+    model.fit(X_train, y_train)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 419, in fit
+    y, expanded_class_weight = self._validate_y_class_weight(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 831, in _validate_y_class_weight
+    check_classification_targets(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/multiclass.py", line 222, in check_classification_targets
+    raise ValueError(
+ValueError: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+
+2025-08-02 07:29:00,441 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:29:00] "GET /?dataset=cryotherapy.csv&class_col=Result_of_Treatment&n_samples=1000&epochs=100&embedding_dim=128 HTTP/1.1" 200 -
+2025-08-02 07:29:00,449 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:29:00] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:29:03,213 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:29:03] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:29:08,570 - INFO - [app.py:101] - --- Starting Task ef1a0b05-599d-4bcf-a763-79bfd8a273bd for file heartfail.csv ---
+2025-08-02 07:29:08,571 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:29:08] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:29:18,293 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:29:18] "GET /results/ef1a0b05-599d-4bcf-a763-79bfd8a273bd HTTP/1.1" 200 -
+2025-08-02 07:29:18,321 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:29:18] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:30:07,067 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py', reloading
+2025-08-02 07:30:07,454 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:30:09,768 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:30:09,779 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:31:36,877 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:31:36] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:31:40,956 - INFO - [app.py:101] - --- Starting Task 78fbffe7-e384-4800-87ea-227ca3698b22 for file immunotherapy.csv ---
+2025-08-02 07:31:40,956 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:31:40] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:31:41,373 - ERROR - [app.py:198] - Task 78fbffe7-e384-4800-87ea-227ca3698b22: FAILED. An unexpected error occurred: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+Traceback:
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 145, in training_stream
+    acc, f1 = predictive_model(real_df_imputed, pseudo_real_df, target_col, mode=mode)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py", line 89, in predictive_model
+    model.fit(X_train, y_train)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 419, in fit
+    y, expanded_class_weight = self._validate_y_class_weight(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 831, in _validate_y_class_weight
+    check_classification_targets(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/multiclass.py", line 222, in check_classification_targets
+    raise ValueError(
+ValueError: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+
+2025-08-02 07:31:43,211 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:31:43] "GET /?dataset=cryotherapy.csv&class_col=Result_of_Treatment&n_samples=1000&epochs=100&embedding_dim=128 HTTP/1.1" 200 -
+2025-08-02 07:31:43,224 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:31:43] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:31:46,290 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:31:46] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:31:56,980 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:31:56] "POST /info HTTP/1.1" 200 -
+2025-08-02 07:32:03,319 - INFO - [app.py:101] - --- Starting Task f5ef9d71-5f35-4849-9567-ec3e5645a609 for file heartfail.csv ---
+2025-08-02 07:32:03,319 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:32:03] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:32:12,942 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:32:12] "GET /results/f5ef9d71-5f35-4849-9567-ec3e5645a609 HTTP/1.1" 200 -
+2025-08-02 07:32:12,961 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:32:12] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:33:01,641 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py', reloading
+2025-08-02 07:33:02,046 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:33:04,370 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:33:04,386 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:34:23,634 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py', reloading
+2025-08-02 07:34:23,861 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:34:26,551 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:34:26,562 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:35:28,966 - INFO - [app.py:101] - --- Starting Task ae5c3ddf-6e91-4518-a164-981d32b72da4 for file heartfail.csv ---
+2025-08-02 07:35:28,968 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:35:28] "POST /generate HTTP/1.1" 200 -
+2025-08-02 07:35:40,004 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:35:40] "GET /results/ae5c3ddf-6e91-4518-a164-981d32b72da4 HTTP/1.1" 200 -
+2025-08-02 07:35:40,023 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:35:40] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
