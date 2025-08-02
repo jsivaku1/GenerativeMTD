@@ -463,3 +463,316 @@ ValueError: Unknown label type: continuous. Maybe you are trying to fit a classi
 2025-08-02 07:35:28,968 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:35:28] "POST /generate HTTP/1.1" 200 -
 2025-08-02 07:35:40,004 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:35:40] "GET /results/ae5c3ddf-6e91-4518-a164-981d32b72da4 HTTP/1.1" 200 -
 2025-08-02 07:35:40,023 - INFO - [_internal.py:97] - 127.0.0.1 - - [02/Aug/2025 07:35:40] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-08-02 07:40:48,611 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py', reloading
+2025-08-02 07:40:49,099 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:40:51,968 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:40:51,995 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:41:31,378 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py', reloading
+2025-08-02 07:41:31,744 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:41:34,141 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:41:34,154 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:47:36,039 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py', reloading
+2025-08-02 07:47:36,309 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:47:39,046 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:47:39,056 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:47:44,728 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py', reloading
+2025-08-02 07:47:44,946 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:47:47,014 - WARNING - [_internal.py:97] -  * Debugger is active!
+2025-08-02 07:47:47,026 - INFO - [_internal.py:97] -  * Debugger PIN: 142-116-905
+2025-08-02 07:47:52,704 - INFO - [_internal.py:97] -  * Detected change in '/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py', reloading
+2025-08-02 07:47:53,037 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:51:41,818 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:51:51,291 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 07:52:00,952 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 10:37:25,509 - INFO - [_internal.py:97] -  * Restarting with stat
+2025-08-02 10:43:43,096 - INFO - [_internal.py:97] -  * Restarting with stat
+Task 1cd25da3-c607-4d46-9d4d-73b257992064: FAILED. Error: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 62, in training_stream
+    real_df_imputed = pipeline.inverse_transform(pipeline.transform(real_df))
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 44, in inverse_transform
+    dfs.append(pd.DataFrame(num_pipe.inverse_transform(num_data), columns=self.numerical_cols))
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/pipeline.py", line 1148, in inverse_transform
+    X = transform.inverse_transform(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/impute/_base.py", line 709, in inverse_transform
+    raise ValueError(
+ValueError: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+
+Task 8fa52c55-ce4e-4403-9fd0-4447caf98a5e: FAILED. Error: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 62, in training_stream
+    real_df_imputed = pipeline.inverse_transform(pipeline.transform(real_df))
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 44, in inverse_transform
+    dfs.append(pd.DataFrame(num_pipe.inverse_transform(num_data), columns=self.numerical_cols))
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/pipeline.py", line 1148, in inverse_transform
+    X = transform.inverse_transform(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/impute/_base.py", line 709, in inverse_transform
+    raise ValueError(
+ValueError: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+
+Task 737cc3b7-d3cc-4d30-b0d1-58ef9f63ec65: FAILED. Error: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 62, in training_stream
+    real_df_imputed = pipeline.inverse_transform(pipeline.transform(real_df))
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 44, in inverse_transform
+    dfs.append(pd.DataFrame(num_pipe.inverse_transform(num_data), columns=self.numerical_cols))
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/pipeline.py", line 1148, in inverse_transform
+    X = transform.inverse_transform(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/impute/_base.py", line 709, in inverse_transform
+    raise ValueError(
+ValueError: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+
+Task 186b9b77-a31a-4134-a3d6-b122090d2b1f: FAILED. Error: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 62, in training_stream
+    real_df_imputed = pipeline.inverse_transform(pipeline.transform(real_df))
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 44, in inverse_transform
+    dfs.append(pd.DataFrame(num_pipe.inverse_transform(num_data), columns=self.numerical_cols))
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/pipeline.py", line 1148, in inverse_transform
+    X = transform.inverse_transform(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/impute/_base.py", line 709, in inverse_transform
+    raise ValueError(
+ValueError: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+
+Task b16ce96c-ff60-4595-b389-a3afc2c1825b: FAILED. Error: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 61, in training_stream
+    real_df_imputed = pipeline.inverse_transform(pipeline.transform(real_df))
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 44, in inverse_transform
+    dfs.append(pd.DataFrame(num_pipe.inverse_transform(num_data), columns=self.numerical_cols))
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/pipeline.py", line 1148, in inverse_transform
+    X = transform.inverse_transform(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/impute/_base.py", line 709, in inverse_transform
+    raise ValueError(
+ValueError: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+
+Task 1e8eef9d-dedd-4b8a-a640-afd810a8868f: FAILED. Error: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 61, in training_stream
+    real_df_imputed = pipeline.inverse_transform(pipeline.transform(real_df))
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 44, in inverse_transform
+    dfs.append(pd.DataFrame(num_pipe.inverse_transform(num_data), columns=self.numerical_cols))
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/pipeline.py", line 1148, in inverse_transform
+    X = transform.inverse_transform(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/impute/_base.py", line 709, in inverse_transform
+    raise ValueError(
+ValueError: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+
+Task 7343ec70-8831-421e-8763-6d33ee09dffb: FAILED. Error: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 61, in training_stream
+    real_df_imputed = pipeline.inverse_transform(pipeline.transform(real_df))
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 44, in inverse_transform
+    dfs.append(pd.DataFrame(num_pipe.inverse_transform(num_data), columns=self.numerical_cols))
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/pipeline.py", line 1148, in inverse_transform
+    X = transform.inverse_transform(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/impute/_base.py", line 709, in inverse_transform
+    raise ValueError(
+ValueError: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+
+Task 59fa15bb-7826-4ae8-9ac9-f5e6efbe23f1: FAILED. Error: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 85, in training_stream
+    acc, _ = predictive_model(real_df_imputed, pseudo_real_df, class_col, mode)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py", line 105, in predictive_model
+    model.fit(X_train, y_train)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 419, in fit
+    y, expanded_class_weight = self._validate_y_class_weight(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 831, in _validate_y_class_weight
+    check_classification_targets(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/multiclass.py", line 222, in check_classification_targets
+    raise ValueError(
+ValueError: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+
+Task 461a1e34-bbf2-4935-b952-fab3ab0779e6: FAILED. Error: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 85, in training_stream
+    acc, _ = predictive_model(real_df_imputed, pseudo_real_df, class_col, mode)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py", line 105, in predictive_model
+    model.fit(X_train, y_train)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 419, in fit
+    y, expanded_class_weight = self._validate_y_class_weight(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 831, in _validate_y_class_weight
+    check_classification_targets(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/multiclass.py", line 222, in check_classification_targets
+    raise ValueError(
+ValueError: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+
+Task d73446a9-0b97-42ae-b65b-69e4bc5f3bf1: FAILED. Error: could not convert string to float: 'mid'
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 71, in training_stream
+    pseudo_df_test = model_test.generate_pseudo_real_data(pipeline)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 37, in generate_pseudo_real_data
+    pseudo_real_df = next(knnmtd.fit_generate(imputed_df), pd.DataFrame())
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/kNNMTD.py", line 103, in fit_generate
+    nn_models['all'] = NearestNeighbors(n_neighbors=self.k).fit(full_real_df.values)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/neighbors/_unsupervised.py", line 179, in fit
+    return self._fit(X)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/neighbors/_base.py", line 526, in _fit
+    X = validate_data(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/validation.py", line 2944, in validate_data
+    out = check_array(X, input_name="X", **check_params)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/validation.py", line 1055, in check_array
+    array = _asarray_with_order(array, order=order, dtype=dtype, xp=xp)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/_array_api.py", line 839, in _asarray_with_order
+    array = numpy.asarray(array, order=order, dtype=dtype)
+ValueError: could not convert string to float: 'mid'
+
+Task b29c1f06-be1b-4d36-8927-538b27706ea4: FAILED. Error: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 85, in training_stream
+    acc, _ = predictive_model(real_df_imputed, pseudo_real_df, class_col, mode)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py", line 105, in predictive_model
+    model.fit(X_train, y_train)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 419, in fit
+    y, expanded_class_weight = self._validate_y_class_weight(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 831, in _validate_y_class_weight
+    check_classification_targets(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/multiclass.py", line 222, in check_classification_targets
+    raise ValueError(
+ValueError: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+
+Task 4b2aaabb-ca7e-4446-986b-80dfd495a3e0: FAILED. Error: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 85, in training_stream
+    acc, _ = predictive_model(real_df_imputed, pseudo_real_df, class_col, mode)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py", line 105, in predictive_model
+    model.fit(X_train, y_train)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 419, in fit
+    y, expanded_class_weight = self._validate_y_class_weight(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 831, in _validate_y_class_weight
+    check_classification_targets(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/multiclass.py", line 222, in check_classification_targets
+    raise ValueError(
+ValueError: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+
+Task cdcea1b7-91df-4f32-9c18-5579770e2537: FAILED. Error: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 85, in training_stream
+    acc, _ = predictive_model(real_df_imputed, pseudo_real_df, class_col, mode)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py", line 105, in predictive_model
+    model.fit(X_train, y_train)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 419, in fit
+    y, expanded_class_weight = self._validate_y_class_weight(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 831, in _validate_y_class_weight
+    check_classification_targets(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/multiclass.py", line 222, in check_classification_targets
+    raise ValueError(
+ValueError: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+
+Task 17074ca6-1cb3-4a7c-9fcd-14248c6733be: FAILED. Error: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 85, in training_stream
+    acc, _ = predictive_model(real_df_imputed, pseudo_real_df, class_col, mode)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/mtd_utils.py", line 105, in predictive_model
+    model.fit(X_train, y_train)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 419, in fit
+    y, expanded_class_weight = self._validate_y_class_weight(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/ensemble/_forest.py", line 831, in _validate_y_class_weight
+    check_classification_targets(y)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/multiclass.py", line 222, in check_classification_targets
+    raise ValueError(
+ValueError: Unknown label type: continuous. Maybe you are trying to fit a classifier, which expects discrete classes on a regression target with continuous values.
+
+Task e08d0811-ded4-4048-af17-688bec8b40be: FAILED. Error: could not convert string to float: 'mid'
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 68, in training_stream
+    pseudo_df_test = model_test.generate_pseudo_real_data(pipeline)
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/GenerativeMTD.py", line 37, in generate_pseudo_real_data
+    pseudo_real_df = next(knnmtd.fit_generate(imputed_df), pd.DataFrame())
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/kNNMTD.py", line 103, in fit_generate
+    nn_models['all'] = NearestNeighbors(n_neighbors=self.k).fit(full_real_df.values)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/neighbors/_unsupervised.py", line 179, in fit
+    return self._fit(X)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/neighbors/_base.py", line 526, in _fit
+    X = validate_data(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/validation.py", line 2944, in validate_data
+    out = check_array(X, input_name="X", **check_params)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/validation.py", line 1055, in check_array
+    array = _asarray_with_order(array, order=order, dtype=dtype, xp=xp)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/utils/_array_api.py", line 839, in _asarray_with_order
+    array = numpy.asarray(array, order=order, dtype=dtype)
+ValueError: could not convert string to float: 'mid'
+
+2025-08-02 15:40:44,562 - INFO - [app.py:100] - --- Starting Task e435bff0-0453-45b2-af56-de3ea7939390 for file bioconcentration.csv ---
+2025-08-02 15:40:44,565 - INFO - [app.py:101] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 256, 'embedding_dim': 128, 'lr': 0.0001, 'seed': 42}, Target: logBCF, Task: regression
+2025-08-02 15:40:44,589 - ERROR - [app.py:201] - Task e435bff0-0453-45b2-af56-de3ea7939390: FAILED. An unexpected error occurred: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 132, in training_stream
+    real_df_imputed = pipeline.inverse_transform(pipeline.transform(real_df))
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 88, in inverse_transform
+    inversed_num = pd.DataFrame(num_pipeline.inverse_transform(num_data), columns=self.numerical_cols)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/pipeline.py", line 1148, in inverse_transform
+    X = transform.inverse_transform(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/impute/_base.py", line 709, in inverse_transform
+    raise ValueError(
+ValueError: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+
+2025-08-02 15:51:35,079 - INFO - [app.py:100] - --- Starting Task 1135e489-f453-4746-9c81-8336c7fd3f2b for file caesarian.csv ---
+2025-08-02 15:51:35,082 - INFO - [app.py:101] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: Caesarian, Task: regression
+2025-08-02 15:51:35,112 - ERROR - [app.py:201] - Task 1135e489-f453-4746-9c81-8336c7fd3f2b: FAILED. An unexpected error occurred: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+Traceback (most recent call last):
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/app.py", line 132, in training_stream
+    real_df_imputed = pipeline.inverse_transform(pipeline.transform(real_df))
+  File "/Users/jayanthsivakumar/Desktop/GenerativeMTD/data_pipeline.py", line 99, in inverse_transform
+    inversed_num = num_pipeline.inverse_transform(num_data)
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/pipeline.py", line 1148, in inverse_transform
+    X = transform.inverse_transform(
+  File "/Users/jayanthsivakumar/Library/Python/3.9/lib/python/site-packages/sklearn/impute/_base.py", line 709, in inverse_transform
+    raise ValueError(
+ValueError: 'inverse_transform' works only when 'SimpleImputer' is instantiated with 'add_indicator=True'. Got 'add_indicator=False' instead.
+
+2025-08-02 18:14:22,521 - INFO - [app.py:97] - --- Starting Task 3c0b0ac7-3ae6-4484-8568-780dcec3c358 for file cervical.csv ---
+2025-08-02 18:14:22,524 - INFO - [app.py:98] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: ca_cervix, Task: regression
+2025-08-02 18:14:22,547 - INFO - [app.py:130] - Task 3c0b0ac7-3ae6-4484-8568-780dcec3c358: Data pipeline fitted successfully.
+2025-08-02 18:14:22,547 - INFO - [app.py:137] - Task 3c0b0ac7-3ae6-4484-8568-780dcec3c358: Using k=7 for kNN-MTD.
+2025-08-02 18:14:22,961 - INFO - [app.py:142] - Task 3c0b0ac7-3ae6-4484-8568-780dcec3c358: Generated 50 pseudo-real samples.
+2025-08-02 18:14:25,190 - INFO - [app.py:151] - Task 3c0b0ac7-3ae6-4484-8568-780dcec3c358: Model training completed.
+2025-08-02 18:14:25,198 - INFO - [app.py:156] - Task 3c0b0ac7-3ae6-4484-8568-780dcec3c358: Generated 1000 final synthetic samples.
+2025-08-02 18:14:25,713 - INFO - [app.py:193] - --- Task 3c0b0ac7-3ae6-4484-8568-780dcec3c358 completed in 3.19 seconds ---
+2025-08-02 18:14:25,777 - ERROR - [app.py:222] - Failed to load results for task 3c0b0ac7-3ae6-4484-8568-780dcec3c358: 'initial_metrics' is undefined
+2025-08-02 18:16:49,471 - INFO - [app.py:100] - --- Starting Task 7f8415bc-38aa-430a-af06-09b6fd8b6685 for file mammography.csv ---
+2025-08-02 18:16:49,472 - INFO - [app.py:101] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: 5, Task: regression
+2025-08-02 18:16:49,495 - INFO - [app.py:133] - Task 7f8415bc-38aa-430a-af06-09b6fd8b6685: Data pipeline fitted successfully.
+2025-08-02 18:16:49,496 - INFO - [app.py:139] - Task 7f8415bc-38aa-430a-af06-09b6fd8b6685: Using k=10 for kNN-MTD.
+2025-08-02 18:16:50,152 - INFO - [app.py:143] - Task 7f8415bc-38aa-430a-af06-09b6fd8b6685: Generated 50 pseudo-real samples.
+2025-08-02 18:16:52,066 - INFO - [app.py:169] - Task 7f8415bc-38aa-430a-af06-09b6fd8b6685: Model training completed.
+2025-08-02 18:16:52,071 - INFO - [app.py:174] - Task 7f8415bc-38aa-430a-af06-09b6fd8b6685: Generated 1000 final synthetic samples.
+2025-08-02 18:16:52,271 - INFO - [app.py:213] - --- Task 7f8415bc-38aa-430a-af06-09b6fd8b6685 completed in 2.80 seconds ---
+2025-08-02 18:23:43,811 - INFO - [app.py:89] - --- Starting Task 6afcfe6b-3a9e-4747-bf71-7ebc55cbb4cd for file cryotherapy.csv ---
+2025-08-02 18:23:43,815 - INFO - [app.py:90] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: Result_of_Treatment, Task: regression
+2025-08-02 18:23:43,828 - INFO - [app.py:110] - Task 6afcfe6b-3a9e-4747-bf71-7ebc55cbb4cd: Data pipeline fitted successfully.
+2025-08-02 18:23:44,246 - INFO - [app.py:129] - Task 6afcfe6b-3a9e-4747-bf71-7ebc55cbb4cd: Generated 50 pseudo-real samples.
+2025-08-02 18:23:49,033 - INFO - [app.py:148] - Task 6afcfe6b-3a9e-4747-bf71-7ebc55cbb4cd: Model training completed.
+2025-08-02 18:23:49,038 - INFO - [app.py:152] - Task 6afcfe6b-3a9e-4747-bf71-7ebc55cbb4cd: Generated 1000 final synthetic samples.
+2025-08-02 18:23:49,335 - INFO - [app.py:185] - --- Task 6afcfe6b-3a9e-4747-bf71-7ebc55cbb4cd completed in 5.52 seconds ---
+2025-08-02 18:30:06,329 - INFO - [app.py:89] - --- Starting Task cf3393dc-64e8-4b64-8940-e0f028cde280 for file cryotherapy.csv ---
+2025-08-02 18:30:06,334 - INFO - [app.py:90] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: Result_of_Treatment, Task: regression
+2025-08-02 18:30:06,360 - INFO - [app.py:110] - Task cf3393dc-64e8-4b64-8940-e0f028cde280: Data pipeline fitted successfully.
+2025-08-02 18:30:06,873 - INFO - [app.py:132] - Task cf3393dc-64e8-4b64-8940-e0f028cde280: Generated 50 pseudo-real samples.
+2025-08-02 18:30:12,244 - INFO - [app.py:151] - Task cf3393dc-64e8-4b64-8940-e0f028cde280: Model training completed.
+2025-08-02 18:30:12,250 - INFO - [app.py:155] - Task cf3393dc-64e8-4b64-8940-e0f028cde280: Generated 1000 final synthetic samples.
+2025-08-02 18:30:12,591 - INFO - [app.py:188] - --- Task cf3393dc-64e8-4b64-8940-e0f028cde280 completed in 6.26 seconds ---
+2025-08-02 18:39:04,456 - INFO - [app.py:89] - --- Starting Task dfbadb46-710a-4dc3-aace-271bd01d9f0c for file cryotherapy.csv ---
+2025-08-02 18:39:04,459 - INFO - [app.py:90] - Parameters: {'n_samples': 1000, 'pseudo_n_obs': 500, 'epochs': 100, 'batch_size': 500, 'embedding_dim': 128, 'lr': 0.0002, 'seed': 42}, Target: Result_of_Treatment, Task: regression
+2025-08-02 18:39:04,479 - INFO - [app.py:110] - Task dfbadb46-710a-4dc3-aace-271bd01d9f0c: Data pipeline fitted successfully.
+2025-08-02 18:39:04,941 - INFO - [app.py:132] - Task dfbadb46-710a-4dc3-aace-271bd01d9f0c: Generated 50 pseudo-real samples.
+2025-08-02 18:39:09,810 - INFO - [app.py:153] - Task dfbadb46-710a-4dc3-aace-271bd01d9f0c: Model training completed.
+2025-08-02 18:39:09,815 - INFO - [app.py:157] - Task dfbadb46-710a-4dc3-aace-271bd01d9f0c: Generated 1000 final synthetic samples.
+2025-08-02 18:39:10,129 - INFO - [app.py:192] - --- Task dfbadb46-710a-4dc3-aace-271bd01d9f0c completed in 5.67 seconds ---
