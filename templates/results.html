@@ -9,9 +9,7 @@
 </head>
 <body>
     <div class="container results-container">
-        <div class="header-flex">
-            <h1>Generation Complete! ✅</h1>
-        </div>
+        <h1>Generation Complete! ✅</h1>
         <p>Your synthetic dataset and performance analysis are ready.</p>
         
         <div class="summary-grid">
@@ -19,91 +17,92 @@
                 <h2>Pipeline Summary</h2>
                 <ul class="pipeline-list">
                     {% for title, description in pipeline_stages %}
-                        <li>
-                            <div class="pipeline-icon">✓</div>
-                            <div class="pipeline-text">
-                                <span class="pipeline-title">{{ title }}</span>
-                                <span class="pipeline-description">{{ description }}</span>
-                            </div>
-                        </li>
+                        <li><div class="pipeline-icon">✓</div><div class="pipeline-text"><span class="pipeline-title">{{ title }}</span><span class="pipeline-description">{{ description }}</span></div></li>
                     {% endfor %}
                 </ul>
             </div>
             <div class="summary-card">
                 <h2>Run Overview</h2>
                 <table class="summary-table">
-                    {% for key, value in input_options.items() %}
-                    <tr>
-                        <td>{{ key }}</td>
-                        <td>{{ value }}</td>
-                    </tr>
-                    {% endfor %}
+                    {% for key, value in input_options.items() %}<tr><td>{{ key }}</td><td>{{ value }}</td></tr>{% endfor %}
                 </table>
             </div>
         </div>
 
-        <h2 class="section-header">Statistical Metric Comparison</h2>
+        <h2 class="section-header">Statistical & Privacy Metric Comparison</h2>
         <div class="summary-grid">
             <div class="summary-card">
                 <h3>Initial Metrics <span class="epoch-label">(Pseudo-Real Data)</span></h3>
                 <table class="summary-table">
-                    {% for key, value in initial_metrics.items() %}
-                    <tr>
-                        <td>{{ key | upper }}</td>
-                        <td><span class="metric-value">{{ value }}</span></td>
-                    </tr>
-                    {% endfor %}
+                    {% for key, value in initial_metrics.items() %}<tr><td>{{ key }}</td><td><span class="metric-value">{{ value }}</span></td></tr>{% endfor %}
                 </table>
             </div>
             <div class="summary-card">
                 <h3>Final Metrics <span class="epoch-label">(Final Synthetic Data)</span></h3>
                 <table class="summary-table">
-                    {% for key, value in final_metrics.items() %}
-                    <tr>
-                        <td>{{ key | upper }}</td>
-                        <td><span class="metric-value final">{{ value }}</span></td>
-                    </tr>
-                    {% endfor %}
+                    {% for key, value in final_metrics.items() %}<tr><td>{{ key }}</td><td><span class="metric-value final">{{ value }}</span></td></tr>{% endfor %}
                 </table>
             </div>
         </div>
 
         {% if initial_ml_utility_scores or final_ml_utility_scores %}
         <h2 class="section-header">Machine Learning Utility Comparison</h2>
-        <div class="summary-grid">
-            <div class="summary-card">
-                <h3>Initial Utility <span class="epoch-label">(Pseudo-Real Data)</span></h3>
-                <table class="summary-table">
+        <div class="summary-card full-width">
+            <table class="ml-utility-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Scenario</th>
+                        <th>Initial (Pseudo-Real)</th>
+                        <th>Final (Synthetic)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% if task_type == 'classification' %}
+                    {% set metrics = [('Accuracy', 0), ('F1-score', 1), ('AUC', 2)] %}
+                    {% for metric_name, idx in metrics %}
+                        {% for mode in ['TSTR', 'TRTS', 'TRTR', 'TSTS'] %}
+                        <tr>
+                            {% if loop.first %}
+                            <td rowspan="4">{{ metric_name }}</td>
+                            {% endif %}
+                            <td>{{ mode }}</td>
+                            <td>{{ '%.2f%%' % (initial_ml_utility_scores[mode][idx] * 100) if initial_ml_utility_scores[mode] and initial_ml_utility_scores[mode][idx] is not none else 'N/A' }}</td>
+                            <td>{{ '%.2f%%' % (final_ml_utility_scores[mode][idx] * 100) if final_ml_utility_scores[mode] and final_ml_utility_scores[mode][idx] is not none else 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                {% elif task_type == 'regression' %}
+                    {% set metrics = [('R² Score', 0), ('RMSE', 1), ('MAE', 2)] %}
+                     {% for metric_name, idx in metrics %}
+                        {% for mode in ['TSTR', 'TRTS', 'TRTR', 'TSTS'] %}
+                        <tr>
+                            {% if loop.first %}
+                            <td rowspan="4">{{ metric_name }}</td>
+                            {% endif %}
+                            <td>{{ mode }}</td>
+                            <td>{{ '%.4f' % initial_ml_utility_scores[mode][idx] if initial_ml_utility_scores[mode] and initial_ml_utility_scores[mode][idx] is not none else 'N/A' }}</td>
+                            <td>{{ '%.4f' % final_ml_utility_scores[mode][idx] if final_ml_utility_scores[mode] and final_ml_utility_scores[mode][idx] is not none else 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                {% elif task_type == 'unsupervised' %}
                     {% for key, value in initial_ml_utility_scores.items() %}
                     <tr>
-                        <td>{{ key.replace('_', ' ') }}</td>
-                        <td><span class="metric-value">{{ value }}</span></td>
+                        <td colspan="2">{{ key }}</td>
+                        <td>{{ '%.4f' % value if value is not none else 'N/A' }}</td>
+                        <td>{{ '%.4f' % final_ml_utility_scores[key] if final_ml_utility_scores[key] is not none else 'N/A' }}</td>
                     </tr>
                     {% endfor %}
-                </table>
-            </div>
-            <div class="summary-card">
-                <h3>Final Utility <span class="epoch-label">(Final Synthetic Data)</span></h3>
-                <table class="summary-table">
-                    {% for key, value in final_ml_utility_scores.items() %}
-                    <tr>
-                        <td>{{ key.replace('_', ' ') }}</td>
-                        <td><span class="metric-value final">{{ value }}</span></td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </div>
+                {% endif %}
+                </tbody>
+            </table>
         </div>
         {% endif %}
 
         <h2 class="section-header plots-header">Training Metrics Over Time</h2>
-        <div class="chart-grid">
-            <div class="chart-card"><h2>Overall VAE Loss</h2><canvas id="lossChart"></canvas></div>
-            <div class="chart-card"><h2>Reconstruction Loss</h2><canvas id="reconLossChart"></canvas></div>
-            <div class="chart-card"><h2>KLD Loss</h2><canvas id="kldLossChart"></canvas></div>
-            <div class="chart-card"><h2>Pairwise Correlation Difference (PCD)</h2><canvas id="pcdChart"></canvas></div>
-            <div class="chart-card"><h2>Nearest Neighbor Distance Ratio (NNDR)</h2><canvas id="nndrChart"></canvas></div>
-            <div class="chart-card"><h2>Distance to Closest Record (DCR)</h2><canvas id="dcrChart"></canvas></div>
+        <div class="chart-grid" id="chart-grid">
+            <!-- Charts will be dynamically inserted here by JavaScript -->
         </div>
 
         <a href="{{ url_for('download_file', filename=generated_filename) }}" class="btn download-btn">Download Synthetic Data (.csv)</a>
@@ -114,59 +113,50 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const trainingLogs = {{ training_logs | tojson }};
-            if (!trainingLogs || trainingLogs.length === 0) {
-                console.error("No training logs found to generate charts.");
-                return;
-            }
+            if (!trainingLogs || trainingLogs.length === 0) return;
 
             const epochs = trainingLogs.map(log => `Epoch ${log.epoch}`);
             
-            const chartData = {
-                loss: trainingLogs.map(log => log.loss),
-                recon_loss: trainingLogs.map(log => log.recon_loss),
-                kld_loss: trainingLogs.map(log => log.kld_loss),
-                pcd: trainingLogs.map(log => log.pcd),
-                nndr: trainingLogs.map(log => log.nndr),
-                dcr: trainingLogs.map(log => log.dcr)
+            const chartMetrics = {
+                'Overall Loss': { color: '#57A0D3', data: [] },
+                'Reconstruction Loss': { color: '#588157', data: [] },
+                'Sinkhorn Loss': { color: '#FF6384', data: [] },
+                'PCD': { color: '#F59E0B', data: [] },
+                'NNDR': { color: '#E56B6F', data: [] },
+                'DCR': { color: '#00C49F', data: [] }
             };
 
-            function createLineChart(canvasId, label, data, color) {
-                const ctx = document.getElementById(canvasId);
-                if (!ctx) {
-                    console.error(`Canvas with ID ${canvasId} not found.`);
-                    return;
-                }
-                new Chart(ctx.getContext('2d'), {
-                    type: 'line', 
-                    data: { 
-                        labels: epochs, 
-                        datasets: [{ 
-                            label: label, 
-                            data: data, 
-                            borderColor: color, 
-                            backgroundColor: `${color}33`,
-                            fill: true, 
-                            tension: 0.3 
-                        }] 
-                    },
-                    options: { 
-                        responsive: true, 
-                        maintainAspectRatio: false,
-                        scales: { 
-                            y: { beginAtZero: false, title: { display: true, text: 'Score' } }, 
-                            x: { title: { display: true, text: 'Epoch' } } 
-                        },
-                        plugins: { legend: { display: false } }
+            trainingLogs.forEach(log => {
+                for (const key in chartMetrics) {
+                    if (log[key] !== undefined && log[key] !== null) {
+                        chartMetrics[key].data.push(log[key]);
                     }
-                });
-            }
+                }
+            });
 
-            createLineChart('lossChart', 'Overall Loss', chartData.loss, '#57A0D3');
-            createLineChart('reconLossChart', 'Reconstruction Loss', chartData.recon_loss, '#588157');
-            createLineChart('kldLossChart', 'KLD Loss', chartData.kld_loss, '#B983FF');
-            createLineChart('pcdChart', 'PCD', chartData.pcd, '#F59E0B');
-            createLineChart('nndrChart', 'NNDR', chartData.nndr, '#E56B6F');
-            createLineChart('dcrChart', 'DCR', chartData.dcr, '#00C49F');
+            const chartGrid = document.getElementById('chart-grid');
+
+            for (const [metricName, properties] of Object.entries(chartMetrics)) {
+                if (properties.data.length > 0) {
+                    const chartCard = document.createElement('div');
+                    chartCard.className = 'chart-card';
+                    const canvas = document.createElement('canvas');
+                    chartCard.innerHTML = `<h2>${metricName}</h2>`;
+                    chartCard.appendChild(canvas);
+                    chartGrid.appendChild(chartCard);
+                    
+                    new Chart(canvas.getContext('2d'), {
+                        type: 'line', 
+                        data: { labels: epochs, datasets: [{ label: metricName, data: properties.data, borderColor: properties.color, backgroundColor: `${properties.color}33`, fill: true, tension: 0.3 }] },
+                        options: { 
+                            responsive: true, 
+                            maintainAspectRatio: false, 
+                            scales: { y: { beginAtZero: false, title: { display: true, text: 'Score' } }, x: { title: { display: true, text: 'Epoch' } } }, 
+                            plugins: { legend: { display: false } } 
+                        }
+                    });
+                }
+            }
         });
     </script>
 </body>
