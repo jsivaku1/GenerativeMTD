@@ -9,108 +9,139 @@
 </head>
 <body>
     <div class="container results-container">
-        <h1>Generation Complete! ✅</h1>
-        <p>Your synthetic dataset and performance analysis are ready.</p>
-        
-        <div class="summary-grid">
-            <div class="summary-card">
-                <h2>Pipeline Summary</h2>
-                <ul class="pipeline-list">
-                    {% for title, description in pipeline_stages %}
-                        <li><div class="pipeline-icon">✓</div><div class="pipeline-text"><span class="pipeline-title">{{ title }}</span><span class="pipeline-description">{{ description }}</span></div></li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="summary-card">
-                <h2>Run Overview</h2>
-                <table class="summary-table">
-                    {% for key, value in input_options.items() %}<tr><td>{{ key }}</td><td>{{ value }}</td></tr>{% endfor %}
-                </table>
-            </div>
+        <div class="tabs">
+            <button class="tab-link active" onclick="openTab(event, 'summary')">Results Summary</button>
+            <button class="tab-link" onclick="openTab(event, 'docs')">References & Docs</button>
         </div>
 
-        <h2 class="section-header">Statistical & Privacy Metric Comparison</h2>
-        <div class="summary-grid">
-            <div class="summary-card">
-                <h3>Initial Metrics <span class="epoch-label">(Pseudo-Real Data)</span></h3>
-                <table class="summary-table">
-                    {% for key, value in initial_metrics.items() %}<tr><td>{{ key }}</td><td><span class="metric-value">{{ value }}</span></td></tr>{% endfor %}
-                </table>
+        <div id="summary" class="tab-content active">
+            <h1>Generation Complete! ✅</h1>
+            <p>Your synthetic dataset and performance analysis are ready.</p>
+            
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h2>Pipeline Summary</h2>
+                    <ul class="pipeline-list">
+                        {% for title, description in pipeline_stages %}
+                            <li><div class="pipeline-icon">✓</div><div class="pipeline-text"><span class="pipeline-title">{{ title }}</span><span class="pipeline-description">{{ description }}</span></div></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="summary-card">
+                    <h2>Run Overview</h2>
+                    <table class="summary-table">
+                        {% for key, value in input_options.items() %}<tr><td>{{ key }}</td><td>{{ value }}</td></tr>{% endfor %}
+                    </table>
+                </div>
             </div>
-            <div class="summary-card">
-                <h3>Final Metrics <span class="epoch-label">(Final Synthetic Data)</span></h3>
-                <table class="summary-table">
-                    {% for key, value in final_metrics.items() %}<tr><td>{{ key }}</td><td><span class="metric-value final">{{ value }}</span></td></tr>{% endfor %}
-                </table>
-            </div>
-        </div>
 
-        {% if initial_ml_utility_scores or final_ml_utility_scores %}
-        <h2 class="section-header">Machine Learning Utility Comparison</h2>
-        <div class="summary-card full-width">
-            <table class="ml-utility-table">
-                <thead>
-                    <tr>
-                        <th>Metric</th>
-                        <th>Scenario</th>
-                        <th>Initial (Pseudo-Real)</th>
-                        <th>Final (Synthetic)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% if task_type == 'classification' %}
-                    {% set metrics = [('Accuracy', 0), ('F1-score', 1), ('AUC', 2)] %}
-                    {% for metric_name, idx in metrics %}
-                        {% for mode in ['TSTR', 'TRTS', 'TRTR', 'TSTS'] %}
+            <h2 class="section-header">Statistical & Privacy Metric Comparison</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h3>Initial Metrics <span class="epoch-label">(Pseudo-Real Data)</span></h3>
+                    <table class="summary-table">
+                        <tr><td>Pairwise Correlation Difference</td><td><span class="metric-value">{{ initial_metrics['PCD'] }}</span></td></tr>
+                        <tr><td>Distance to Closest Record</td><td><span class="metric-value">{{ initial_metrics['DCR'] }}</span></td></tr>
+                        <tr><td>Nearest Neighbor Distance Ratio</td><td><span class="metric-value">{{ initial_metrics['NNDR'] }}</span></td></tr>
+                    </table>
+                </div>
+                <div class="summary-card">
+                    <h3>Final Metrics <span class="epoch-label">(Final Synthetic Data)</span></h3>
+                    <table class="summary-table">
+                        <tr><td>Pairwise Correlation Difference</td><td><span class="metric-value final">{{ final_metrics['PCD'] }}</span></td></tr>
+                        <tr><td>Distance to Closest Record</td><td><span class="metric-value final">{{ final_metrics['DCR'] }}</span></td></tr>
+                        <tr><td>Nearest Neighbor Distance Ratio</td><td><span class="metric-value final">{{ final_metrics['NNDR'] }}</span></td></tr>
+                    </table>
+                </div>
+            </div>
+
+            {% if initial_ml_utility_scores or final_ml_utility_scores %}
+            <h2 class="section-header">Machine Learning Utility Comparison</h2>
+            <div class="summary-card full-width">
+                <table class="ml-utility-table">
+                    <thead>
                         <tr>
-                            {% if loop.first %}
-                            <td rowspan="4">{{ metric_name }}</td>
-                            {% endif %}
-                            <td>{{ mode }}</td>
-                            <td>{{ '%.2f%%' % (initial_ml_utility_scores[mode][idx] * 100) if initial_ml_utility_scores[mode] and initial_ml_utility_scores[mode][idx] is not none else 'N/A' }}</td>
-                            <td>{{ '%.2f%%' % (final_ml_utility_scores[mode][idx] * 100) if final_ml_utility_scores[mode] and final_ml_utility_scores[mode][idx] is not none else 'N/A' }}</td>
+                            <th>Metric</th>
+                            <th>Scenario</th>
+                            <th>Initial (Pseudo-Real)</th>
+                            <th>Final (Synthetic)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if task_type == 'classification' %}
+                        {% set metrics = [('Accuracy', 0), ('F1-score', 1), ('AUC', 2)] %}
+                        {% for metric_name, idx in metrics %}
+                            {% for mode in ['TSTR', 'TRTS', 'TRTR', 'TSTS'] %}
+                            <tr>
+                                {% if loop.first %}<td rowspan="{{ loop.length }}">{{ metric_name }}</td>{% endif %}
+                                <td>{{ mode }}</td>
+                                <td>{{ '%.2f%%' % (initial_ml_utility_scores[mode][idx] * 100) if initial_ml_utility_scores[mode] and initial_ml_utility_scores[mode][idx] is not none and not initial_ml_utility_scores[mode][idx] | string == 'nan' else 'N/A' }}</td>
+                                <td>{{ '%.2f%%' % (final_ml_utility_scores[mode][idx] * 100) if final_ml_utility_scores[mode] and final_ml_utility_scores[mode][idx] is not none and not final_ml_utility_scores[mode][idx] | string == 'nan' else 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    {% elif task_type == 'regression' %}
+                        {% set metrics = [('R² Score', 0), ('RMSE', 1), ('MAE', 2)] %}
+                         {% for metric_name, idx in metrics %}
+                            {% for mode in ['TSTR', 'TRTS', 'TRTR', 'TSTS'] %}
+                            <tr>
+                                {% if loop.first %}<td rowspan="{{ loop.length }}">{{ metric_name }}</td>{% endif %}
+                                <td>{{ mode }}</td>
+                                <td>{{ '%.4f' % initial_ml_utility_scores[mode][idx] if initial_ml_utility_scores[mode] and initial_ml_utility_scores[mode][idx] is not none and not initial_ml_utility_scores[mode][idx] | string == 'nan' else 'N/A' }}</td>
+                                <td>{{ '%.4f' % final_ml_utility_scores[mode][idx] if final_ml_utility_scores[mode] and final_ml_utility_scores[mode][idx] is not none and not final_ml_utility_scores[mode][idx] | string == 'nan' else 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    {% elif task_type == 'unsupervised' %}
+                        {% for key, value in initial_ml_utility_scores.items() %}
+                        <tr>
+                            <td colspan="2">{{ key }}</td>
+                            <td>{{ '%.4f' % value if value is not none and not value | string == 'nan' else 'N/A' }}</td>
+                            <td>{{ '%.4f' % final_ml_utility_scores[key] if final_ml_utility_scores[key] is not none and not final_ml_utility_scores[key] | string == 'nan' else 'N/A' }}</td>
                         </tr>
                         {% endfor %}
-                    {% endfor %}
-                {% elif task_type == 'regression' %}
-                    {% set metrics = [('R² Score', 0), ('RMSE', 1), ('MAE', 2)] %}
-                     {% for metric_name, idx in metrics %}
-                        {% for mode in ['TSTR', 'TRTS', 'TRTR', 'TSTS'] %}
-                        <tr>
-                            {% if loop.first %}
-                            <td rowspan="4">{{ metric_name }}</td>
-                            {% endif %}
-                            <td>{{ mode }}</td>
-                            <td>{{ '%.4f' % initial_ml_utility_scores[mode][idx] if initial_ml_utility_scores[mode] and initial_ml_utility_scores[mode][idx] is not none else 'N/A' }}</td>
-                            <td>{{ '%.4f' % final_ml_utility_scores[mode][idx] if final_ml_utility_scores[mode] and final_ml_utility_scores[mode][idx] is not none else 'N/A' }}</td>
-                        </tr>
-                        {% endfor %}
-                    {% endfor %}
-                {% elif task_type == 'unsupervised' %}
-                    {% for key, value in initial_ml_utility_scores.items() %}
-                    <tr>
-                        <td colspan="2">{{ key }}</td>
-                        <td>{{ '%.4f' % value if value is not none else 'N/A' }}</td>
-                        <td>{{ '%.4f' % final_ml_utility_scores[key] if final_ml_utility_scores[key] is not none else 'N/A' }}</td>
-                    </tr>
-                    {% endfor %}
-                {% endif %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
 
-        <h2 class="section-header plots-header">Training Metrics Over Time</h2>
-        <div class="chart-grid" id="chart-grid">
-            <!-- Charts will be dynamically inserted here by JavaScript -->
+            <h2 class="section-header plots-header">Training Metrics Over Time</h2>
+            <div class="chart-grid" id="chart-grid">
+                <!-- Charts will be dynamically inserted here by JavaScript -->
+            </div>
+
+            <a href="{{ url_for('download_file', filename=generated_filename) }}" class="btn download-btn">Download Synthetic Data (.csv)</a>
+            <br>
+            <a href="{{ url_for('index') }}" class="link-back">Generate another dataset</a>
         </div>
 
-        <a href="{{ url_for('download_file', filename=generated_filename) }}" class="btn download-btn">Download Synthetic Data (.csv)</a>
-        <br>
-        <a href="{{ url_for('index') }}" class="link-back">Generate another dataset</a>
+        <div id="docs" class="tab-content">
+            <h1>References & Docs</h1>
+            <div class="summary-card full-width explanations">
+                <h3>Metric Explanations</h3>
+                <p><strong>PCD (Pairwise Correlation Difference):</strong> Measures the difference between the correlation matrices of the real and synthetic data. A lower value is better, indicating higher statistical similarity. <br><em>Formula: ||corr(X_real) - corr(X_synth)||_F</em></p>
+                <p><strong>DCR (Distance to Closest Record):</strong> The average Euclidean distance from each synthetic record to its nearest real record. Higher values suggest better privacy. <br><em>Formula: mean(||s_i - 1NN(s_i, R)||) for each synthetic record s_i in S</em></p>
+                <p><strong>NNDR (Nearest Neighbor Distance Ratio):</strong> The ratio of the distance to the closest real record over the distance to the second closest. Values closer to 1 indicate better privacy. <br><em>Formula: mean(||s_i - 1NN|| / ||s_i - 2NN||)</em></p>
+            </div>
+        </div>
     </div>
 
     <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tab-link");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const trainingLogs = {{ training_logs | tojson }};
             if (!trainingLogs || trainingLogs.length === 0) return;
@@ -147,11 +178,25 @@
                     
                     new Chart(canvas.getContext('2d'), {
                         type: 'line', 
-                        data: { labels: epochs, datasets: [{ label: metricName, data: properties.data, borderColor: properties.color, backgroundColor: `${properties.color}33`, fill: true, tension: 0.3 }] },
+                        data: { 
+                            labels: epochs, 
+                            datasets: [{ 
+                                label: metricName, 
+                                data: properties.data, 
+                                borderColor: properties.color, 
+                                backgroundColor: `${properties.color}33`, 
+                                fill: true, 
+                                tension: 0.3,
+                                pointRadius: 0
+                            }] 
+                        },
                         options: { 
                             responsive: true, 
                             maintainAspectRatio: false, 
-                            scales: { y: { beginAtZero: false, title: { display: true, text: 'Score' } }, x: { title: { display: true, text: 'Epoch' } } }, 
+                            scales: { 
+                                y: { beginAtZero: false, title: { display: true, text: 'Score' } }, 
+                                x: { title: { display: true, text: 'Epoch' } } 
+                            }, 
                             plugins: { legend: { display: false } } 
                         }
                     });
